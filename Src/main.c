@@ -143,8 +143,6 @@ int main(void)
         }
     }
     Delay(1000);
-    LED_Off_All();
-    Delay(1000);
-
+    
     return 0;
 }
