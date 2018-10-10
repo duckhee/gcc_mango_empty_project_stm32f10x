@@ -82,7 +82,7 @@ void display_prompt(char *prompt)
 {
     if(prompt == NULL)
     {
-        printf(">>>");
+        printf(">>> ");
     }
     else
     {
