@@ -74,7 +74,7 @@ int main(void)
     USB_Cable_Config(DISABLE);
 
     Delay(500);
-
+    LED_Off_All();
     while(1)
     {
         printf("\r\n---------------------\r\n");
