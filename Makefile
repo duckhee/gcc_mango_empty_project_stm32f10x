@@ -122,7 +122,10 @@ gcc_help:
 #show dectory search path
 gcc_dir:
 	$(CC) -print-search-dirs
-
+#show basic spec charset
+gcc_dump:
+	$(CC) -dumpspecs
+	
 gccversion:
 	$(CC) --version
 
