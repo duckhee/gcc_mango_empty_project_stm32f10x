@@ -7,16 +7,20 @@ src/main.c \
 src/stm32f10x_it.c \
 src/hw_config.c \
 src/debug.c \
-src/key.c \
-src/led.c \
-src/seven_segment.c \
-src/usb_desc.c \
-src/usb_endp.c \
-src/usb_istr.c \
-src/usb_prop.c \
-src/usb_pwr.c \
-src/zigbee_test.c \
 src/syscalls.c \
+
+USB_DEF_SOURCES = \
+src/usb/usb_desc.c \
+src/usb/usb_endp.c \
+src/usb/usb_istr.c \
+src/usb/usb_prop.c \
+src/usb/usb_pwr.c \
+
+HW_DRIVER_SOURCES = \
+src/Hw_driver/key.c \
+src/Hw_driver/led.c \
+src/Hw_driver/seven_segment.c \
+src/Hw_driver/zigbee_test.c \
 
 
 CMSIS_SOURCES = \
@@ -62,7 +66,7 @@ Menu/src/led_menu.c \
 Menu/src/key_menu.c \
 
 
-C_SOURCES = $(SRC_SOURCES) $(CMSIS_SOURCES) $(USB_SOURCES) $(CORE_SOURCES) $(MENUS_SOURCE)
+C_SOURCES = $(SRC_SOURCES) $(CMSIS_SOURCES) $(USB_SOURCES) $(CORE_SOURCES) $(MENUS_SOURCE) $(HW_DRIVER_SOURCES) $(USB_DEF_SOURCES)
 
 # ASM sources
 ASM_SOURCES =  \
