@@ -8,6 +8,9 @@ FreeRTOS/Src/stream_buffer.c     \
 FreeRTOS/Src/tasks.c             \
 FreeRTOS/Src/timers.c            \
 
+RTOS_CON_SRC = \
+FreeRTOS/control/Src/ParTest.c   \
 
 
-RTOS_SOURCES = $(RTOS_SRC)
+
+RTOS_SOURCES = $(RTOS_SRC) $(RTOS_CON_SRC)

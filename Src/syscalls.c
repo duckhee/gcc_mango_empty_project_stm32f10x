@@ -1,5 +1,8 @@
 #include "hw_config.h"
+#include <stdlib.h>
+#include <errno.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include "stm32f10x.h"
 
 //retargetting _write

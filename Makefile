@@ -31,7 +31,7 @@ OPT = -Og
 # Build path
 BUILD_DIR = build
 
-RTOS_FLAGS = no
+RTOS_FLAGS = yes
 
 
 include exinc.mk
