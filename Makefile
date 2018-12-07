@@ -88,7 +88,7 @@ INCLUDE = -I./include -I.
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
-#CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
+#CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections -fomit-frame-pointer
 CFLAGS = $(MCU) $(C_DEFS) $(INCLUDE) $(OPT) -Wall -fdata-sections -ffunction-sections
 CFLAGS += $(patsubst %,-I%,$(C_INCLUDES))
 CFLAGS += -fdata-sections -Wall -Wextra -Wimplicit -Wcast-align -Wpointer-arith -Wredundant-decls -Wshadow -Wcast-qual -Wcast-align
@@ -157,6 +157,13 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	
 $(BUILD_DIR):
 	mkdir $@		
+
+
+flash: $(TARGET).bin
+	st-flash write $(TARGET).bin 0x8000000
+
+erase:
+	st-flash erase
 
 #######################################
 # clean up
