@@ -31,7 +31,14 @@ OPT = -Og
 # Build path
 BUILD_DIR = build
 
+RTOS_FLAGS = no
+
+
+include exinc.mk
+include rtosInc.mk
+
 include source.mk
+include rtosSrc.mk
 #include inc.mk
 
 
@@ -79,18 +86,27 @@ C_DEFS =  \
 -D USE_STDPERIPH_DRIVER \
 -D BOARD_DEF_MANGO_M32 \
 
-include exinc.mk
 #---------------------------------------------------------------------------
 # Include 디렉토리
 #---------------------------------------------------------------------------
 #include 하기 위한 옵션 설정
 INCLUDE = -I./include -I.
 
+
+ifeq ($(RTOS_FLAGS), yes)
+ALL_INCLUDES = $(C_INCLUDES) $(RTOSINCLUDE)
+ALL_SOURCES = $(C_SOURCES) $(RTOS_SOURCES)
+else
+ALL_INCLUDES = $(C_INCLUDES)
+ALL_SOURCES = $(C_SOURCES)
+endif
+
+
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 #CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 CFLAGS = $(MCU) $(C_DEFS) $(INCLUDE) $(OPT) -Wall -fdata-sections -ffunction-sections
-CFLAGS += $(patsubst %,-I%,$(C_INCLUDES))
+CFLAGS += $(patsubst %,-I%,$(ALL_INCLUDES))
 CFLAGS += -fdata-sections -Wall -Wextra -Wimplicit -Wcast-align -Wpointer-arith -Wredundant-decls -Wshadow -Wcast-qual -Wcast-align
 CFLAGS += -g -gdwarf-2 -u _printf_float -u _scanf_float
 ifeq ($(DEBUG), 1)
@@ -133,8 +149,8 @@ gccversion:
 # build the application
 #######################################
 # list of objects
-OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
-vpath %.c $(sort $(dir $(C_SOURCES)))
+OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(ALL_SOURCES:.c=.o)))
+vpath %.c $(sort $(dir $(ALL_SOURCES)))
 # list of ASM program objects
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
