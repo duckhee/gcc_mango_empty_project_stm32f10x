@@ -228,39 +228,7 @@ static bool toggle_data_key1 = FALSE;
 
 void EXTI0_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(GPIO_EXTI_Line_KEY1) != RESET) {
-        printf("Left-WKUP Button Press\r\n");
 
-#if 0
-        /* USB Remote Wakup ... */
-        if (pInformation->Current_Feature & 0x20) //Remote wake-up enabled
-        {
-          Resume(RESUME_INTERNAL);
-        }
-#endif
-
-        if(TRUE == g_TestProcessState)
-        {
-            Send_Buffer[0] = 0x05;
-
-            if(toggle_data_key1)
-            {
-                toggle_data_key1 = FALSE;
-                Send_Buffer[1] = 0x01;
-            }
-            else
-            {
-                toggle_data_key1 = TRUE;
-                Send_Buffer[1] = 0x00;
-            }
-
-            UserToPMABufferCopy(Send_Buffer, ENDP1_TXADDR, 2);
-            SetEPTxCount(ENDP1, 2);
-            SetEPTxValid(ENDP1);
-        }
-
-        EXTI_ClearITPendingBit(GPIO_EXTI_Line_KEY1);
-    }
 }
 
 /*******************************************************************************
@@ -275,31 +243,7 @@ static bool toggle_data_key2 = FALSE;
 
 void EXTI1_IRQHandler(void)
 {
-    if(EXTI_GetITStatus(GPIO_EXTI_Line_KEY2) != RESET) {
-        printf("Right-USER Button Press\r\n");
-
-        if(TRUE == g_TestProcessState)
-        {
-            Send_Buffer[0] = 0x06;
-
-            if(toggle_data_key2)
-            {
-                toggle_data_key2 = FALSE;
-                Send_Buffer[1] = 0x01;
-            }
-            else
-            {
-                toggle_data_key2 = TRUE;
-                Send_Buffer[1] = 0x00;
-            }
-
-            UserToPMABufferCopy(Send_Buffer, ENDP1_TXADDR, 2);
-            SetEPTxCount(ENDP1, 2);
-            SetEPTxValid(ENDP1);
-        }
-
-        EXTI_ClearITPendingBit(GPIO_EXTI_Line_KEY2);
-    }
+ 
 }
 
 /*******************************************************************************
