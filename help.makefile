@@ -156,6 +156,8 @@ REMOVE = $(REMOVE_CMD) -rf
 #이런 작업을 하지 않아도 될 함수들은 frame pointer를 제거해서 거기에 필요한
 #연산을 줄이는 옵션이다.
 
+#-fverbose-asm ? 
+
 
 #Need to put this pack in CFLAGS????
 #-D"assert_param(x)="
