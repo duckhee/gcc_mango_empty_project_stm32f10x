@@ -15,17 +15,18 @@ __attribute__ ((used)) int _write(int fd, char *ptr, int len)
 }
 
 //retargetting _read
-__attribute__ ((used)) int _read(int fd, char *ptr, int len)
+/*
+__attribute__ ((used)) int _read(char *buf, int len)
 {
     size_t i;
-    for(i = 0; i < len; i++)
+    for(i = 0; i < len; ++i)
     {
-        USART_ReceiveData(USART1);
+        buf[i] = USART_ReceiveData(USART1);
         while(USART_GetFlagStatus(USART1, USART_FLAG_RXNE) == RESET);
     }
-    return len;
+    return i;
 }
-
+*/
 /*
 
 //retargetting _read
