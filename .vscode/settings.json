@@ -4,6 +4,7 @@
         "stm32f10x.h": "c",
         "lcd.h": "c",
         "spi_flash.h": "c",
-        "stm32f10x_spi.h": "c"
+        "stm32f10x_spi.h": "c",
+        "stm32f10x_type.h": "c"
     }
 }

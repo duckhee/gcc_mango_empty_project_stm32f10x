@@ -68,6 +68,7 @@ xComPortHandle xReturn;
 USART_InitTypeDef USART_InitStructure;
 NVIC_InitTypeDef NVIC_InitStructure;
 GPIO_InitTypeDef GPIO_InitStructure;
+USART_ClockInitTypeDef USART_InitClockStructure;
 
 	/* Create the queues used to hold Rx/Tx characters. */
 	xRxedChars = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
@@ -97,15 +98,21 @@ GPIO_InitTypeDef GPIO_InitStructure;
 		USART_InitStructure.USART_Parity = USART_Parity_No ;
 		USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 		USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-		USART_InitStructure.USART_Clock = USART_Clock_Disable;
-		USART_InitStructure.USART_CPOL = USART_CPOL_Low;
-		USART_InitStructure.USART_CPHA = USART_CPHA_2Edge;
-		USART_InitStructure.USART_LastBit = USART_LastBit_Disable;
+
+		//USART_ClockInitTypeDef setting 
+		USART_InitClockStructure.USART_Clock = USART_Clock_Disable;
+		USART_InitClockStructure.USART_CPOL = USART_CPOL_Low;
+		USART_InitClockStructure.USART_CPHA = USART_CPHA_2Edge;
+		USART_InitClockStructure.USART_LastBit = USART_LastBit_Disable;
 		
+		//clock setting
+		USART_ClockInit(USART1, &USART_InitClockStructure);
 		USART_Init( USART1, &USART_InitStructure );
 		
 		USART_ITConfig( USART1, USART_IT_RXNE, ENABLE );
 		
+
+		//
 		NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQChannel;
 		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = configLIBRARY_KERNEL_INTERRUPT_PRIORITY;
 		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;

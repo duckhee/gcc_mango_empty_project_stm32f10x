@@ -86,6 +86,8 @@ typedef enum
 	ser115200
 } eBaud;
 
+#define USART1_IRQChannel            ((u8)0x25)  /* USART1 global Interrupt */
+
 xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLength );
 xComPortHandle xSerialPortInit( eCOMPort ePort, eBaud eWantedBaud, eParity eWantedParity, eDataBits eWantedDataBits, eStopBits eWantedStopBits, unsigned portBASE_TYPE uxBufferLength );
 void vSerialPutString( xComPortHandle pxPort, const signed char * const pcString, unsigned short usStringLength );

@@ -25,6 +25,7 @@ FreeRTOS/test_Src/integer.c \
 FreeRTOS/test_Src/lcd.c     \
 FreeRTOS/test_Src/heap_2.c  \
 FreeRTOS/test_Src/serial.c   \
+FreeRTOS/test_Src/timertest.c  \
 #FreeRTOS/test_Src/comtest_strings.c \
 FreeRTOS/test_Src/QPeek.c \
 FreeRTOS/test_Src/QueueSetPolling.c \

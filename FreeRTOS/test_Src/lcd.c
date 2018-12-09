@@ -1052,8 +1052,8 @@ void LCD_WriteReg(u8 LCD_Reg, u8 LCD_RegValue)
   tmp = LCD_Reg << 8;
   tmp |= LCD_RegValue;
 
-  SPI_SendData(SPI2, tmp);
-  while(SPI_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
+  SPI_I2S_SendData(SPI2, tmp);
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
   {
   }
 
@@ -1075,19 +1075,19 @@ u8 LCD_ReadReg(u8 LCD_Reg)
   LCD_CtrlLinesWrite(GPIOD, CtrlPin_RS, Bit_RESET);
   LCD_CtrlLinesWrite(GPIOB, CtrlPin_NCS, Bit_RESET);
 
-  while(SPI_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
   {
   }
-  SPI_SendData(SPI2, LCD_Reg);
+  SPI_I2S_SendData(SPI2, LCD_Reg);
 
   LCD_CtrlLinesWrite(GPIOD, CtrlPin_NWR, Bit_SET);
 
-  while(SPI_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
   {
   }
-  SPI_SendData(SPI2, 0xFF);
+  SPI_I2S_SendData(SPI2, 0xFF);
 
-  while(SPI_GetFlagStatus(SPI2, SPI_FLAG_RXNE)== RESET)
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_FLAG_RXNE)== RESET)
   {
   }
   tmp = SPI_ReceiveData(SPI2);
@@ -1109,8 +1109,8 @@ void LCD_WriteRAM(u16 RGB_Code)
   LCD_CtrlLinesWrite(GPIOD, CtrlPin_RS, Bit_SET);
   LCD_CtrlLinesWrite(GPIOB, CtrlPin_NCS, Bit_RESET);
 
-  SPI_SendData(SPI2, RGB_Code);
-  while(SPI_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
+  SPI_I2S_SendData(SPI2, RGB_Code);
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
   {
   }
 
@@ -1132,11 +1132,11 @@ u16  LCD_ReadRAM(void)
   LCD_CtrlLinesWrite(GPIOD, CtrlPin_RS, Bit_SET);
   LCD_CtrlLinesWrite(GPIOB, CtrlPin_NCS, Bit_RESET);
 
-  while(SPI_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_FLAG_TXE) == RESET)
   {
   }
-  SPI_SendData(SPI2, 0xFF);
-  while(SPI_GetFlagStatus(SPI2, SPI_FLAG_RXNE)==RESET)
+  SPI_I2S_SendData(SPI2, 0xFF);
+  while(SPI_I2S_GetFlagStatus(SPI2, SPI_FLAG_RXNE)==RESET)
   {
   }
   tmp = SPI_ReceiveData(SPI2);
