@@ -232,6 +232,7 @@ static void prvCopyDataFromQueue( xQUEUE * const pxQueue, const void *pvBuffer )
 
 xQueueHandle xQueueCreate( unsigned portBASE_TYPE uxQueueLength, unsigned portBASE_TYPE uxItemSize )
 {
+	
 xQUEUE *pxNewQueue;
 size_t xQueueSizeInBytes;
 
@@ -264,11 +265,12 @@ size_t xQueueSizeInBytes;
 				vListInitialise( &( pxNewQueue->xTasksWaitingToReceive ) );
 
 				traceQUEUE_CREATE( pxNewQueue );
-
+				
 				return  pxNewQueue;
 			}
 			else
 			{
+				
 				traceQUEUE_CREATE_FAILED();
 				vPortFree( pxNewQueue );
 			}
@@ -277,6 +279,7 @@ size_t xQueueSizeInBytes;
 
 	/* Will only reach here if we could not allocate enough memory or no memory
 	was required. */
+	
 	return NULL;
 }
 /*-----------------------------------------------------------*/

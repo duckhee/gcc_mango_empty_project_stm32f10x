@@ -31,9 +31,9 @@ OPT = -Og
 # Build path
 BUILD_DIR = build
 
-MANGO_Z1 = no
+MANGO_Z1 = yes
 
-RTOS_FLAGS = no
+RTOS_FLAGS = yes
 
 
 
