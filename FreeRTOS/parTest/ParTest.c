@@ -57,8 +57,8 @@
 /* Library includes. */
 #include "stm32f10x_conf.h"
 
-#define partstMAX_OUTPUT_LED	( 4 )
-#define partstFIRST_LED			GPIO_Pin_6
+#define partstMAX_OUTPUT_LED	( 3 )
+#define partstFIRST_LED			GPIO_Pin_5
 
 static unsigned portSHORT usOutputValue = 0;
 
@@ -69,7 +69,7 @@ void vParTestInitialise( void )
 GPIO_InitTypeDef GPIO_InitStructure;
 
 	/* Configure PC.06, PC.07, PC.08 and PC.09 as output push-pull */
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init( GPIOC, &GPIO_InitStructure );
@@ -84,7 +84,16 @@ unsigned portSHORT usBit;
 	{
 		if( uxLED < partstMAX_OUTPUT_LED )
 		{
-			usBit = partstFIRST_LED << uxLED;
+			//usBit = partstFIRST_LED << uxLED;
+
+			if(uxLED == 0)
+			{
+				usBit = partstFIRST_LED << uxLED;
+			}
+			else
+			{
+				usBit = partstFIRST_LED << (uxLED + 2);
+			}
 
 			if( xValue == pdFALSE )
 			{
@@ -111,6 +120,7 @@ unsigned portSHORT usBit;
 	{
 		if( uxLED < partstMAX_OUTPUT_LED )
 		{
+			/*
 			usBit = partstFIRST_LED << uxLED;
 
 			if( usOutputValue & usBit )
@@ -123,6 +133,26 @@ unsigned portSHORT usBit;
 			}
 
 			GPIO_Write( GPIOC, usOutputValue );
+			*/
+			if(uxLED == 0)
+			{
+				usBit = partstFIRST_LED << uxLED;
+			}
+			else
+			{
+				usBit = partstFIRST_LED << (uxLED + 2);
+			}
+
+			if(usOutputValue & usBit)
+			{
+				usOutputValue &= ~usBit;
+			}
+			else
+			{
+				usOutputValue |= usBit;
+			}
+
+			GPIO_Write(GPIOB, usOutputValue);
 		}
 	}
 	xTaskResumeAll();

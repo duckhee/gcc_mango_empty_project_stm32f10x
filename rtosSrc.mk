@@ -2,6 +2,7 @@ RTOS_SRC = \
 FreeRTOS/Src/list.c   \
 FreeRTOS/Src/queue.c   \
 FreeRTOS/Src/tasks.c   \
+FreeRTOS/Src/lcd.c
 
 
 
@@ -24,6 +25,7 @@ RTOS_TEST_SRC = \
 FreeRTOS/parTest/spi_flash.c   \
 FreeRTOS/parTest/timertest.c   \
 FreeRTOS/parTest/ParTest.c     \
+FreeRTOS/serial/serial.c
 
 
 

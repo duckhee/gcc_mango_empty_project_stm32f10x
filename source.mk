@@ -19,8 +19,8 @@ src/usb/usb_pwr.c \
 HW_DRIVER_SOURCES = \
 src/Hw_driver/key.c \
 src/Hw_driver/led.c \
-src/Hw_driver/seven_segment.c \
 src/Hw_driver/zigbee_test.c \
+#src/Hw_driver/seven_segment.c \
 
 
 CMSIS_SOURCES = \
@@ -64,6 +64,16 @@ MENUS_SOURCE = \
 Menu/src/main_menu.c \
 Menu/src/led_menu.c \
 Menu/src/key_menu.c \
+
+CC2520_SRC = \
+cc2520/Src/basic_rf_security.c   \
+cc2520/Src/basic_rf.c            \
+cc2520/Src/cc2520_mango_porting.c  \
+cc2520/Src/hal_cc2520.c           \
+cc2520/Src/hal_int.c            \
+cc2520/Src/hal_rf.c           \
+cc2520/Src/util.c 
+
 
 
 C_SOURCES = $(SRC_SOURCES) $(CMSIS_SOURCES) $(USB_SOURCES) $(CORE_SOURCES) $(MENUS_SOURCE) $(HW_DRIVER_SOURCES) $(USB_DEF_SOURCES)

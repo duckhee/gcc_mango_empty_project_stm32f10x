@@ -31,9 +31,9 @@ void default_menu()
     while(1){
         printf("\r\n---------------------\r\n");
 #ifdef BOARD_DEF_MANGO_M32
-        printf("Mango M32 test start...\n");
+        printf("Mango M32 test start...\r\n");
 #elif  BOARD_DEF_MANGO_Z1
-        printf("Mango Z1 test start...\n");
+        printf("Mango Z1 test start...\r\n");
 #endif
         printf("Press menu key\r\n");
         printf("---------------------\r\n");

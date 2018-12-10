@@ -31,7 +31,10 @@ OPT = -Og
 # Build path
 BUILD_DIR = build
 
+MANGO_Z1 = yes
+
 RTOS_FLAGS = yes
+
 
 
 include exinc.mk
@@ -84,8 +87,7 @@ AS_DEFS =
 # C defines
 C_DEFS =  \
 -D USE_STDPERIPH_DRIVER \
--D BOARD_DEF_MANGO_M32 \
-#-D BOARD_DEF_MANGO_Z1  \
+
 #-D DEBUG
 
 #---------------------------------------------------------------------------
@@ -101,6 +103,15 @@ ALL_SOURCES = $(C_SOURCES) $(RTOS_SOURCES)
 else
 ALL_INCLUDES = $(C_INCLUDES)
 ALL_SOURCES = $(C_SOURCES)
+endif
+
+
+ifeq ($(MANGO_Z1), yes)
+C_DEFS += -D BOARD_DEF_MANGO_Z1  
+ALL_INCLUDES += $(CC2520_INCLUDES)
+ALL_SOURCES += $(CC2520_SRC)
+else
+C_DEFS += -D BOARD_DEF_MANGO_M32 
 endif
 
 

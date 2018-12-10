@@ -6,6 +6,7 @@
         "spi_flash.h": "c",
         "stm32f10x_spi.h": "c",
         "stm32f10x_type.h": "c",
-        "stm32f10x_conf.h": "c"
+        "stm32f10x_conf.h": "c",
+        "hal_rf.h": "c"
     }
 }

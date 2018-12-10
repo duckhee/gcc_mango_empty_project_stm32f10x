@@ -16,5 +16,9 @@ STM32_USB-FS-Device_Driver/inc \
 MENU_INCLUDE = \
 Menu/inc \
 
+CC2520_INCLUDES = \
+cc2520/Inc
+
+
 # C includes
 C_INCLUDES = $(MAIN_INCLUDES) $(CORE_INCLUDES) $(CMSIS_INCLUDES) $(MENU_INCLUDE)
