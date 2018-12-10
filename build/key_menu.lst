@@ -1,0 +1,363 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"key_menu.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.Command_Key_Main,"ax",%progbits
+  20              		.align	2
+  21              		.global	Command_Key_Main
+  22              		.thumb
+  23              		.thumb_func
+  25              	Command_Key_Main:
+  26              	.LFB28:
+  27              		.file 1 "Menu/src/key_menu.c"
+   1:Menu/src/key_menu.c **** #define KEY_MENU_LOCAL
+   2:Menu/src/key_menu.c **** 
+   3:Menu/src/key_menu.c **** #include "key_menu.h"
+   4:Menu/src/key_menu.c **** 
+   5:Menu/src/key_menu.c **** static unsigned short flag;
+   6:Menu/src/key_menu.c **** 
+   7:Menu/src/key_menu.c **** KEY_MENU_DEF int Command_Key_Main(int argc, char **argv);
+   8:Menu/src/key_menu.c **** KEY_MENU_DEF int Command_Key_Main_Menu(void);
+   9:Menu/src/key_menu.c **** 
+  10:Menu/src/key_menu.c **** 
+  11:Menu/src/key_menu.c **** KEY_MENU_DEF int Command_Key_Main(int argc, char **argv)
+  12:Menu/src/key_menu.c **** {
+  28              		.loc 1 12 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+  33              	.LVL0:
+  13:Menu/src/key_menu.c ****     int key;
+  14:Menu/src/key_menu.c ****     return 0;
+  15:Menu/src/key_menu.c **** }
+  34              		.loc 1 15 0
+  35 0000 0020     		movs	r0, #0
+  36              	.LVL1:
+  37 0002 7047     		bx	lr
+  38              		.cfi_endproc
+  39              	.LFE28:
+  41              		.section	.text.Command_Key_Main_Menu,"ax",%progbits
+  42              		.align	2
+  43              		.global	Command_Key_Main_Menu
+  44              		.thumb
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s 			page 2
+
+
+  45              		.thumb_func
+  47              	Command_Key_Main_Menu:
+  48              	.LFB29:
+  16:Menu/src/key_menu.c **** 
+  17:Menu/src/key_menu.c **** KEY_MENU_DEF int Command_Key_Main_Menu(void)
+  18:Menu/src/key_menu.c **** {
+  49              		.loc 1 18 0
+  50              		.cfi_startproc
+  51              		@ args = 0, pretend = 0, frame = 0
+  52              		@ frame_needed = 0, uses_anonymous_args = 0
+  53 0000 38B5     		push	{r3, r4, r5, lr}
+  54              	.LCFI0:
+  55              		.cfi_def_cfa_offset 16
+  56              		.cfi_offset 3, -16
+  57              		.cfi_offset 4, -12
+  58              		.cfi_offset 5, -8
+  59              		.cfi_offset 14, -4
+  19:Menu/src/key_menu.c ****     int key;
+  20:Menu/src/key_menu.c ****     
+  21:Menu/src/key_menu.c ****     printf("\r\n\r\n");
+  60              		.loc 1 21 0
+  61 0002 1F4D     		ldr	r5, .L4
+  62 0004 2846     		mov	r0, r5
+  63 0006 FFF7FEFF 		bl	puts
+  64              	.LVL2:
+  22:Menu/src/key_menu.c ****     printf("-------------------------------------------------\r\n");
+  65              		.loc 1 22 0
+  66 000a 1E4C     		ldr	r4, .L4+4
+  67 000c 2046     		mov	r0, r4
+  68 000e FFF7FEFF 		bl	puts
+  69              	.LVL3:
+  23:Menu/src/key_menu.c ****     printf("                 KEY MAIN MENU\n");
+  70              		.loc 1 23 0
+  71 0012 1D48     		ldr	r0, .L4+8
+  72 0014 FFF7FEFF 		bl	puts
+  73              	.LVL4:
+  24:Menu/src/key_menu.c ****     printf("-------------------------------------------------\r\n");
+  74              		.loc 1 24 0
+  75 0018 2046     		mov	r0, r4
+  76 001a FFF7FEFF 		bl	puts
+  77              	.LVL5:
+  25:Menu/src/key_menu.c ****     printf(" 1. Key Test                                         \r\n");
+  78              		.loc 1 25 0
+  79 001e 1B48     		ldr	r0, .L4+12
+  80 0020 FFF7FEFF 		bl	puts
+  81              	.LVL6:
+  26:Menu/src/key_menu.c ****     printf(" 2. Led Test                                         \r\n");
+  82              		.loc 1 26 0
+  83 0024 1A48     		ldr	r0, .L4+16
+  84 0026 FFF7FEFF 		bl	puts
+  85              	.LVL7:
+  27:Menu/src/key_menu.c ****     printf(" 3. System_Information                                         \r\n");
+  86              		.loc 1 27 0
+  87 002a 1A48     		ldr	r0, .L4+20
+  88 002c FFF7FEFF 		bl	puts
+  89              	.LVL8:
+  28:Menu/src/key_menu.c ****     printf(" 4. Test                                         \r\n");
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s 			page 3
+
+
+  90              		.loc 1 28 0
+  91 0030 1948     		ldr	r0, .L4+24
+  92 0032 FFF7FEFF 		bl	puts
+  93              	.LVL9:
+  29:Menu/src/key_menu.c ****     printf(" 5. Test                                         \r\n");
+  94              		.loc 1 29 0
+  95 0036 1948     		ldr	r0, .L4+28
+  96 0038 FFF7FEFF 		bl	puts
+  97              	.LVL10:
+  30:Menu/src/key_menu.c ****     printf(" 6. Test                                         \r\n");
+  98              		.loc 1 30 0
+  99 003c 1848     		ldr	r0, .L4+32
+ 100 003e FFF7FEFF 		bl	puts
+ 101              	.LVL11:
+  31:Menu/src/key_menu.c ****     printf(" 7. Test                                         \r\n");
+ 102              		.loc 1 31 0
+ 103 0042 1848     		ldr	r0, .L4+36
+ 104 0044 FFF7FEFF 		bl	puts
+ 105              	.LVL12:
+  32:Menu/src/key_menu.c ****     printf(" 8. Test                                         \r\n");
+ 106              		.loc 1 32 0
+ 107 0048 1748     		ldr	r0, .L4+40
+ 108 004a FFF7FEFF 		bl	puts
+ 109              	.LVL13:
+  33:Menu/src/key_menu.c ****     printf(" 9. Test                                         \r\n");
+ 110              		.loc 1 33 0
+ 111 004e 1748     		ldr	r0, .L4+44
+ 112 0050 FFF7FEFF 		bl	puts
+ 113              	.LVL14:
+  34:Menu/src/key_menu.c ****     printf(" 0. Test                                         \r\n");
+ 114              		.loc 1 34 0
+ 115 0054 1648     		ldr	r0, .L4+48
+ 116 0056 FFF7FEFF 		bl	puts
+ 117              	.LVL15:
+  35:Menu/src/key_menu.c ****     printf("-------------------------------------------------\r\n");
+ 118              		.loc 1 35 0
+ 119 005a 2046     		mov	r0, r4
+ 120 005c FFF7FEFF 		bl	puts
+ 121              	.LVL16:
+  36:Menu/src/key_menu.c ****     printf(" q. KEY Menu QUIT\r\n");
+ 122              		.loc 1 36 0
+ 123 0060 1448     		ldr	r0, .L4+52
+ 124 0062 FFF7FEFF 		bl	puts
+ 125              	.LVL17:
+  37:Menu/src/key_menu.c ****     printf("-------------------------------------------------\r\n");
+ 126              		.loc 1 37 0
+ 127 0066 2046     		mov	r0, r4
+ 128 0068 FFF7FEFF 		bl	puts
+ 129              	.LVL18:
+  38:Menu/src/key_menu.c ****     printf("\r\n\r\n");
+ 130              		.loc 1 38 0
+ 131 006c 2846     		mov	r0, r5
+ 132 006e FFF7FEFF 		bl	puts
+ 133              	.LVL19:
+  39:Menu/src/key_menu.c ****     
+  40:Menu/src/key_menu.c ****     printf("SELECT THE COMMAND NUMBER : ");
+ 134              		.loc 1 40 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s 			page 4
+
+
+ 135 0072 1148     		ldr	r0, .L4+56
+ 136 0074 FFF7FEFF 		bl	printf
+ 137              	.LVL20:
+  41:Menu/src/key_menu.c ****     key=USART_GetCharacter(USART1);
+ 138              		.loc 1 41 0
+ 139 0078 1048     		ldr	r0, .L4+60
+ 140 007a FFF7FEFF 		bl	USART_GetCharacter
+ 141              	.LVL21:
+  42:Menu/src/key_menu.c ****         
+  43:Menu/src/key_menu.c ****     return key;    
+  44:Menu/src/key_menu.c **** }...
+ 142              		.loc 1 44 0
+ 143 007e 38BD     		pop	{r3, r4, r5, pc}
+ 144              	.L5:
+ 145              		.align	2
+ 146              	.L4:
+ 147 0080 00000000 		.word	.LC0
+ 148 0084 04000000 		.word	.LC1
+ 149 0088 38000000 		.word	.LC2
+ 150 008c 58000000 		.word	.LC3
+ 151 0090 90000000 		.word	.LC4
+ 152 0094 C8000000 		.word	.LC5
+ 153 0098 0C010000 		.word	.LC6
+ 154 009c 40010000 		.word	.LC7
+ 155 00a0 74010000 		.word	.LC8
+ 156 00a4 A8010000 		.word	.LC9
+ 157 00a8 DC010000 		.word	.LC10
+ 158 00ac 10020000 		.word	.LC11
+ 159 00b0 44020000 		.word	.LC12
+ 160 00b4 78020000 		.word	.LC13
+ 161 00b8 8C020000 		.word	.LC14
+ 162 00bc 00380140 		.word	1073821696
+ 163              		.cfi_endproc
+ 164              	.LFE29:
+ 166              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 167              		.align	2
+ 168              	.LC0:
+ 169 0000 0D0A0D00 		.ascii	"\015\012\015\000"
+ 170              	.LC1:
+ 171 0004 2D2D2D2D 		.ascii	"-------------------------------------------------\015"
+ 171      2D2D2D2D 
+ 171      2D2D2D2D 
+ 171      2D2D2D2D 
+ 171      2D2D2D2D 
+ 172 0036 00       		.ascii	"\000"
+ 173 0037 00       		.space	1
+ 174              	.LC2:
+ 175 0038 20202020 		.ascii	"                 KEY MAIN MENU\000"
+ 175      20202020 
+ 175      20202020 
+ 175      20202020 
+ 175      204B4559 
+ 176 0057 00       		.space	1
+ 177              	.LC3:
+ 178 0058 20312E20 		.ascii	" 1. Key Test                                       "
+ 178      4B657920 
+ 178      54657374 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s 			page 5
+
+
+ 178      20202020 
+ 178      20202020 
+ 179 008b 20200D00 		.ascii	"  \015\000"
+ 180 008f 00       		.space	1
+ 181              	.LC4:
+ 182 0090 20322E20 		.ascii	" 2. Led Test                                       "
+ 182      4C656420 
+ 182      54657374 
+ 182      20202020 
+ 182      20202020 
+ 183 00c3 20200D00 		.ascii	"  \015\000"
+ 184 00c7 00       		.space	1
+ 185              	.LC5:
+ 186 00c8 20332E20 		.ascii	" 3. System_Information                             "
+ 186      53797374 
+ 186      656D5F49 
+ 186      6E666F72 
+ 186      6D617469 
+ 187 00fb 20202020 		.ascii	"            \015\000"
+ 187      20202020 
+ 187      20202020 
+ 187      0D00
+ 188 0109 000000   		.space	3
+ 189              	.LC6:
+ 190 010c 20342E20 		.ascii	" 4. Test                                         \015"
+ 190      54657374 
+ 190      20202020 
+ 190      20202020 
+ 190      20202020 
+ 191 013e 00       		.ascii	"\000"
+ 192 013f 00       		.space	1
+ 193              	.LC7:
+ 194 0140 20352E20 		.ascii	" 5. Test                                         \015"
+ 194      54657374 
+ 194      20202020 
+ 194      20202020 
+ 194      20202020 
+ 195 0172 00       		.ascii	"\000"
+ 196 0173 00       		.space	1
+ 197              	.LC8:
+ 198 0174 20362E20 		.ascii	" 6. Test                                         \015"
+ 198      54657374 
+ 198      20202020 
+ 198      20202020 
+ 198      20202020 
+ 199 01a6 00       		.ascii	"\000"
+ 200 01a7 00       		.space	1
+ 201              	.LC9:
+ 202 01a8 20372E20 		.ascii	" 7. Test                                         \015"
+ 202      54657374 
+ 202      20202020 
+ 202      20202020 
+ 202      20202020 
+ 203 01da 00       		.ascii	"\000"
+ 204 01db 00       		.space	1
+ 205              	.LC10:
+ 206 01dc 20382E20 		.ascii	" 8. Test                                         \015"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s 			page 6
+
+
+ 206      54657374 
+ 206      20202020 
+ 206      20202020 
+ 206      20202020 
+ 207 020e 00       		.ascii	"\000"
+ 208 020f 00       		.space	1
+ 209              	.LC11:
+ 210 0210 20392E20 		.ascii	" 9. Test                                         \015"
+ 210      54657374 
+ 210      20202020 
+ 210      20202020 
+ 210      20202020 
+ 211 0242 00       		.ascii	"\000"
+ 212 0243 00       		.space	1
+ 213              	.LC12:
+ 214 0244 20302E20 		.ascii	" 0. Test                                         \015"
+ 214      54657374 
+ 214      20202020 
+ 214      20202020 
+ 214      20202020 
+ 215 0276 00       		.ascii	"\000"
+ 216 0277 00       		.space	1
+ 217              	.LC13:
+ 218 0278 20712E20 		.ascii	" q. KEY Menu QUIT\015\000"
+ 218      4B455920 
+ 218      4D656E75 
+ 218      20515549 
+ 218      540D00
+ 219 028b 00       		.space	1
+ 220              	.LC14:
+ 221 028c 53454C45 		.ascii	"SELECT THE COMMAND NUMBER : \000"
+ 221      43542054 
+ 221      48452043 
+ 221      4F4D4D41 
+ 221      4E44204E 
+ 222              		.text
+ 223              	.Letext0:
+ 224              		.file 2 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/machine/_default_types
+ 225              		.file 3 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/sys/_stdint.h"
+ 226              		.file 4 "CMSIS/Core/CM3/stm32f10x.h"
+ 227              		.file 5 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/stdio.h"
+ 228              		.file 6 "Inc/hw_config.h"
+ 229              		.file 7 "<built-in>"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s 			page 7
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 key_menu.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s:20     .text.Command_Key_Main:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s:25     .text.Command_Key_Main:0000000000000000 Command_Key_Main
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s:42     .text.Command_Key_Main_Menu:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s:47     .text.Command_Key_Main_Menu:0000000000000000 Command_Key_Main_Menu
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s:147    .text.Command_Key_Main_Menu:0000000000000080 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccqyQewS.s:167    .rodata.str1.4:0000000000000000 $d
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+puts
+printf
+USART_GetCharacter

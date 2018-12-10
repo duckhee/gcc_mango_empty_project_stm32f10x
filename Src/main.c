@@ -49,7 +49,7 @@ int main(void)
 
     /* UART initialization */
     USART1_Init();
-
+	printf("testing\r\n");
     /* Setup SysTick Timer for 1 msec interrupts  */
     if (SysTick_Config(rcc_clocks.SYSCLK_Frequency / 1000))
     { 

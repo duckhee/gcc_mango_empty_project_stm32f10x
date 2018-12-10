@@ -1,12 +1,13 @@
 RTOS_INC = \
-FreeRTOS/ARM_CM3   \
-FreeRTOS/Inc       \
+FreeRTOS/Inc
 
+RTOS_ARMCM3 = \
+FreeRTOS/ARMCM3/Inc
 
-RTOS_CON_INC = \
-FreeRTOS/control/Inc \
+RTOS_MIN = \
+FreeRTOS/Common/Inc  \
 
 RTOS_TEST_INC = \
-FreeRTOS/test_Inc  \
+FreeRTOS/parTest/Inc
 
-RTOSINCLUDE = $(RTOS_INC) $(RTOS_CON_INC) $(RTOS_TEST_INC)
+RTOSINCLUDE = $(RTOS_MIN) $(RTOS_INC) $(RTOS_ARMCM3) $(RTOS_TEST_INC)

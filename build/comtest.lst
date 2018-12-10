@@ -1,0 +1,718 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"comtest.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.vComRxTask,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  24              	vComRxTask:
+  25              	.LFB2:
+  26              		.file 1 "FreeRTOS/Common/Minimal/comtest.c"
+   1:FreeRTOS/Common/Minimal/comtest.c **** /*
+   2:FreeRTOS/Common/Minimal/comtest.c **** 	FreeRTOS V5.4.2 - Copyright (C) 2009 Real Time Engineers Ltd.
+   3:FreeRTOS/Common/Minimal/comtest.c **** 
+   4:FreeRTOS/Common/Minimal/comtest.c **** 	This file is part of the FreeRTOS distribution.
+   5:FreeRTOS/Common/Minimal/comtest.c **** 
+   6:FreeRTOS/Common/Minimal/comtest.c **** 	FreeRTOS is free software; you can redistribute it and/or modify it	under 
+   7:FreeRTOS/Common/Minimal/comtest.c **** 	the terms of the GNU General Public License (version 2) as published by the 
+   8:FreeRTOS/Common/Minimal/comtest.c **** 	Free Software Foundation and modified by the FreeRTOS exception.
+   9:FreeRTOS/Common/Minimal/comtest.c **** 	**NOTE** The exception to the GPL is included to allow you to distribute a
+  10:FreeRTOS/Common/Minimal/comtest.c **** 	combined work that includes FreeRTOS without being obliged to provide the 
+  11:FreeRTOS/Common/Minimal/comtest.c **** 	source code for proprietary components outside of the FreeRTOS kernel.  
+  12:FreeRTOS/Common/Minimal/comtest.c **** 	Alternative commercial license and support terms are also available upon 
+  13:FreeRTOS/Common/Minimal/comtest.c **** 	request.  See the licensing section of http://www.FreeRTOS.org for full 
+  14:FreeRTOS/Common/Minimal/comtest.c **** 	license details.
+  15:FreeRTOS/Common/Minimal/comtest.c **** 
+  16:FreeRTOS/Common/Minimal/comtest.c **** 	FreeRTOS is distributed in the hope that it will be useful,	but WITHOUT
+  17:FreeRTOS/Common/Minimal/comtest.c **** 	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  18:FreeRTOS/Common/Minimal/comtest.c **** 	FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+  19:FreeRTOS/Common/Minimal/comtest.c **** 	more details.
+  20:FreeRTOS/Common/Minimal/comtest.c **** 
+  21:FreeRTOS/Common/Minimal/comtest.c **** 	You should have received a copy of the GNU General Public License along
+  22:FreeRTOS/Common/Minimal/comtest.c **** 	with FreeRTOS; if not, write to the Free Software Foundation, Inc., 59
+  23:FreeRTOS/Common/Minimal/comtest.c **** 	Temple Place, Suite 330, Boston, MA  02111-1307  USA.
+  24:FreeRTOS/Common/Minimal/comtest.c **** 
+  25:FreeRTOS/Common/Minimal/comtest.c **** 
+  26:FreeRTOS/Common/Minimal/comtest.c **** 	***************************************************************************
+  27:FreeRTOS/Common/Minimal/comtest.c **** 	*                                                                         *
+  28:FreeRTOS/Common/Minimal/comtest.c **** 	* Looking for a quick start?  Then check out the FreeRTOS eBook!          *
+  29:FreeRTOS/Common/Minimal/comtest.c **** 	* See http://www.FreeRTOS.org/Documentation for details                   *
+  30:FreeRTOS/Common/Minimal/comtest.c **** 	*                                                                         *
+  31:FreeRTOS/Common/Minimal/comtest.c **** 	***************************************************************************
+  32:FreeRTOS/Common/Minimal/comtest.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 2
+
+
+  33:FreeRTOS/Common/Minimal/comtest.c **** 	1 tab == 4 spaces!
+  34:FreeRTOS/Common/Minimal/comtest.c **** 
+  35:FreeRTOS/Common/Minimal/comtest.c **** 	Please ensure to read the configuration and relevant port sections of the
+  36:FreeRTOS/Common/Minimal/comtest.c **** 	online documentation.
+  37:FreeRTOS/Common/Minimal/comtest.c **** 
+  38:FreeRTOS/Common/Minimal/comtest.c **** 	http://www.FreeRTOS.org - Documentation, latest information, license and
+  39:FreeRTOS/Common/Minimal/comtest.c **** 	contact details.
+  40:FreeRTOS/Common/Minimal/comtest.c **** 
+  41:FreeRTOS/Common/Minimal/comtest.c **** 	http://www.SafeRTOS.com - A version that is certified for use in safety
+  42:FreeRTOS/Common/Minimal/comtest.c **** 	critical systems.
+  43:FreeRTOS/Common/Minimal/comtest.c **** 
+  44:FreeRTOS/Common/Minimal/comtest.c **** 	http://www.OpenRTOS.com - Commercial support, development, porting,
+  45:FreeRTOS/Common/Minimal/comtest.c **** 	licensing and training services.
+  46:FreeRTOS/Common/Minimal/comtest.c **** */
+  47:FreeRTOS/Common/Minimal/comtest.c **** 
+  48:FreeRTOS/Common/Minimal/comtest.c **** 
+  49:FreeRTOS/Common/Minimal/comtest.c **** /*
+  50:FreeRTOS/Common/Minimal/comtest.c ****  * This version of comtest. c is for use on systems that have limited stack
+  51:FreeRTOS/Common/Minimal/comtest.c ****  * space and no display facilities.  The complete version can be found in
+  52:FreeRTOS/Common/Minimal/comtest.c ****  * the Demo/Common/Full directory.
+  53:FreeRTOS/Common/Minimal/comtest.c ****  *
+  54:FreeRTOS/Common/Minimal/comtest.c ****  * Creates two tasks that operate on an interrupt driven serial port.  A
+  55:FreeRTOS/Common/Minimal/comtest.c ****  * loopback connector should be used so that everything that is transmitted is
+  56:FreeRTOS/Common/Minimal/comtest.c ****  * also received.  The serial port does not use any flow control.  On a
+  57:FreeRTOS/Common/Minimal/comtest.c ****  * standard 9way 'D' connector pins two and three should be connected together.
+  58:FreeRTOS/Common/Minimal/comtest.c ****  *
+  59:FreeRTOS/Common/Minimal/comtest.c ****  * The first task posts a sequence of characters to the Tx queue, toggling an
+  60:FreeRTOS/Common/Minimal/comtest.c ****  * LED on each successful post.  At the end of the sequence it sleeps for a
+  61:FreeRTOS/Common/Minimal/comtest.c ****  * pseudo-random period before resending the same sequence.
+  62:FreeRTOS/Common/Minimal/comtest.c ****  *
+  63:FreeRTOS/Common/Minimal/comtest.c ****  * The UART Tx end interrupt is enabled whenever data is available in the Tx
+  64:FreeRTOS/Common/Minimal/comtest.c ****  * queue.  The Tx end ISR removes a single character from the Tx queue and
+  65:FreeRTOS/Common/Minimal/comtest.c ****  * passes it to the UART for transmission.
+  66:FreeRTOS/Common/Minimal/comtest.c ****  *
+  67:FreeRTOS/Common/Minimal/comtest.c ****  * The second task blocks on the Rx queue waiting for a character to become
+  68:FreeRTOS/Common/Minimal/comtest.c ****  * available.  When the UART Rx end interrupt receives a character it places
+  69:FreeRTOS/Common/Minimal/comtest.c ****  * it in the Rx queue, waking the second task.  The second task checks that the
+  70:FreeRTOS/Common/Minimal/comtest.c ****  * characters removed from the Rx queue form the same sequence as those posted
+  71:FreeRTOS/Common/Minimal/comtest.c ****  * to the Tx queue, and toggles an LED for each correct character.
+  72:FreeRTOS/Common/Minimal/comtest.c ****  *
+  73:FreeRTOS/Common/Minimal/comtest.c ****  * The receiving task is spawned with a higher priority than the transmitting
+  74:FreeRTOS/Common/Minimal/comtest.c ****  * task.  The receiver will therefore wake every time a character is
+  75:FreeRTOS/Common/Minimal/comtest.c ****  * transmitted so neither the Tx or Rx queue should ever hold more than a few
+  76:FreeRTOS/Common/Minimal/comtest.c ****  * characters.
+  77:FreeRTOS/Common/Minimal/comtest.c ****  *
+  78:FreeRTOS/Common/Minimal/comtest.c ****  */
+  79:FreeRTOS/Common/Minimal/comtest.c **** 
+  80:FreeRTOS/Common/Minimal/comtest.c **** /* Scheduler include files. */
+  81:FreeRTOS/Common/Minimal/comtest.c **** #include <stdlib.h>
+  82:FreeRTOS/Common/Minimal/comtest.c **** #include "FreeRTOS.h"
+  83:FreeRTOS/Common/Minimal/comtest.c **** #include "task.h"
+  84:FreeRTOS/Common/Minimal/comtest.c **** 
+  85:FreeRTOS/Common/Minimal/comtest.c **** /* Demo program include files. */
+  86:FreeRTOS/Common/Minimal/comtest.c **** #include "serial.h"
+  87:FreeRTOS/Common/Minimal/comtest.c **** #include "comtest.h"
+  88:FreeRTOS/Common/Minimal/comtest.c **** #include "partest.h"
+  89:FreeRTOS/Common/Minimal/comtest.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 3
+
+
+  90:FreeRTOS/Common/Minimal/comtest.c **** #define comSTACK_SIZE				configMINIMAL_STACK_SIZE
+  91:FreeRTOS/Common/Minimal/comtest.c **** #define comTX_LED_OFFSET			( 0 )
+  92:FreeRTOS/Common/Minimal/comtest.c **** #define comRX_LED_OFFSET			( 1 )
+  93:FreeRTOS/Common/Minimal/comtest.c **** #define comTOTAL_PERMISSIBLE_ERRORS ( 2 )
+  94:FreeRTOS/Common/Minimal/comtest.c **** 
+  95:FreeRTOS/Common/Minimal/comtest.c **** /* The Tx task will transmit the sequence of characters at a pseudo random
+  96:FreeRTOS/Common/Minimal/comtest.c **** interval.  This is the maximum and minimum block time between sends. */
+  97:FreeRTOS/Common/Minimal/comtest.c **** #define comTX_MAX_BLOCK_TIME		( ( portTickType ) 0x96 )
+  98:FreeRTOS/Common/Minimal/comtest.c **** #define comTX_MIN_BLOCK_TIME		( ( portTickType ) 0x32 )
+  99:FreeRTOS/Common/Minimal/comtest.c **** #define comOFFSET_TIME				( ( portTickType ) 3 )
+ 100:FreeRTOS/Common/Minimal/comtest.c **** 
+ 101:FreeRTOS/Common/Minimal/comtest.c **** /* We should find that each character can be queued for Tx immediately and we
+ 102:FreeRTOS/Common/Minimal/comtest.c **** don't have to block to send. */
+ 103:FreeRTOS/Common/Minimal/comtest.c **** #define comNO_BLOCK					( ( portTickType ) 0 )
+ 104:FreeRTOS/Common/Minimal/comtest.c **** 
+ 105:FreeRTOS/Common/Minimal/comtest.c **** /* The Rx task will block on the Rx queue for a long period. */
+ 106:FreeRTOS/Common/Minimal/comtest.c **** #define comRX_BLOCK_TIME			( ( portTickType ) 0xffff )
+ 107:FreeRTOS/Common/Minimal/comtest.c **** 
+ 108:FreeRTOS/Common/Minimal/comtest.c **** /* The sequence transmitted is from comFIRST_BYTE to and including comLAST_BYTE. */
+ 109:FreeRTOS/Common/Minimal/comtest.c **** #define comFIRST_BYTE				( 'A' )
+ 110:FreeRTOS/Common/Minimal/comtest.c **** #define comLAST_BYTE				( 'X' )
+ 111:FreeRTOS/Common/Minimal/comtest.c **** 
+ 112:FreeRTOS/Common/Minimal/comtest.c **** #define comBUFFER_LEN				( ( unsigned portBASE_TYPE ) ( comLAST_BYTE - comFIRST_BYTE ) + ( unsigned
+ 113:FreeRTOS/Common/Minimal/comtest.c **** #define comINITIAL_RX_COUNT_VALUE	( 0 )
+ 114:FreeRTOS/Common/Minimal/comtest.c **** 
+ 115:FreeRTOS/Common/Minimal/comtest.c **** /* Handle to the com port used by both tasks. */
+ 116:FreeRTOS/Common/Minimal/comtest.c **** static xComPortHandle xPort = NULL;
+ 117:FreeRTOS/Common/Minimal/comtest.c **** 
+ 118:FreeRTOS/Common/Minimal/comtest.c **** /* The transmit task as described at the top of the file. */
+ 119:FreeRTOS/Common/Minimal/comtest.c **** static portTASK_FUNCTION_PROTO( vComTxTask, pvParameters );
+ 120:FreeRTOS/Common/Minimal/comtest.c **** 
+ 121:FreeRTOS/Common/Minimal/comtest.c **** /* The receive task as described at the top of the file. */
+ 122:FreeRTOS/Common/Minimal/comtest.c **** static portTASK_FUNCTION_PROTO( vComRxTask, pvParameters );
+ 123:FreeRTOS/Common/Minimal/comtest.c **** 
+ 124:FreeRTOS/Common/Minimal/comtest.c **** /* The LED that should be toggled by the Rx and Tx tasks.  The Rx task will
+ 125:FreeRTOS/Common/Minimal/comtest.c **** toggle LED ( uxBaseLED + comRX_LED_OFFSET).  The Tx task will toggle LED
+ 126:FreeRTOS/Common/Minimal/comtest.c **** ( uxBaseLED + comTX_LED_OFFSET ). */
+ 127:FreeRTOS/Common/Minimal/comtest.c **** static unsigned portBASE_TYPE uxBaseLED = 0;
+ 128:FreeRTOS/Common/Minimal/comtest.c **** 
+ 129:FreeRTOS/Common/Minimal/comtest.c **** /* Check variable used to ensure no error have occurred.  The Rx task will
+ 130:FreeRTOS/Common/Minimal/comtest.c **** increment this variable after every successfully received sequence.  If at any
+ 131:FreeRTOS/Common/Minimal/comtest.c **** time the sequence is incorrect the the variable will stop being incremented. */
+ 132:FreeRTOS/Common/Minimal/comtest.c **** static volatile unsigned portBASE_TYPE uxRxLoops = comINITIAL_RX_COUNT_VALUE;
+ 133:FreeRTOS/Common/Minimal/comtest.c **** 
+ 134:FreeRTOS/Common/Minimal/comtest.c **** /*-----------------------------------------------------------*/
+ 135:FreeRTOS/Common/Minimal/comtest.c **** 
+ 136:FreeRTOS/Common/Minimal/comtest.c **** void vAltStartComTestTasks( unsigned portBASE_TYPE uxPriority, unsigned portLONG ulBaudRate, unsign
+ 137:FreeRTOS/Common/Minimal/comtest.c **** {
+ 138:FreeRTOS/Common/Minimal/comtest.c **** 	/* Initialise the com port then spawn the Rx and Tx tasks. */
+ 139:FreeRTOS/Common/Minimal/comtest.c **** 	uxBaseLED = uxLED;
+ 140:FreeRTOS/Common/Minimal/comtest.c **** 	xSerialPortInitMinimal( ulBaudRate, comBUFFER_LEN );
+ 141:FreeRTOS/Common/Minimal/comtest.c **** 
+ 142:FreeRTOS/Common/Minimal/comtest.c **** 	/* The Tx task is spawned with a lower priority than the Rx task. */
+ 143:FreeRTOS/Common/Minimal/comtest.c **** 	xTaskCreate( vComTxTask, ( signed portCHAR * ) "COMTx", comSTACK_SIZE, NULL, uxPriority - 1, ( xTa
+ 144:FreeRTOS/Common/Minimal/comtest.c **** 	xTaskCreate( vComRxTask, ( signed portCHAR * ) "COMRx", comSTACK_SIZE, NULL, uxPriority, ( xTaskHa
+ 145:FreeRTOS/Common/Minimal/comtest.c **** }
+ 146:FreeRTOS/Common/Minimal/comtest.c **** /*-----------------------------------------------------------*/
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 4
+
+
+ 147:FreeRTOS/Common/Minimal/comtest.c **** 
+ 148:FreeRTOS/Common/Minimal/comtest.c **** static portTASK_FUNCTION( vComTxTask, pvParameters )
+ 149:FreeRTOS/Common/Minimal/comtest.c **** {
+ 150:FreeRTOS/Common/Minimal/comtest.c **** signed portCHAR cByteToSend;
+ 151:FreeRTOS/Common/Minimal/comtest.c **** portTickType xTimeToWait;
+ 152:FreeRTOS/Common/Minimal/comtest.c **** 
+ 153:FreeRTOS/Common/Minimal/comtest.c **** 	/* Just to stop compiler warnings. */
+ 154:FreeRTOS/Common/Minimal/comtest.c **** 	( void ) pvParameters;
+ 155:FreeRTOS/Common/Minimal/comtest.c **** 
+ 156:FreeRTOS/Common/Minimal/comtest.c **** 	for( ;; )
+ 157:FreeRTOS/Common/Minimal/comtest.c **** 	{
+ 158:FreeRTOS/Common/Minimal/comtest.c **** 		/* Simply transmit a sequence of characters from comFIRST_BYTE to
+ 159:FreeRTOS/Common/Minimal/comtest.c **** 		comLAST_BYTE. */
+ 160:FreeRTOS/Common/Minimal/comtest.c **** 		for( cByteToSend = comFIRST_BYTE; cByteToSend <= comLAST_BYTE; cByteToSend++ )
+ 161:FreeRTOS/Common/Minimal/comtest.c **** 		{
+ 162:FreeRTOS/Common/Minimal/comtest.c **** 			if( xSerialPutChar( xPort, cByteToSend, comNO_BLOCK ) == pdPASS )
+ 163:FreeRTOS/Common/Minimal/comtest.c **** 			{
+ 164:FreeRTOS/Common/Minimal/comtest.c **** 				vParTestToggleLED( uxBaseLED + comTX_LED_OFFSET );
+ 165:FreeRTOS/Common/Minimal/comtest.c **** 			}
+ 166:FreeRTOS/Common/Minimal/comtest.c **** 		}
+ 167:FreeRTOS/Common/Minimal/comtest.c **** 
+ 168:FreeRTOS/Common/Minimal/comtest.c **** 		/* Turn the LED off while we are not doing anything. */
+ 169:FreeRTOS/Common/Minimal/comtest.c **** 		vParTestSetLED( uxBaseLED + comTX_LED_OFFSET, pdFALSE );
+ 170:FreeRTOS/Common/Minimal/comtest.c **** 
+ 171:FreeRTOS/Common/Minimal/comtest.c **** 		/* We have posted all the characters in the string - wait before
+ 172:FreeRTOS/Common/Minimal/comtest.c **** 		re-sending.  Wait a pseudo-random time as this will provide a better
+ 173:FreeRTOS/Common/Minimal/comtest.c **** 		test. */
+ 174:FreeRTOS/Common/Minimal/comtest.c **** 		xTimeToWait = xTaskGetTickCount() + comOFFSET_TIME;
+ 175:FreeRTOS/Common/Minimal/comtest.c **** 
+ 176:FreeRTOS/Common/Minimal/comtest.c **** 		/* Make sure we don't wait too long... */
+ 177:FreeRTOS/Common/Minimal/comtest.c **** 		xTimeToWait %= comTX_MAX_BLOCK_TIME;
+ 178:FreeRTOS/Common/Minimal/comtest.c **** 
+ 179:FreeRTOS/Common/Minimal/comtest.c **** 		/* ...but we do want to wait. */
+ 180:FreeRTOS/Common/Minimal/comtest.c **** 		if( xTimeToWait < comTX_MIN_BLOCK_TIME )
+ 181:FreeRTOS/Common/Minimal/comtest.c **** 		{
+ 182:FreeRTOS/Common/Minimal/comtest.c **** 			xTimeToWait = comTX_MIN_BLOCK_TIME;
+ 183:FreeRTOS/Common/Minimal/comtest.c **** 		}
+ 184:FreeRTOS/Common/Minimal/comtest.c **** 
+ 185:FreeRTOS/Common/Minimal/comtest.c **** 		vTaskDelay( xTimeToWait );
+ 186:FreeRTOS/Common/Minimal/comtest.c **** 	}
+ 187:FreeRTOS/Common/Minimal/comtest.c **** } /*lint !e715 !e818 pvParameters is required for a task function even if it is not referenced. */
+ 188:FreeRTOS/Common/Minimal/comtest.c **** /*-----------------------------------------------------------*/
+ 189:FreeRTOS/Common/Minimal/comtest.c **** 
+ 190:FreeRTOS/Common/Minimal/comtest.c **** static portTASK_FUNCTION( vComRxTask, pvParameters )
+ 191:FreeRTOS/Common/Minimal/comtest.c **** {
+  27              		.loc 1 191 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 8
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              	.LVL0:
+  32 0000 70B5     		push	{r4, r5, r6, lr}
+  33              	.LCFI0:
+  34              		.cfi_def_cfa_offset 16
+  35              		.cfi_offset 4, -16
+  36              		.cfi_offset 5, -12
+  37              		.cfi_offset 6, -8
+  38              		.cfi_offset 14, -4
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 5
+
+
+  39 0002 82B0     		sub	sp, sp, #8
+  40              	.LCFI1:
+  41              		.cfi_def_cfa_offset 24
+  42              	.LVL1:
+ 192:FreeRTOS/Common/Minimal/comtest.c **** signed portCHAR cExpectedByte, cByteRxed;
+ 193:FreeRTOS/Common/Minimal/comtest.c **** portBASE_TYPE xResyncRequired = pdFALSE, xErrorOccurred = pdFALSE;
+  43              		.loc 1 193 0
+  44 0004 0025     		movs	r5, #0
+  45 0006 2E46     		mov	r6, r5
+  46              	.LVL2:
+  47              	.L2:
+ 194:FreeRTOS/Common/Minimal/comtest.c **** 
+ 195:FreeRTOS/Common/Minimal/comtest.c **** 	/* Just to stop compiler warnings. */
+ 196:FreeRTOS/Common/Minimal/comtest.c **** 	( void ) pvParameters;
+ 197:FreeRTOS/Common/Minimal/comtest.c **** 
+ 198:FreeRTOS/Common/Minimal/comtest.c **** 	for( ;; )
+ 199:FreeRTOS/Common/Minimal/comtest.c **** 	{
+ 200:FreeRTOS/Common/Minimal/comtest.c **** 		/* We expect to receive the characters from comFIRST_BYTE to
+ 201:FreeRTOS/Common/Minimal/comtest.c **** 		comLAST_BYTE in an incrementing order.  Loop to receive each byte. */
+ 202:FreeRTOS/Common/Minimal/comtest.c **** 		for( cExpectedByte = comFIRST_BYTE; cExpectedByte <= comLAST_BYTE; cExpectedByte++ )
+  48              		.loc 1 202 0
+  49 0008 4124     		movs	r4, #65
+  50 000a 12E0     		b	.L3
+  51              	.LVL3:
+  52              	.L6:
+ 203:FreeRTOS/Common/Minimal/comtest.c **** 		{
+ 204:FreeRTOS/Common/Minimal/comtest.c **** 			/* Block on the queue that contains received bytes until a byte is
+ 205:FreeRTOS/Common/Minimal/comtest.c **** 			available. */
+ 206:FreeRTOS/Common/Minimal/comtest.c **** 			if( xSerialGetChar( xPort, &cByteRxed, comRX_BLOCK_TIME ) )
+  53              		.loc 1 206 0
+  54 000c 4FF6FF72 		movw	r2, #65535
+  55 0010 0DF10701 		add	r1, sp, #7
+  56 0014 0020     		movs	r0, #0
+  57 0016 FFF7FEFF 		bl	xSerialGetChar
+  58              	.LVL4:
+  59 001a 40B1     		cbz	r0, .L4
+ 207:FreeRTOS/Common/Minimal/comtest.c **** 			{
+ 208:FreeRTOS/Common/Minimal/comtest.c **** 				/* Was this the byte we were expecting?  If so, toggle the LED,
+ 209:FreeRTOS/Common/Minimal/comtest.c **** 				otherwise we are out on sync and should break out of the loop
+ 210:FreeRTOS/Common/Minimal/comtest.c **** 				until the expected character sequence is about to restart. */
+ 211:FreeRTOS/Common/Minimal/comtest.c **** 				if( cByteRxed == cExpectedByte )
+  60              		.loc 1 211 0
+  61 001c 9DF90730 		ldrsb	r3, [sp, #7]
+  62 0020 9C42     		cmp	r4, r3
+  63 0022 09D1     		bne	.L11
+ 212:FreeRTOS/Common/Minimal/comtest.c **** 				{
+ 213:FreeRTOS/Common/Minimal/comtest.c **** 					vParTestToggleLED( uxBaseLED + comRX_LED_OFFSET );
+  64              		.loc 1 213 0
+  65 0024 134B     		ldr	r3, .L14
+  66 0026 1868     		ldr	r0, [r3]
+  67 0028 0130     		adds	r0, r0, #1
+  68 002a FFF7FEFF 		bl	vParTestToggleLED
+  69              	.LVL5:
+  70              	.L4:
+ 202:FreeRTOS/Common/Minimal/comtest.c **** 		{
+  71              		.loc 1 202 0 discriminator 2
+  72 002e 0134     		adds	r4, r4, #1
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 6
+
+
+  73              	.LVL6:
+  74 0030 64B2     		sxtb	r4, r4
+  75              	.LVL7:
+  76              	.L3:
+ 202:FreeRTOS/Common/Minimal/comtest.c **** 		{
+  77              		.loc 1 202 0 is_stmt 0 discriminator 1
+  78 0032 582C     		cmp	r4, #88
+  79 0034 EADD     		ble	.L6
+  80 0036 00E0     		b	.L5
+  81              	.L11:
+ 214:FreeRTOS/Common/Minimal/comtest.c **** 				}
+ 215:FreeRTOS/Common/Minimal/comtest.c **** 				else
+ 216:FreeRTOS/Common/Minimal/comtest.c **** 				{
+ 217:FreeRTOS/Common/Minimal/comtest.c **** 					xResyncRequired = pdTRUE;
+  82              		.loc 1 217 0 is_stmt 1
+  83 0038 0126     		movs	r6, #1
+  84              	.LVL8:
+  85              	.L5:
+ 218:FreeRTOS/Common/Minimal/comtest.c **** 					break; /*lint !e960 Non-switch break allowed. */
+ 219:FreeRTOS/Common/Minimal/comtest.c **** 				}
+ 220:FreeRTOS/Common/Minimal/comtest.c **** 			}
+ 221:FreeRTOS/Common/Minimal/comtest.c **** 		}
+ 222:FreeRTOS/Common/Minimal/comtest.c **** 
+ 223:FreeRTOS/Common/Minimal/comtest.c **** 		/* Turn the LED off while we are not doing anything. */
+ 224:FreeRTOS/Common/Minimal/comtest.c **** 		vParTestSetLED( uxBaseLED + comRX_LED_OFFSET, pdFALSE );
+  86              		.loc 1 224 0
+  87 003a 0E4B     		ldr	r3, .L14
+  88 003c 1868     		ldr	r0, [r3]
+  89 003e 0021     		movs	r1, #0
+  90 0040 0130     		adds	r0, r0, #1
+  91 0042 FFF7FEFF 		bl	vParTestSetLED
+  92              	.LVL9:
+ 225:FreeRTOS/Common/Minimal/comtest.c **** 
+ 226:FreeRTOS/Common/Minimal/comtest.c **** 		/* Did we break out of the loop because the characters were received in
+ 227:FreeRTOS/Common/Minimal/comtest.c **** 		an unexpected order?  If so wait here until the character sequence is
+ 228:FreeRTOS/Common/Minimal/comtest.c **** 		about to restart. */
+ 229:FreeRTOS/Common/Minimal/comtest.c **** 		if( xResyncRequired == pdTRUE )
+  93              		.loc 1 229 0
+  94 0046 76B1     		cbz	r6, .L12
+  95 0048 06E0     		b	.L7
+  96              	.L9:
+ 230:FreeRTOS/Common/Minimal/comtest.c **** 		{
+ 231:FreeRTOS/Common/Minimal/comtest.c **** 			while( cByteRxed != comLAST_BYTE )
+ 232:FreeRTOS/Common/Minimal/comtest.c **** 			{
+ 233:FreeRTOS/Common/Minimal/comtest.c **** 				/* Block until the next char is available. */
+ 234:FreeRTOS/Common/Minimal/comtest.c **** 				xSerialGetChar( xPort, &cByteRxed, comRX_BLOCK_TIME );
+  97              		.loc 1 234 0
+  98 004a 4FF6FF72 		movw	r2, #65535
+  99 004e 0DF10701 		add	r1, sp, #7
+ 100 0052 0020     		movs	r0, #0
+ 101 0054 FFF7FEFF 		bl	xSerialGetChar
+ 102              	.LVL10:
+ 103              	.L7:
+ 231:FreeRTOS/Common/Minimal/comtest.c **** 			{
+ 104              		.loc 1 231 0
+ 105 0058 9DF90730 		ldrsb	r3, [sp, #7]
+ 106 005c 582B     		cmp	r3, #88
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 7
+
+
+ 107 005e F4D1     		bne	.L9
+ 235:FreeRTOS/Common/Minimal/comtest.c **** 			}
+ 236:FreeRTOS/Common/Minimal/comtest.c **** 
+ 237:FreeRTOS/Common/Minimal/comtest.c **** 			/* Note that an error occurred which caused us to have to resync.
+ 238:FreeRTOS/Common/Minimal/comtest.c **** 			We use this to stop incrementing the loop counter so
+ 239:FreeRTOS/Common/Minimal/comtest.c **** 			sAreComTestTasksStillRunning() will return false - indicating an
+ 240:FreeRTOS/Common/Minimal/comtest.c **** 			error. */
+ 241:FreeRTOS/Common/Minimal/comtest.c **** 			xErrorOccurred++;
+ 108              		.loc 1 241 0
+ 109 0060 0135     		adds	r5, r5, #1
+ 110              	.LVL11:
+ 242:FreeRTOS/Common/Minimal/comtest.c **** 
+ 243:FreeRTOS/Common/Minimal/comtest.c **** 			/* We have now resynced with the Tx task and can continue. */
+ 244:FreeRTOS/Common/Minimal/comtest.c **** 			xResyncRequired = pdFALSE;
+ 111              		.loc 1 244 0
+ 112 0062 0026     		movs	r6, #0
+ 113 0064 D0E7     		b	.L2
+ 114              	.LVL12:
+ 115              	.L12:
+ 245:FreeRTOS/Common/Minimal/comtest.c **** 		}
+ 246:FreeRTOS/Common/Minimal/comtest.c **** 		else
+ 247:FreeRTOS/Common/Minimal/comtest.c **** 		{
+ 248:FreeRTOS/Common/Minimal/comtest.c **** 			if( xErrorOccurred < comTOTAL_PERMISSIBLE_ERRORS )
+ 116              		.loc 1 248 0
+ 117 0066 012D     		cmp	r5, #1
+ 118 0068 CEDC     		bgt	.L2
+ 249:FreeRTOS/Common/Minimal/comtest.c **** 			{
+ 250:FreeRTOS/Common/Minimal/comtest.c **** 				/* Increment the count of successful loops.  As error
+ 251:FreeRTOS/Common/Minimal/comtest.c **** 				occurring (i.e. an unexpected character being received) will
+ 252:FreeRTOS/Common/Minimal/comtest.c **** 				prevent this counter being incremented for the rest of the
+ 253:FreeRTOS/Common/Minimal/comtest.c **** 				execution.   Don't worry about mutual exclusion on this
+ 254:FreeRTOS/Common/Minimal/comtest.c **** 				variable - it doesn't really matter as we just want it
+ 255:FreeRTOS/Common/Minimal/comtest.c **** 				to change. */
+ 256:FreeRTOS/Common/Minimal/comtest.c **** 				uxRxLoops++;
+ 119              		.loc 1 256 0
+ 120 006a 034A     		ldr	r2, .L14+4
+ 121 006c 1368     		ldr	r3, [r2]
+ 122 006e 0133     		adds	r3, r3, #1
+ 123 0070 1360     		str	r3, [r2]
+ 124 0072 C9E7     		b	.L2
+ 125              	.L15:
+ 126              		.align	2
+ 127              	.L14:
+ 128 0074 00000000 		.word	.LANCHOR0
+ 129 0078 00000000 		.word	.LANCHOR1
+ 130              		.cfi_endproc
+ 131              	.LFE2:
+ 133              		.section	.text.vComTxTask,"ax",%progbits
+ 134              		.align	2
+ 135              		.thumb
+ 136              		.thumb_func
+ 138              	vComTxTask:
+ 139              	.LFB1:
+ 149:FreeRTOS/Common/Minimal/comtest.c **** signed portCHAR cByteToSend;
+ 140              		.loc 1 149 0
+ 141              		.cfi_startproc
+ 142              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 8
+
+
+ 143              		@ frame_needed = 0, uses_anonymous_args = 0
+ 144              	.LVL13:
+ 145 0000 10B5     		push	{r4, lr}
+ 146              	.LCFI2:
+ 147              		.cfi_def_cfa_offset 8
+ 148              		.cfi_offset 4, -8
+ 149              		.cfi_offset 14, -4
+ 150              	.LVL14:
+ 151              	.L21:
+ 160:FreeRTOS/Common/Minimal/comtest.c **** 		{
+ 152              		.loc 1 160 0
+ 153 0002 4124     		movs	r4, #65
+ 154 0004 0CE0     		b	.L17
+ 155              	.LVL15:
+ 156              	.L19:
+ 162:FreeRTOS/Common/Minimal/comtest.c **** 			{
+ 157              		.loc 1 162 0
+ 158 0006 0022     		movs	r2, #0
+ 159 0008 2146     		mov	r1, r4
+ 160 000a 1046     		mov	r0, r2
+ 161 000c FFF7FEFF 		bl	xSerialPutChar
+ 162              	.LVL16:
+ 163 0010 0128     		cmp	r0, #1
+ 164 0012 03D1     		bne	.L18
+ 164:FreeRTOS/Common/Minimal/comtest.c **** 			}
+ 165              		.loc 1 164 0
+ 166 0014 0E4B     		ldr	r3, .L24
+ 167 0016 1868     		ldr	r0, [r3]
+ 168 0018 FFF7FEFF 		bl	vParTestToggleLED
+ 169              	.LVL17:
+ 170              	.L18:
+ 160:FreeRTOS/Common/Minimal/comtest.c **** 		{
+ 171              		.loc 1 160 0 discriminator 2
+ 172 001c 0134     		adds	r4, r4, #1
+ 173              	.LVL18:
+ 174 001e 64B2     		sxtb	r4, r4
+ 175              	.LVL19:
+ 176              	.L17:
+ 160:FreeRTOS/Common/Minimal/comtest.c **** 		{
+ 177              		.loc 1 160 0 is_stmt 0 discriminator 1
+ 178 0020 582C     		cmp	r4, #88
+ 179 0022 F0DD     		ble	.L19
+ 169:FreeRTOS/Common/Minimal/comtest.c **** 
+ 180              		.loc 1 169 0 is_stmt 1
+ 181 0024 0021     		movs	r1, #0
+ 182 0026 0A4B     		ldr	r3, .L24
+ 183 0028 1868     		ldr	r0, [r3]
+ 184 002a FFF7FEFF 		bl	vParTestSetLED
+ 185              	.LVL20:
+ 174:FreeRTOS/Common/Minimal/comtest.c **** 
+ 186              		.loc 1 174 0
+ 187 002e FFF7FEFF 		bl	xTaskGetTickCount
+ 188              	.LVL21:
+ 189 0032 C31C     		adds	r3, r0, #3
+ 190              	.LVL22:
+ 177:FreeRTOS/Common/Minimal/comtest.c **** 
+ 191              		.loc 1 177 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 9
+
+
+ 192 0034 0748     		ldr	r0, .L24+4
+ 193 0036 A0FB0320 		umull	r2, r0, r0, r3
+ 194 003a 0009     		lsrs	r0, r0, #4
+ 195 003c 9622     		movs	r2, #150
+ 196 003e 02FB1030 		mls	r0, r2, r0, r3
+ 197              	.LVL23:
+ 180:FreeRTOS/Common/Minimal/comtest.c **** 		{
+ 198              		.loc 1 180 0
+ 199 0042 3128     		cmp	r0, #49
+ 200 0044 00D8     		bhi	.L20
+ 182:FreeRTOS/Common/Minimal/comtest.c **** 		}
+ 201              		.loc 1 182 0
+ 202 0046 3220     		movs	r0, #50
+ 203              	.LVL24:
+ 204              	.L20:
+ 185:FreeRTOS/Common/Minimal/comtest.c **** 	}
+ 205              		.loc 1 185 0
+ 206 0048 FFF7FEFF 		bl	vTaskDelay
+ 207              	.LVL25:
+ 186:FreeRTOS/Common/Minimal/comtest.c **** } /*lint !e715 !e818 pvParameters is required for a task function even if it is not referenced. */
+ 208              		.loc 1 186 0
+ 209 004c D9E7     		b	.L21
+ 210              	.L25:
+ 211 004e 00BF     		.align	2
+ 212              	.L24:
+ 213 0050 00000000 		.word	.LANCHOR0
+ 214 0054 B5814E1B 		.word	458129845
+ 215              		.cfi_endproc
+ 216              	.LFE1:
+ 218              		.section	.text.vAltStartComTestTasks,"ax",%progbits
+ 219              		.align	2
+ 220              		.global	vAltStartComTestTasks
+ 221              		.thumb
+ 222              		.thumb_func
+ 224              	vAltStartComTestTasks:
+ 225              	.LFB0:
+ 137:FreeRTOS/Common/Minimal/comtest.c **** 	/* Initialise the com port then spawn the Rx and Tx tasks. */
+ 226              		.loc 1 137 0
+ 227              		.cfi_startproc
+ 228              		@ args = 0, pretend = 0, frame = 0
+ 229              		@ frame_needed = 0, uses_anonymous_args = 0
+ 230              	.LVL26:
+ 231 0000 30B5     		push	{r4, r5, lr}
+ 232              	.LCFI3:
+ 233              		.cfi_def_cfa_offset 12
+ 234              		.cfi_offset 4, -12
+ 235              		.cfi_offset 5, -8
+ 236              		.cfi_offset 14, -4
+ 237 0002 83B0     		sub	sp, sp, #12
+ 238              	.LCFI4:
+ 239              		.cfi_def_cfa_offset 24
+ 240 0004 0546     		mov	r5, r0
+ 241 0006 0846     		mov	r0, r1
+ 242              	.LVL27:
+ 139:FreeRTOS/Common/Minimal/comtest.c **** 	xSerialPortInitMinimal( ulBaudRate, comBUFFER_LEN );
+ 243              		.loc 1 139 0
+ 244 0008 0C4B     		ldr	r3, .L28
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 10
+
+
+ 245 000a 1A60     		str	r2, [r3]
+ 140:FreeRTOS/Common/Minimal/comtest.c **** 
+ 246              		.loc 1 140 0
+ 247 000c 1821     		movs	r1, #24
+ 248              	.LVL28:
+ 249 000e FFF7FEFF 		bl	xSerialPortInitMinimal
+ 250              	.LVL29:
+ 143:FreeRTOS/Common/Minimal/comtest.c **** 	xTaskCreate( vComRxTask, ( signed portCHAR * ) "COMRx", comSTACK_SIZE, NULL, uxPriority, ( xTaskHa
+ 251              		.loc 1 143 0
+ 252 0012 0024     		movs	r4, #0
+ 253 0014 0194     		str	r4, [sp, #4]
+ 254 0016 6B1E     		subs	r3, r5, #1
+ 255 0018 0093     		str	r3, [sp]
+ 256 001a 2346     		mov	r3, r4
+ 257 001c 8022     		movs	r2, #128
+ 258 001e 0849     		ldr	r1, .L28+4
+ 259 0020 0848     		ldr	r0, .L28+8
+ 260 0022 FFF7FEFF 		bl	xTaskCreate
+ 261              	.LVL30:
+ 144:FreeRTOS/Common/Minimal/comtest.c **** }
+ 262              		.loc 1 144 0
+ 263 0026 0194     		str	r4, [sp, #4]
+ 264 0028 0095     		str	r5, [sp]
+ 265 002a 2346     		mov	r3, r4
+ 266 002c 8022     		movs	r2, #128
+ 267 002e 0649     		ldr	r1, .L28+12
+ 268 0030 0648     		ldr	r0, .L28+16
+ 269 0032 FFF7FEFF 		bl	xTaskCreate
+ 270              	.LVL31:
+ 145:FreeRTOS/Common/Minimal/comtest.c **** /*-----------------------------------------------------------*/
+ 271              		.loc 1 145 0
+ 272 0036 03B0     		add	sp, sp, #12
+ 273              	.LCFI5:
+ 274              		.cfi_def_cfa_offset 12
+ 275              		@ sp needed
+ 276 0038 30BD     		pop	{r4, r5, pc}
+ 277              	.LVL32:
+ 278              	.L29:
+ 279 003a 00BF     		.align	2
+ 280              	.L28:
+ 281 003c 00000000 		.word	.LANCHOR0
+ 282 0040 00000000 		.word	.LC0
+ 283 0044 00000000 		.word	vComTxTask
+ 284 0048 08000000 		.word	.LC1
+ 285 004c 00000000 		.word	vComRxTask
+ 286              		.cfi_endproc
+ 287              	.LFE0:
+ 289              		.section	.text.xAreComTestTasksStillRunning,"ax",%progbits
+ 290              		.align	2
+ 291              		.global	xAreComTestTasksStillRunning
+ 292              		.thumb
+ 293              		.thumb_func
+ 295              	xAreComTestTasksStillRunning:
+ 296              	.LFB3:
+ 257:FreeRTOS/Common/Minimal/comtest.c **** 			}
+ 258:FreeRTOS/Common/Minimal/comtest.c **** 		}
+ 259:FreeRTOS/Common/Minimal/comtest.c **** 	}
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 11
+
+
+ 260:FreeRTOS/Common/Minimal/comtest.c **** } /*lint !e715 !e818 pvParameters is required for a task function even if it is not referenced. */
+ 261:FreeRTOS/Common/Minimal/comtest.c **** /*-----------------------------------------------------------*/
+ 262:FreeRTOS/Common/Minimal/comtest.c **** 
+ 263:FreeRTOS/Common/Minimal/comtest.c **** portBASE_TYPE xAreComTestTasksStillRunning( void )
+ 264:FreeRTOS/Common/Minimal/comtest.c **** {
+ 297              		.loc 1 264 0
+ 298              		.cfi_startproc
+ 299              		@ args = 0, pretend = 0, frame = 0
+ 300              		@ frame_needed = 0, uses_anonymous_args = 0
+ 301              		@ link register save eliminated.
+ 265:FreeRTOS/Common/Minimal/comtest.c **** portBASE_TYPE xReturn;
+ 266:FreeRTOS/Common/Minimal/comtest.c **** 
+ 267:FreeRTOS/Common/Minimal/comtest.c **** 	/* If the count of successful reception loops has not changed than at
+ 268:FreeRTOS/Common/Minimal/comtest.c **** 	some time an error occurred (i.e. a character was received out of sequence)
+ 269:FreeRTOS/Common/Minimal/comtest.c **** 	and we will return false. */
+ 270:FreeRTOS/Common/Minimal/comtest.c **** 	if( uxRxLoops == comINITIAL_RX_COUNT_VALUE )
+ 302              		.loc 1 270 0
+ 303 0000 044B     		ldr	r3, .L33
+ 304 0002 1B68     		ldr	r3, [r3]
+ 305 0004 0BB9     		cbnz	r3, .L32
+ 271:FreeRTOS/Common/Minimal/comtest.c **** 	{
+ 272:FreeRTOS/Common/Minimal/comtest.c **** 		xReturn = pdFALSE;
+ 306              		.loc 1 272 0
+ 307 0006 0020     		movs	r0, #0
+ 308 0008 00E0     		b	.L31
+ 309              	.L32:
+ 273:FreeRTOS/Common/Minimal/comtest.c **** 	}
+ 274:FreeRTOS/Common/Minimal/comtest.c **** 	else
+ 275:FreeRTOS/Common/Minimal/comtest.c **** 	{
+ 276:FreeRTOS/Common/Minimal/comtest.c **** 		xReturn = pdTRUE;
+ 310              		.loc 1 276 0
+ 311 000a 0120     		movs	r0, #1
+ 312              	.L31:
+ 313              	.LVL33:
+ 277:FreeRTOS/Common/Minimal/comtest.c **** 	}
+ 278:FreeRTOS/Common/Minimal/comtest.c **** 
+ 279:FreeRTOS/Common/Minimal/comtest.c **** 	/* Reset the count of successful Rx loops.  When this function is called
+ 280:FreeRTOS/Common/Minimal/comtest.c **** 	again we expect this to have been incremented. */
+ 281:FreeRTOS/Common/Minimal/comtest.c **** 	uxRxLoops = comINITIAL_RX_COUNT_VALUE;
+ 314              		.loc 1 281 0
+ 315 000c 0022     		movs	r2, #0
+ 316 000e 014B     		ldr	r3, .L33
+ 317 0010 1A60     		str	r2, [r3]
+ 282:FreeRTOS/Common/Minimal/comtest.c **** 
+ 283:FreeRTOS/Common/Minimal/comtest.c **** 	return xReturn;
+ 284:FreeRTOS/Common/Minimal/comtest.c **** }
+ 318              		.loc 1 284 0
+ 319 0012 7047     		bx	lr
+ 320              	.L34:
+ 321              		.align	2
+ 322              	.L33:
+ 323 0014 00000000 		.word	.LANCHOR1
+ 324              		.cfi_endproc
+ 325              	.LFE3:
+ 327              		.section	.bss.uxRxLoops,"aw",%nobits
+ 328              		.align	2
+ 329              		.set	.LANCHOR1,. + 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 12
+
+
+ 332              	uxRxLoops:
+ 333 0000 00000000 		.space	4
+ 334              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 335              		.align	2
+ 336              	.LC0:
+ 337 0000 434F4D54 		.ascii	"COMTx\000"
+ 337      7800
+ 338 0006 0000     		.space	2
+ 339              	.LC1:
+ 340 0008 434F4D52 		.ascii	"COMRx\000"
+ 340      7800
+ 341              		.section	.bss.uxBaseLED,"aw",%nobits
+ 342              		.align	2
+ 343              		.set	.LANCHOR0,. + 0
+ 346              	uxBaseLED:
+ 347 0000 00000000 		.space	4
+ 348              		.text
+ 349              	.Letext0:
+ 350              		.file 2 "FreeRTOS/ARMCM3/Inc/portmacro.h"
+ 351              		.file 3 "FreeRTOS/Inc/task.h"
+ 352              		.file 4 "FreeRTOS/Common/Inc/serial.h"
+ 353              		.file 5 "FreeRTOS/Common/Inc/partest.h"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s 			page 13
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 comtest.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:20     .text.vComRxTask:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:24     .text.vComRxTask:0000000000000000 vComRxTask
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:128    .text.vComRxTask:0000000000000074 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:134    .text.vComTxTask:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:138    .text.vComTxTask:0000000000000000 vComTxTask
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:213    .text.vComTxTask:0000000000000050 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:219    .text.vAltStartComTestTasks:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:224    .text.vAltStartComTestTasks:0000000000000000 vAltStartComTestTasks
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:281    .text.vAltStartComTestTasks:000000000000003c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:290    .text.xAreComTestTasksStillRunning:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:295    .text.xAreComTestTasksStillRunning:0000000000000000 xAreComTestTasksStillRunning
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:323    .text.xAreComTestTasksStillRunning:0000000000000014 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:328    .bss.uxRxLoops:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:332    .bss.uxRxLoops:0000000000000000 uxRxLoops
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:335    .rodata.str1.4:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:342    .bss.uxBaseLED:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccCjLUAW.s:346    .bss.uxBaseLED:0000000000000000 uxBaseLED
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+xSerialGetChar
+vParTestToggleLED
+vParTestSetLED
+xSerialPutChar
+xTaskGetTickCount
+vTaskDelay
+xSerialPortInitMinimal
+xTaskCreate

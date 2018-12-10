@@ -31,7 +31,7 @@ OPT = -Og
 # Build path
 BUILD_DIR = build
 
-RTOS_FLAGS = no
+RTOS_FLAGS = yes
 
 
 include exinc.mk
@@ -85,6 +85,7 @@ AS_DEFS =
 C_DEFS =  \
 -D USE_STDPERIPH_DRIVER \
 -D BOARD_DEF_MANGO_M32 \
+#-D BOARD_DEF_MANGO_Z1  \
 #-D DEBUG
 
 #---------------------------------------------------------------------------
@@ -181,7 +182,6 @@ flash: $(BUILD_DIR)/$(TARGET).bin
 
 down_load: $(BUILD_DIR)/$(TARGET).bin
 	~/stm32ld /dev/tty.usbserial-14201 115200 ./$(BUILD_DIR)/$(TARGET).bin
-	st-flash write $(TARGET).bin 0x8000000
 
 
 erase:

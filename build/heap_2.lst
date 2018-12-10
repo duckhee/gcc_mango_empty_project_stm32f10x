@@ -1,0 +1,604 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"heap_2.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.pvPortMalloc,"ax",%progbits
+  20              		.align	2
+  21              		.global	pvPortMalloc
+  22              		.thumb
+  23              		.thumb_func
+  25              	pvPortMalloc:
+  26              	.LFB0:
+  27              		.file 1 "FreeRTOS/ARMCM3/Src/heap_2.c"
+   1:FreeRTOS/ARMCM3/Src/heap_2.c **** /*
+   2:FreeRTOS/ARMCM3/Src/heap_2.c **** 	FreeRTOS V5.4.2 - Copyright (C) 2009 Real Time Engineers Ltd.
+   3:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+   4:FreeRTOS/ARMCM3/Src/heap_2.c **** 	This file is part of the FreeRTOS distribution.
+   5:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+   6:FreeRTOS/ARMCM3/Src/heap_2.c **** 	FreeRTOS is free software; you can redistribute it and/or modify it	under 
+   7:FreeRTOS/ARMCM3/Src/heap_2.c **** 	the terms of the GNU General Public License (version 2) as published by the 
+   8:FreeRTOS/ARMCM3/Src/heap_2.c **** 	Free Software Foundation and modified by the FreeRTOS exception.
+   9:FreeRTOS/ARMCM3/Src/heap_2.c **** 	**NOTE** The exception to the GPL is included to allow you to distribute a
+  10:FreeRTOS/ARMCM3/Src/heap_2.c **** 	combined work that includes FreeRTOS without being obliged to provide the 
+  11:FreeRTOS/ARMCM3/Src/heap_2.c **** 	source code for proprietary components outside of the FreeRTOS kernel.  
+  12:FreeRTOS/ARMCM3/Src/heap_2.c **** 	Alternative commercial license and support terms are also available upon 
+  13:FreeRTOS/ARMCM3/Src/heap_2.c **** 	request.  See the licensing section of http://www.FreeRTOS.org for full 
+  14:FreeRTOS/ARMCM3/Src/heap_2.c **** 	license details.
+  15:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  16:FreeRTOS/ARMCM3/Src/heap_2.c **** 	FreeRTOS is distributed in the hope that it will be useful,	but WITHOUT
+  17:FreeRTOS/ARMCM3/Src/heap_2.c **** 	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  18:FreeRTOS/ARMCM3/Src/heap_2.c **** 	FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+  19:FreeRTOS/ARMCM3/Src/heap_2.c **** 	more details.
+  20:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  21:FreeRTOS/ARMCM3/Src/heap_2.c **** 	You should have received a copy of the GNU General Public License along
+  22:FreeRTOS/ARMCM3/Src/heap_2.c **** 	with FreeRTOS; if not, write to the Free Software Foundation, Inc., 59
+  23:FreeRTOS/ARMCM3/Src/heap_2.c **** 	Temple Place, Suite 330, Boston, MA  02111-1307  USA.
+  24:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  25:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  26:FreeRTOS/ARMCM3/Src/heap_2.c **** 	***************************************************************************
+  27:FreeRTOS/ARMCM3/Src/heap_2.c **** 	*                                                                         *
+  28:FreeRTOS/ARMCM3/Src/heap_2.c **** 	* Looking for a quick start?  Then check out the FreeRTOS eBook!          *
+  29:FreeRTOS/ARMCM3/Src/heap_2.c **** 	* See http://www.FreeRTOS.org/Documentation for details                   *
+  30:FreeRTOS/ARMCM3/Src/heap_2.c **** 	*                                                                         *
+  31:FreeRTOS/ARMCM3/Src/heap_2.c **** 	***************************************************************************
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 2
+
+
+  32:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  33:FreeRTOS/ARMCM3/Src/heap_2.c **** 	1 tab == 4 spaces!
+  34:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  35:FreeRTOS/ARMCM3/Src/heap_2.c **** 	Please ensure to read the configuration and relevant port sections of the
+  36:FreeRTOS/ARMCM3/Src/heap_2.c **** 	online documentation.
+  37:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  38:FreeRTOS/ARMCM3/Src/heap_2.c **** 	http://www.FreeRTOS.org - Documentation, latest information, license and
+  39:FreeRTOS/ARMCM3/Src/heap_2.c **** 	contact details.
+  40:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  41:FreeRTOS/ARMCM3/Src/heap_2.c **** 	http://www.SafeRTOS.com - A version that is certified for use in safety
+  42:FreeRTOS/ARMCM3/Src/heap_2.c **** 	critical systems.
+  43:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  44:FreeRTOS/ARMCM3/Src/heap_2.c **** 	http://www.OpenRTOS.com - Commercial support, development, porting,
+  45:FreeRTOS/ARMCM3/Src/heap_2.c **** 	licensing and training services.
+  46:FreeRTOS/ARMCM3/Src/heap_2.c **** */
+  47:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  48:FreeRTOS/ARMCM3/Src/heap_2.c **** /*
+  49:FreeRTOS/ARMCM3/Src/heap_2.c ****  * A sample implementation of pvPortMalloc() and vPortFree() that permits
+  50:FreeRTOS/ARMCM3/Src/heap_2.c ****  * allocated blocks to be freed, but does not combine adjacent free blocks
+  51:FreeRTOS/ARMCM3/Src/heap_2.c ****  * into a single larger block.
+  52:FreeRTOS/ARMCM3/Src/heap_2.c ****  *
+  53:FreeRTOS/ARMCM3/Src/heap_2.c ****  * See heap_1.c and heap_3.c for alternative implementations, and the memory
+  54:FreeRTOS/ARMCM3/Src/heap_2.c ****  * management pages of http://www.FreeRTOS.org for more information.
+  55:FreeRTOS/ARMCM3/Src/heap_2.c ****  */
+  56:FreeRTOS/ARMCM3/Src/heap_2.c **** #include <stdlib.h>
+  57:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  58:FreeRTOS/ARMCM3/Src/heap_2.c **** #include "FreeRTOS.h"
+  59:FreeRTOS/ARMCM3/Src/heap_2.c **** #include "task.h"
+  60:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  61:FreeRTOS/ARMCM3/Src/heap_2.c **** /* Setup the correct byte alignment mask for the defined byte alignment. */
+  62:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  63:FreeRTOS/ARMCM3/Src/heap_2.c **** #if portBYTE_ALIGNMENT == 8
+  64:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#define heapBYTE_ALIGNMENT_MASK ( ( size_t ) 0x0007 )
+  65:FreeRTOS/ARMCM3/Src/heap_2.c **** #endif
+  66:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  67:FreeRTOS/ARMCM3/Src/heap_2.c **** #if portBYTE_ALIGNMENT == 4
+  68:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#define heapBYTE_ALIGNMENT_MASK	( ( size_t ) 0x0003 )
+  69:FreeRTOS/ARMCM3/Src/heap_2.c **** #endif
+  70:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  71:FreeRTOS/ARMCM3/Src/heap_2.c **** #if portBYTE_ALIGNMENT == 2
+  72:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#define heapBYTE_ALIGNMENT_MASK	( ( size_t ) 0x0001 )
+  73:FreeRTOS/ARMCM3/Src/heap_2.c **** #endif
+  74:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  75:FreeRTOS/ARMCM3/Src/heap_2.c **** #if portBYTE_ALIGNMENT == 1
+  76:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#define heapBYTE_ALIGNMENT_MASK	( ( size_t ) 0x0000 )
+  77:FreeRTOS/ARMCM3/Src/heap_2.c **** #endif
+  78:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  79:FreeRTOS/ARMCM3/Src/heap_2.c **** #ifndef heapBYTE_ALIGNMENT_MASK
+  80:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#error "Invalid portBYTE_ALIGNMENT definition"
+  81:FreeRTOS/ARMCM3/Src/heap_2.c **** #endif
+  82:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  83:FreeRTOS/ARMCM3/Src/heap_2.c **** /* Allocate the memory for the heap.  The struct is used to force byte
+  84:FreeRTOS/ARMCM3/Src/heap_2.c **** alignment without using any non-portable code. */
+  85:FreeRTOS/ARMCM3/Src/heap_2.c **** static union xRTOS_HEAP
+  86:FreeRTOS/ARMCM3/Src/heap_2.c **** {
+  87:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#if portBYTE_ALIGNMENT == 8
+  88:FreeRTOS/ARMCM3/Src/heap_2.c **** 		volatile portDOUBLE dDummy;
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 3
+
+
+  89:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#else
+  90:FreeRTOS/ARMCM3/Src/heap_2.c **** 		volatile unsigned portLONG ulDummy;
+  91:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#endif	
+  92:FreeRTOS/ARMCM3/Src/heap_2.c **** 	unsigned portCHAR ucHeap[ configTOTAL_HEAP_SIZE ];
+  93:FreeRTOS/ARMCM3/Src/heap_2.c **** } xHeap;
+  94:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+  95:FreeRTOS/ARMCM3/Src/heap_2.c **** /* Define the linked list structure.  This is used to link free blocks in order
+  96:FreeRTOS/ARMCM3/Src/heap_2.c **** of their size. */
+  97:FreeRTOS/ARMCM3/Src/heap_2.c **** typedef struct A_BLOCK_LINK
+  98:FreeRTOS/ARMCM3/Src/heap_2.c **** {
+  99:FreeRTOS/ARMCM3/Src/heap_2.c **** 	struct A_BLOCK_LINK *pxNextFreeBlock;	/*<< The next free block in the list. */
+ 100:FreeRTOS/ARMCM3/Src/heap_2.c **** 	size_t xBlockSize;						/*<< The size of the free block. */
+ 101:FreeRTOS/ARMCM3/Src/heap_2.c **** } xBlockLink;
+ 102:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 103:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 104:FreeRTOS/ARMCM3/Src/heap_2.c **** static const unsigned portSHORT  heapSTRUCT_SIZE	= ( sizeof( xBlockLink ) + portBYTE_ALIGNMENT - ( 
+ 105:FreeRTOS/ARMCM3/Src/heap_2.c **** #define heapMINIMUM_BLOCK_SIZE	( ( size_t ) ( heapSTRUCT_SIZE * 2 ) )
+ 106:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 107:FreeRTOS/ARMCM3/Src/heap_2.c **** /* Create a couple of list links to mark the start and end of the list. */
+ 108:FreeRTOS/ARMCM3/Src/heap_2.c **** static xBlockLink xStart, xEnd;
+ 109:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 110:FreeRTOS/ARMCM3/Src/heap_2.c **** /* STATIC FUNCTIONS ARE DEFINED AS MACROS TO MINIMIZE THE FUNCTION CALL DEPTH. */
+ 111:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 112:FreeRTOS/ARMCM3/Src/heap_2.c **** /*
+ 113:FreeRTOS/ARMCM3/Src/heap_2.c ****  * Insert a block into the list of free blocks - which is ordered by size of
+ 114:FreeRTOS/ARMCM3/Src/heap_2.c ****  * the block.  Small blocks at the start of the list and large blocks at the end
+ 115:FreeRTOS/ARMCM3/Src/heap_2.c ****  * of the list.
+ 116:FreeRTOS/ARMCM3/Src/heap_2.c ****  */
+ 117:FreeRTOS/ARMCM3/Src/heap_2.c **** #define prvInsertBlockIntoFreeList( pxBlockToInsert )								\
+ 118:FreeRTOS/ARMCM3/Src/heap_2.c **** {																					\
+ 119:FreeRTOS/ARMCM3/Src/heap_2.c **** xBlockLink *pxIterator;																\
+ 120:FreeRTOS/ARMCM3/Src/heap_2.c **** size_t xBlockSize;																	\
+ 121:FreeRTOS/ARMCM3/Src/heap_2.c **** 																					\
+ 122:FreeRTOS/ARMCM3/Src/heap_2.c **** 	xBlockSize = pxBlockToInsert->xBlockSize;										\
+ 123:FreeRTOS/ARMCM3/Src/heap_2.c **** 																					\
+ 124:FreeRTOS/ARMCM3/Src/heap_2.c **** 	/* Iterate through the list until a block is found that has a larger size */	\
+ 125:FreeRTOS/ARMCM3/Src/heap_2.c **** 	/* than the block we are inserting. */											\
+ 126:FreeRTOS/ARMCM3/Src/heap_2.c **** 	for( pxIterator = &xStart; pxIterator->pxNextFreeBlock->xBlockSize < xBlockSize; pxIterator = pxIt
+ 127:FreeRTOS/ARMCM3/Src/heap_2.c **** 	{																				\
+ 128:FreeRTOS/ARMCM3/Src/heap_2.c **** 		/* There is nothing to do here - just iterate to the correct position. */	\
+ 129:FreeRTOS/ARMCM3/Src/heap_2.c **** 	}																				\
+ 130:FreeRTOS/ARMCM3/Src/heap_2.c **** 																					\
+ 131:FreeRTOS/ARMCM3/Src/heap_2.c **** 	/* Update the list to include the block being inserted in the correct */		\
+ 132:FreeRTOS/ARMCM3/Src/heap_2.c **** 	/* position. */																	\
+ 133:FreeRTOS/ARMCM3/Src/heap_2.c **** 	pxBlockToInsert->pxNextFreeBlock = pxIterator->pxNextFreeBlock;					\
+ 134:FreeRTOS/ARMCM3/Src/heap_2.c **** 	pxIterator->pxNextFreeBlock = pxBlockToInsert;									\
+ 135:FreeRTOS/ARMCM3/Src/heap_2.c **** }
+ 136:FreeRTOS/ARMCM3/Src/heap_2.c **** /*-----------------------------------------------------------*/
+ 137:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 138:FreeRTOS/ARMCM3/Src/heap_2.c **** #define prvHeapInit()																\
+ 139:FreeRTOS/ARMCM3/Src/heap_2.c **** {																					\
+ 140:FreeRTOS/ARMCM3/Src/heap_2.c **** xBlockLink *pxFirstFreeBlock;														\
+ 141:FreeRTOS/ARMCM3/Src/heap_2.c **** 																					\
+ 142:FreeRTOS/ARMCM3/Src/heap_2.c **** 	/* xStart is used to hold a pointer to the first item in the list of free */	\
+ 143:FreeRTOS/ARMCM3/Src/heap_2.c **** 	/* blocks.  The void cast is used to prevent compiler warnings. */				\
+ 144:FreeRTOS/ARMCM3/Src/heap_2.c **** 	xStart.pxNextFreeBlock = ( void * ) xHeap.ucHeap;								\
+ 145:FreeRTOS/ARMCM3/Src/heap_2.c **** 	xStart.xBlockSize = ( size_t ) 0;												\
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 4
+
+
+ 146:FreeRTOS/ARMCM3/Src/heap_2.c **** 																					\
+ 147:FreeRTOS/ARMCM3/Src/heap_2.c **** 	/* xEnd is used to mark the end of the list of free blocks. */					\
+ 148:FreeRTOS/ARMCM3/Src/heap_2.c **** 	xEnd.xBlockSize = configTOTAL_HEAP_SIZE;										\
+ 149:FreeRTOS/ARMCM3/Src/heap_2.c **** 	xEnd.pxNextFreeBlock = NULL;													\
+ 150:FreeRTOS/ARMCM3/Src/heap_2.c **** 																					\
+ 151:FreeRTOS/ARMCM3/Src/heap_2.c **** 	/* To start with there is a single free block that is sized to take up the		\
+ 152:FreeRTOS/ARMCM3/Src/heap_2.c **** 	entire heap space. */															\
+ 153:FreeRTOS/ARMCM3/Src/heap_2.c **** 	pxFirstFreeBlock = ( void * ) xHeap.ucHeap;										\
+ 154:FreeRTOS/ARMCM3/Src/heap_2.c **** 	pxFirstFreeBlock->xBlockSize = configTOTAL_HEAP_SIZE;							\
+ 155:FreeRTOS/ARMCM3/Src/heap_2.c **** 	pxFirstFreeBlock->pxNextFreeBlock = &xEnd;										\
+ 156:FreeRTOS/ARMCM3/Src/heap_2.c **** }
+ 157:FreeRTOS/ARMCM3/Src/heap_2.c **** /*-----------------------------------------------------------*/
+ 158:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 159:FreeRTOS/ARMCM3/Src/heap_2.c **** void *pvPortMalloc( size_t xWantedSize )
+ 160:FreeRTOS/ARMCM3/Src/heap_2.c **** {
+  28              		.loc 1 160 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              	.LVL0:
+  33 0000 70B5     		push	{r4, r5, r6, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 16
+  36              		.cfi_offset 4, -16
+  37              		.cfi_offset 5, -12
+  38              		.cfi_offset 6, -8
+  39              		.cfi_offset 14, -4
+  40 0002 0446     		mov	r4, r0
+  41              	.LVL1:
+ 161:FreeRTOS/ARMCM3/Src/heap_2.c **** xBlockLink *pxBlock, *pxPreviousBlock, *pxNewBlockLink;
+ 162:FreeRTOS/ARMCM3/Src/heap_2.c **** static portBASE_TYPE xHeapHasBeenInitialised = pdFALSE;
+ 163:FreeRTOS/ARMCM3/Src/heap_2.c **** void *pvReturn = NULL;
+ 164:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 165:FreeRTOS/ARMCM3/Src/heap_2.c **** 	vTaskSuspendAll();
+  42              		.loc 1 165 0
+  43 0004 FFF7FEFF 		bl	vTaskSuspendAll
+  44              	.LVL2:
+ 166:FreeRTOS/ARMCM3/Src/heap_2.c **** 	{
+ 167:FreeRTOS/ARMCM3/Src/heap_2.c **** 		/* If this is the first call to malloc then the heap will require
+ 168:FreeRTOS/ARMCM3/Src/heap_2.c **** 		initialisation to setup the list of free blocks. */
+ 169:FreeRTOS/ARMCM3/Src/heap_2.c **** 		if( xHeapHasBeenInitialised == pdFALSE )
+  45              		.loc 1 169 0
+  46 0008 244B     		ldr	r3, .L13
+  47 000a 1B68     		ldr	r3, [r3]
+  48 000c 73B9     		cbnz	r3, .L2
+  49              	.LBB2:
+ 170:FreeRTOS/ARMCM3/Src/heap_2.c **** 		{
+ 171:FreeRTOS/ARMCM3/Src/heap_2.c **** 			prvHeapInit();
+  50              		.loc 1 171 0
+  51 000e 244A     		ldr	r2, .L13+4
+  52 0010 244B     		ldr	r3, .L13+8
+  53 0012 1360     		str	r3, [r2]
+  54 0014 0020     		movs	r0, #0
+  55 0016 5060     		str	r0, [r2, #4]
+  56 0018 234A     		ldr	r2, .L13+12
+  57 001a 4FF48841 		mov	r1, #17408
+  58 001e 5160     		str	r1, [r2, #4]
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 5
+
+
+  59 0020 1060     		str	r0, [r2]
+  60              	.LVL3:
+  61 0022 5960     		str	r1, [r3, #4]
+  62 0024 1A60     		str	r2, [r3]
+  63              	.LBE2:
+ 172:FreeRTOS/ARMCM3/Src/heap_2.c **** 			xHeapHasBeenInitialised = pdTRUE;
+  64              		.loc 1 172 0
+  65 0026 0122     		movs	r2, #1
+  66 0028 1C4B     		ldr	r3, .L13
+  67 002a 1A60     		str	r2, [r3]
+  68              	.LVL4:
+  69              	.L2:
+ 173:FreeRTOS/ARMCM3/Src/heap_2.c **** 		}
+ 174:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 175:FreeRTOS/ARMCM3/Src/heap_2.c **** 		/* The wanted size is increased so it can contain a xBlockLink
+ 176:FreeRTOS/ARMCM3/Src/heap_2.c **** 		structure in addition to the requested amount of bytes. */
+ 177:FreeRTOS/ARMCM3/Src/heap_2.c **** 		if( xWantedSize > 0 )
+  70              		.loc 1 177 0
+  71 002c 34B1     		cbz	r4, .L3
+ 178:FreeRTOS/ARMCM3/Src/heap_2.c **** 		{
+ 179:FreeRTOS/ARMCM3/Src/heap_2.c **** 			xWantedSize += heapSTRUCT_SIZE;
+  72              		.loc 1 179 0
+  73 002e 0C34     		adds	r4, r4, #12
+  74              	.LVL5:
+ 180:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 181:FreeRTOS/ARMCM3/Src/heap_2.c **** 			/* Ensure that blocks are always aligned to the required number of bytes. */
+ 182:FreeRTOS/ARMCM3/Src/heap_2.c **** 			if( xWantedSize & heapBYTE_ALIGNMENT_MASK )
+  75              		.loc 1 182 0
+  76 0030 14F0030F 		tst	r4, #3
+  77 0034 02D0     		beq	.L3
+ 183:FreeRTOS/ARMCM3/Src/heap_2.c **** 			{
+ 184:FreeRTOS/ARMCM3/Src/heap_2.c **** 				/* Byte alignment required. */
+ 185:FreeRTOS/ARMCM3/Src/heap_2.c **** 				xWantedSize += ( portBYTE_ALIGNMENT - ( xWantedSize & heapBYTE_ALIGNMENT_MASK ) );
+  78              		.loc 1 185 0
+  79 0036 24F00304 		bic	r4, r4, #3
+  80              	.LVL6:
+  81 003a 0434     		adds	r4, r4, #4
+  82              	.LVL7:
+  83              	.L3:
+ 186:FreeRTOS/ARMCM3/Src/heap_2.c **** 			}
+ 187:FreeRTOS/ARMCM3/Src/heap_2.c **** 		}
+ 188:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 189:FreeRTOS/ARMCM3/Src/heap_2.c **** 		if( ( xWantedSize > 0 ) && ( xWantedSize < configTOTAL_HEAP_SIZE ) )
+  84              		.loc 1 189 0
+  85 003c 621E     		subs	r2, r4, #1
+  86 003e 44F2FE33 		movw	r3, #17406
+  87 0042 9A42     		cmp	r2, r3
+  88 0044 23D8     		bhi	.L8
+  89              	.LVL8:
+ 190:FreeRTOS/ARMCM3/Src/heap_2.c **** 		{
+ 191:FreeRTOS/ARMCM3/Src/heap_2.c **** 			/* Blocks are stored in byte order - traverse the list from the start
+ 192:FreeRTOS/ARMCM3/Src/heap_2.c **** 			(smallest) block until one of adequate size is found. */
+ 193:FreeRTOS/ARMCM3/Src/heap_2.c **** 			pxPreviousBlock = &xStart;
+ 194:FreeRTOS/ARMCM3/Src/heap_2.c **** 			pxBlock = xStart.pxNextFreeBlock;
+  90              		.loc 1 194 0
+  91 0046 1649     		ldr	r1, .L13+4
+  92 0048 0B68     		ldr	r3, [r1]
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 6
+
+
+  93              	.LVL9:
+ 195:FreeRTOS/ARMCM3/Src/heap_2.c **** 			while( ( pxBlock->xBlockSize < xWantedSize ) && ( pxBlock->pxNextFreeBlock ) )
+  94              		.loc 1 195 0
+  95 004a 01E0     		b	.L6
+  96              	.LVL10:
+  97              	.L9:
+ 196:FreeRTOS/ARMCM3/Src/heap_2.c **** 			{
+ 197:FreeRTOS/ARMCM3/Src/heap_2.c **** 				pxPreviousBlock = pxBlock;
+  98              		.loc 1 197 0
+  99 004c 1946     		mov	r1, r3
+ 100              	.LVL11:
+ 198:FreeRTOS/ARMCM3/Src/heap_2.c **** 				pxBlock = pxBlock->pxNextFreeBlock;
+ 101              		.loc 1 198 0
+ 102 004e 1346     		mov	r3, r2
+ 103              	.LVL12:
+ 104              	.L6:
+ 195:FreeRTOS/ARMCM3/Src/heap_2.c **** 			while( ( pxBlock->xBlockSize < xWantedSize ) && ( pxBlock->pxNextFreeBlock ) )
+ 105              		.loc 1 195 0
+ 106 0050 5A68     		ldr	r2, [r3, #4]
+ 107 0052 9442     		cmp	r4, r2
+ 108 0054 02D9     		bls	.L5
+ 195:FreeRTOS/ARMCM3/Src/heap_2.c **** 			while( ( pxBlock->xBlockSize < xWantedSize ) && ( pxBlock->pxNextFreeBlock ) )
+ 109              		.loc 1 195 0 is_stmt 0 discriminator 1
+ 110 0056 1A68     		ldr	r2, [r3]
+ 111 0058 002A     		cmp	r2, #0
+ 112 005a F7D1     		bne	.L9
+ 113              	.L5:
+ 199:FreeRTOS/ARMCM3/Src/heap_2.c **** 			}
+ 200:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 201:FreeRTOS/ARMCM3/Src/heap_2.c **** 			/* If we found the end marker then a block of adequate size was not found. */
+ 202:FreeRTOS/ARMCM3/Src/heap_2.c **** 			if( pxBlock != &xEnd )
+ 114              		.loc 1 202 0 is_stmt 1
+ 115 005c 124A     		ldr	r2, .L13+12
+ 116 005e 9342     		cmp	r3, r2
+ 117 0060 17D0     		beq	.L10
+ 203:FreeRTOS/ARMCM3/Src/heap_2.c **** 			{
+ 204:FreeRTOS/ARMCM3/Src/heap_2.c **** 				/* Return the memory space - jumping over the xBlockLink structure
+ 205:FreeRTOS/ARMCM3/Src/heap_2.c **** 				at its start. */
+ 206:FreeRTOS/ARMCM3/Src/heap_2.c **** 				pvReturn = ( void * ) ( ( ( unsigned portCHAR * ) pxPreviousBlock->pxNextFreeBlock ) + heapSTRU
+ 118              		.loc 1 206 0
+ 119 0062 0D68     		ldr	r5, [r1]
+ 120 0064 0C35     		adds	r5, r5, #12
+ 121              	.LVL13:
+ 207:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 208:FreeRTOS/ARMCM3/Src/heap_2.c **** 				/* This block is being returned for use so must be taken our of the
+ 209:FreeRTOS/ARMCM3/Src/heap_2.c **** 				list of free blocks. */
+ 210:FreeRTOS/ARMCM3/Src/heap_2.c **** 				pxPreviousBlock->pxNextFreeBlock = pxBlock->pxNextFreeBlock;
+ 122              		.loc 1 210 0
+ 123 0066 1A68     		ldr	r2, [r3]
+ 124 0068 0A60     		str	r2, [r1]
+ 211:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 212:FreeRTOS/ARMCM3/Src/heap_2.c **** 				/* If the block is larger than required it can be split into two. */
+ 213:FreeRTOS/ARMCM3/Src/heap_2.c **** 				if( ( pxBlock->xBlockSize - xWantedSize ) > heapMINIMUM_BLOCK_SIZE )
+ 125              		.loc 1 213 0
+ 126 006a 5A68     		ldr	r2, [r3, #4]
+ 127 006c 121B     		subs	r2, r2, r4
+ 128 006e 182A     		cmp	r2, #24
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 7
+
+
+ 129 0070 10D9     		bls	.L4
+ 214:FreeRTOS/ARMCM3/Src/heap_2.c **** 				{
+ 215:FreeRTOS/ARMCM3/Src/heap_2.c **** 					/* This block is to be split into two.  Create a new block
+ 216:FreeRTOS/ARMCM3/Src/heap_2.c **** 					following the number of bytes requested. The void cast is
+ 217:FreeRTOS/ARMCM3/Src/heap_2.c **** 					used to prevent byte alignment warnings from the compiler. */
+ 218:FreeRTOS/ARMCM3/Src/heap_2.c **** 					pxNewBlockLink = ( void * ) ( ( ( unsigned portCHAR * ) pxBlock ) + xWantedSize );
+ 130              		.loc 1 218 0
+ 131 0072 1E19     		adds	r6, r3, r4
+ 132              	.LVL14:
+ 219:FreeRTOS/ARMCM3/Src/heap_2.c **** 					
+ 220:FreeRTOS/ARMCM3/Src/heap_2.c **** 					/* Calculate the sizes of two blocks split from the single
+ 221:FreeRTOS/ARMCM3/Src/heap_2.c **** 					block. */
+ 222:FreeRTOS/ARMCM3/Src/heap_2.c **** 					pxNewBlockLink->xBlockSize = pxBlock->xBlockSize - xWantedSize;	
+ 133              		.loc 1 222 0
+ 134 0074 7260     		str	r2, [r6, #4]
+ 223:FreeRTOS/ARMCM3/Src/heap_2.c **** 					pxBlock->xBlockSize = xWantedSize;			
+ 135              		.loc 1 223 0
+ 136 0076 5C60     		str	r4, [r3, #4]
+ 137              	.LBB3:
+ 224:FreeRTOS/ARMCM3/Src/heap_2.c **** 					
+ 225:FreeRTOS/ARMCM3/Src/heap_2.c **** 					/* Insert the new block into the list of free blocks. */
+ 226:FreeRTOS/ARMCM3/Src/heap_2.c **** 					prvInsertBlockIntoFreeList( ( pxNewBlockLink ) );
+ 138              		.loc 1 226 0
+ 139 0078 7068     		ldr	r0, [r6, #4]
+ 140              	.LVL15:
+ 141 007a 094A     		ldr	r2, .L13+4
+ 142 007c 00E0     		b	.L7
+ 143              	.LVL16:
+ 144              	.L11:
+ 145 007e 1A46     		mov	r2, r3
+ 146              	.LVL17:
+ 147              	.L7:
+ 148              		.loc 1 226 0 is_stmt 0 discriminator 1
+ 149 0080 1368     		ldr	r3, [r2]
+ 150 0082 5968     		ldr	r1, [r3, #4]
+ 151 0084 8842     		cmp	r0, r1
+ 152 0086 FAD8     		bhi	.L11
+ 153              		.loc 1 226 0 discriminator 4
+ 154 0088 3360     		str	r3, [r6]
+ 155 008a 1660     		str	r6, [r2]
+ 156 008c 02E0     		b	.L4
+ 157              	.LVL18:
+ 158              	.L8:
+ 159              	.LBE3:
+ 163:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 160              		.loc 1 163 0 is_stmt 1
+ 161 008e 0025     		movs	r5, #0
+ 162 0090 00E0     		b	.L4
+ 163              	.LVL19:
+ 164              	.L10:
+ 165 0092 0025     		movs	r5, #0
+ 166              	.LVL20:
+ 167              	.L4:
+ 227:FreeRTOS/ARMCM3/Src/heap_2.c **** 				}
+ 228:FreeRTOS/ARMCM3/Src/heap_2.c **** 			}
+ 229:FreeRTOS/ARMCM3/Src/heap_2.c **** 		}
+ 230:FreeRTOS/ARMCM3/Src/heap_2.c **** 	}
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 8
+
+
+ 231:FreeRTOS/ARMCM3/Src/heap_2.c **** 	xTaskResumeAll();
+ 168              		.loc 1 231 0
+ 169 0094 FFF7FEFF 		bl	xTaskResumeAll
+ 170              	.LVL21:
+ 232:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 233:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#if( configUSE_MALLOC_FAILED_HOOK == 1 )
+ 234:FreeRTOS/ARMCM3/Src/heap_2.c **** 	{
+ 235:FreeRTOS/ARMCM3/Src/heap_2.c **** 		if( pvReturn == NULL )
+ 236:FreeRTOS/ARMCM3/Src/heap_2.c **** 		{
+ 237:FreeRTOS/ARMCM3/Src/heap_2.c **** 			extern void vApplicationMallocFailedHook( void );
+ 238:FreeRTOS/ARMCM3/Src/heap_2.c **** 			vApplicationMallocFailedHook();
+ 239:FreeRTOS/ARMCM3/Src/heap_2.c **** 		}
+ 240:FreeRTOS/ARMCM3/Src/heap_2.c **** 	}
+ 241:FreeRTOS/ARMCM3/Src/heap_2.c **** 	#endif
+ 242:FreeRTOS/ARMCM3/Src/heap_2.c **** 	
+ 243:FreeRTOS/ARMCM3/Src/heap_2.c **** 	return pvReturn;
+ 244:FreeRTOS/ARMCM3/Src/heap_2.c **** }
+ 171              		.loc 1 244 0
+ 172 0098 2846     		mov	r0, r5
+ 173 009a 70BD     		pop	{r4, r5, r6, pc}
+ 174              	.LVL22:
+ 175              	.L14:
+ 176              		.align	2
+ 177              	.L13:
+ 178 009c 00000000 		.word	.LANCHOR1
+ 179 00a0 00000000 		.word	.LANCHOR0
+ 180 00a4 00000000 		.word	.LANCHOR2
+ 181 00a8 00000000 		.word	.LANCHOR3
+ 182              		.cfi_endproc
+ 183              	.LFE0:
+ 185              		.section	.text.vPortFree,"ax",%progbits
+ 186              		.align	2
+ 187              		.global	vPortFree
+ 188              		.thumb
+ 189              		.thumb_func
+ 191              	vPortFree:
+ 192              	.LFB1:
+ 245:FreeRTOS/ARMCM3/Src/heap_2.c **** /*-----------------------------------------------------------*/
+ 246:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 247:FreeRTOS/ARMCM3/Src/heap_2.c **** void vPortFree( void *pv )
+ 248:FreeRTOS/ARMCM3/Src/heap_2.c **** {
+ 193              		.loc 1 248 0
+ 194              		.cfi_startproc
+ 195              		@ args = 0, pretend = 0, frame = 0
+ 196              		@ frame_needed = 0, uses_anonymous_args = 0
+ 197              	.LVL23:
+ 249:FreeRTOS/ARMCM3/Src/heap_2.c **** unsigned portCHAR *puc = ( unsigned portCHAR * ) pv;
+ 250:FreeRTOS/ARMCM3/Src/heap_2.c **** xBlockLink *pxLink;
+ 251:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 252:FreeRTOS/ARMCM3/Src/heap_2.c **** 	if( pv )
+ 198              		.loc 1 252 0
+ 199 0000 A0B1     		cbz	r0, .L20
+ 248:FreeRTOS/ARMCM3/Src/heap_2.c **** unsigned portCHAR *puc = ( unsigned portCHAR * ) pv;
+ 200              		.loc 1 248 0
+ 201 0002 70B5     		push	{r4, r5, r6, lr}
+ 202              	.LCFI1:
+ 203              		.cfi_def_cfa_offset 16
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 9
+
+
+ 204              		.cfi_offset 4, -16
+ 205              		.cfi_offset 5, -12
+ 206              		.cfi_offset 6, -8
+ 207              		.cfi_offset 14, -4
+ 208 0004 0546     		mov	r5, r0
+ 253:FreeRTOS/ARMCM3/Src/heap_2.c **** 	{
+ 254:FreeRTOS/ARMCM3/Src/heap_2.c **** 		/* The memory being freed will have an xBlockLink structure immediately
+ 255:FreeRTOS/ARMCM3/Src/heap_2.c **** 		before it. */
+ 256:FreeRTOS/ARMCM3/Src/heap_2.c **** 		puc -= heapSTRUCT_SIZE;
+ 209              		.loc 1 256 0
+ 210 0006 A0F10C06 		sub	r6, r0, #12
+ 211              	.LVL24:
+ 257:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 258:FreeRTOS/ARMCM3/Src/heap_2.c **** 		/* This casting is to keep the compiler from issuing warnings. */
+ 259:FreeRTOS/ARMCM3/Src/heap_2.c **** 		pxLink = ( void * ) puc;
+ 260:FreeRTOS/ARMCM3/Src/heap_2.c **** 
+ 261:FreeRTOS/ARMCM3/Src/heap_2.c **** 		vTaskSuspendAll();
+ 212              		.loc 1 261 0
+ 213 000a FFF7FEFF 		bl	vTaskSuspendAll
+ 214              	.LVL25:
+ 215              	.LBB4:
+ 262:FreeRTOS/ARMCM3/Src/heap_2.c **** 		{				
+ 263:FreeRTOS/ARMCM3/Src/heap_2.c **** 			/* Add this block to the list of free blocks. */
+ 264:FreeRTOS/ARMCM3/Src/heap_2.c **** 			prvInsertBlockIntoFreeList( ( ( xBlockLink * ) pxLink ) );
+ 216              		.loc 1 264 0
+ 217 000e 55F8084C 		ldr	r4, [r5, #-8]
+ 218              	.LVL26:
+ 219 0012 074A     		ldr	r2, .L21
+ 220 0014 00E0     		b	.L17
+ 221              	.LVL27:
+ 222              	.L18:
+ 223 0016 1A46     		mov	r2, r3
+ 224              	.LVL28:
+ 225              	.L17:
+ 226              		.loc 1 264 0 is_stmt 0 discriminator 1
+ 227 0018 1368     		ldr	r3, [r2]
+ 228 001a 5968     		ldr	r1, [r3, #4]
+ 229 001c 8C42     		cmp	r4, r1
+ 230 001e FAD8     		bhi	.L18
+ 231              		.loc 1 264 0 discriminator 4
+ 232 0020 45F80C3C 		str	r3, [r5, #-12]
+ 233 0024 1660     		str	r6, [r2]
+ 234              	.LBE4:
+ 265:FreeRTOS/ARMCM3/Src/heap_2.c **** 		}
+ 266:FreeRTOS/ARMCM3/Src/heap_2.c **** 		xTaskResumeAll();
+ 235              		.loc 1 266 0 is_stmt 1 discriminator 4
+ 236 0026 FFF7FEFF 		bl	xTaskResumeAll
+ 237              	.LVL29:
+ 238 002a 70BD     		pop	{r4, r5, r6, pc}
+ 239              	.LVL30:
+ 240              	.L20:
+ 241              	.LCFI2:
+ 242              		.cfi_def_cfa_offset 0
+ 243              		.cfi_restore 4
+ 244              		.cfi_restore 5
+ 245              		.cfi_restore 6
+ 246              		.cfi_restore 14
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 10
+
+
+ 247 002c 7047     		bx	lr
+ 248              	.L22:
+ 249 002e 00BF     		.align	2
+ 250              	.L21:
+ 251 0030 00000000 		.word	.LANCHOR0
+ 252              		.cfi_endproc
+ 253              	.LFE1:
+ 255              		.section	.bss.xHeap,"aw",%nobits
+ 256              		.align	2
+ 257              		.set	.LANCHOR2,. + 0
+ 260              	xHeap:
+ 261 0000 00000000 		.space	17408
+ 261      00000000 
+ 261      00000000 
+ 261      00000000 
+ 261      00000000 
+ 262              		.section	.bss.xHeapHasBeenInitialised.4924,"aw",%nobits
+ 263              		.align	2
+ 264              		.set	.LANCHOR1,. + 0
+ 267              	xHeapHasBeenInitialised.4924:
+ 268 0000 00000000 		.space	4
+ 269              		.section	.bss.xStart,"aw",%nobits
+ 270              		.align	2
+ 271              		.set	.LANCHOR0,. + 0
+ 274              	xStart:
+ 275 0000 00000000 		.space	8
+ 275      00000000 
+ 276              		.section	.bss.xEnd,"aw",%nobits
+ 277              		.align	2
+ 278              		.set	.LANCHOR3,. + 0
+ 281              	xEnd:
+ 282 0000 00000000 		.space	8
+ 282      00000000 
+ 283              		.text
+ 284              	.Letext0:
+ 285              		.file 2 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/lib/gcc/arm-none-eabi/5.4.1/include/stddef.h
+ 286              		.file 3 "FreeRTOS/Inc/task.h"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s 			page 11
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 heap_2.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:20     .text.pvPortMalloc:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:25     .text.pvPortMalloc:0000000000000000 pvPortMalloc
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:178    .text.pvPortMalloc:000000000000009c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:186    .text.vPortFree:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:191    .text.vPortFree:0000000000000000 vPortFree
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:251    .text.vPortFree:0000000000000030 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:256    .bss.xHeap:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:260    .bss.xHeap:0000000000000000 xHeap
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:263    .bss.xHeapHasBeenInitialised.4924:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:267    .bss.xHeapHasBeenInitialised.4924:0000000000000000 xHeapHasBeenInitialised.4924
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:270    .bss.xStart:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:274    .bss.xStart:0000000000000000 xStart
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:277    .bss.xEnd:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cclFBeJL.s:281    .bss.xEnd:0000000000000000 xEnd
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+vTaskSuspendAll
+xTaskResumeAll

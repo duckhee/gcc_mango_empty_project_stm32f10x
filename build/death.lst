@@ -1,0 +1,659 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"death.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.vCreateTasks,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  24              	vCreateTasks:
+  25              	.LFB2:
+  26              		.file 1 "FreeRTOS/Common/Minimal/death.c"
+   1:FreeRTOS/Common/Minimal/death.c **** /*
+   2:FreeRTOS/Common/Minimal/death.c **** 	FreeRTOS V5.4.2 - Copyright (C) 2009 Real Time Engineers Ltd.
+   3:FreeRTOS/Common/Minimal/death.c **** 
+   4:FreeRTOS/Common/Minimal/death.c **** 	This file is part of the FreeRTOS distribution.
+   5:FreeRTOS/Common/Minimal/death.c **** 
+   6:FreeRTOS/Common/Minimal/death.c **** 	FreeRTOS is free software; you can redistribute it and/or modify it	under 
+   7:FreeRTOS/Common/Minimal/death.c **** 	the terms of the GNU General Public License (version 2) as published by the 
+   8:FreeRTOS/Common/Minimal/death.c **** 	Free Software Foundation and modified by the FreeRTOS exception.
+   9:FreeRTOS/Common/Minimal/death.c **** 	**NOTE** The exception to the GPL is included to allow you to distribute a
+  10:FreeRTOS/Common/Minimal/death.c **** 	combined work that includes FreeRTOS without being obliged to provide the 
+  11:FreeRTOS/Common/Minimal/death.c **** 	source code for proprietary components outside of the FreeRTOS kernel.  
+  12:FreeRTOS/Common/Minimal/death.c **** 	Alternative commercial license and support terms are also available upon 
+  13:FreeRTOS/Common/Minimal/death.c **** 	request.  See the licensing section of http://www.FreeRTOS.org for full 
+  14:FreeRTOS/Common/Minimal/death.c **** 	license details.
+  15:FreeRTOS/Common/Minimal/death.c **** 
+  16:FreeRTOS/Common/Minimal/death.c **** 	FreeRTOS is distributed in the hope that it will be useful,	but WITHOUT
+  17:FreeRTOS/Common/Minimal/death.c **** 	ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  18:FreeRTOS/Common/Minimal/death.c **** 	FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+  19:FreeRTOS/Common/Minimal/death.c **** 	more details.
+  20:FreeRTOS/Common/Minimal/death.c **** 
+  21:FreeRTOS/Common/Minimal/death.c **** 	You should have received a copy of the GNU General Public License along
+  22:FreeRTOS/Common/Minimal/death.c **** 	with FreeRTOS; if not, write to the Free Software Foundation, Inc., 59
+  23:FreeRTOS/Common/Minimal/death.c **** 	Temple Place, Suite 330, Boston, MA  02111-1307  USA.
+  24:FreeRTOS/Common/Minimal/death.c **** 
+  25:FreeRTOS/Common/Minimal/death.c **** 
+  26:FreeRTOS/Common/Minimal/death.c **** 	***************************************************************************
+  27:FreeRTOS/Common/Minimal/death.c **** 	*                                                                         *
+  28:FreeRTOS/Common/Minimal/death.c **** 	* Looking for a quick start?  Then check out the FreeRTOS eBook!          *
+  29:FreeRTOS/Common/Minimal/death.c **** 	* See http://www.FreeRTOS.org/Documentation for details                   *
+  30:FreeRTOS/Common/Minimal/death.c **** 	*                                                                         *
+  31:FreeRTOS/Common/Minimal/death.c **** 	***************************************************************************
+  32:FreeRTOS/Common/Minimal/death.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 2
+
+
+  33:FreeRTOS/Common/Minimal/death.c **** 	1 tab == 4 spaces!
+  34:FreeRTOS/Common/Minimal/death.c **** 
+  35:FreeRTOS/Common/Minimal/death.c **** 	Please ensure to read the configuration and relevant port sections of the
+  36:FreeRTOS/Common/Minimal/death.c **** 	online documentation.
+  37:FreeRTOS/Common/Minimal/death.c **** 
+  38:FreeRTOS/Common/Minimal/death.c **** 	http://www.FreeRTOS.org - Documentation, latest information, license and
+  39:FreeRTOS/Common/Minimal/death.c **** 	contact details.
+  40:FreeRTOS/Common/Minimal/death.c **** 
+  41:FreeRTOS/Common/Minimal/death.c **** 	http://www.SafeRTOS.com - A version that is certified for use in safety
+  42:FreeRTOS/Common/Minimal/death.c **** 	critical systems.
+  43:FreeRTOS/Common/Minimal/death.c **** 
+  44:FreeRTOS/Common/Minimal/death.c **** 	http://www.OpenRTOS.com - Commercial support, development, porting,
+  45:FreeRTOS/Common/Minimal/death.c **** 	licensing and training services.
+  46:FreeRTOS/Common/Minimal/death.c **** */
+  47:FreeRTOS/Common/Minimal/death.c **** 
+  48:FreeRTOS/Common/Minimal/death.c **** /**
+  49:FreeRTOS/Common/Minimal/death.c ****  * Create a single persistent task which periodically dynamically creates another
+  50:FreeRTOS/Common/Minimal/death.c ****  * two tasks.  The original task is called the creator task, the two tasks it
+  51:FreeRTOS/Common/Minimal/death.c ****  * creates are called suicidal tasks.
+  52:FreeRTOS/Common/Minimal/death.c ****  *
+  53:FreeRTOS/Common/Minimal/death.c ****  * One of the created suicidal tasks kill one other suicidal task before killing
+  54:FreeRTOS/Common/Minimal/death.c ****  * itself - leaving just the original task remaining.
+  55:FreeRTOS/Common/Minimal/death.c ****  *
+  56:FreeRTOS/Common/Minimal/death.c ****  * The creator task must be spawned after all of the other demo application tasks
+  57:FreeRTOS/Common/Minimal/death.c ****  * as it keeps a check on the number of tasks under the scheduler control.  The
+  58:FreeRTOS/Common/Minimal/death.c ****  * number of tasks it expects to see running should never be greater than the
+  59:FreeRTOS/Common/Minimal/death.c ****  * number of tasks that were in existence when the creator task was spawned, plus
+  60:FreeRTOS/Common/Minimal/death.c ****  * one set of four suicidal tasks.  If this number is exceeded an error is flagged.
+  61:FreeRTOS/Common/Minimal/death.c ****  *
+  62:FreeRTOS/Common/Minimal/death.c ****  * \page DeathC death.c
+  63:FreeRTOS/Common/Minimal/death.c ****  * \ingroup DemoFiles
+  64:FreeRTOS/Common/Minimal/death.c ****  * <HR>
+  65:FreeRTOS/Common/Minimal/death.c ****  */
+  66:FreeRTOS/Common/Minimal/death.c **** 
+  67:FreeRTOS/Common/Minimal/death.c **** /*
+  68:FreeRTOS/Common/Minimal/death.c **** Changes from V3.0.0
+  69:FreeRTOS/Common/Minimal/death.c **** 	+ CreationCount sizes changed from unsigned portBASE_TYPE to
+  70:FreeRTOS/Common/Minimal/death.c **** 	  unsigned portSHORT to minimize the risk of overflowing.
+  71:FreeRTOS/Common/Minimal/death.c **** 	
+  72:FreeRTOS/Common/Minimal/death.c **** 	+ Reset of usLastCreationCount added
+  73:FreeRTOS/Common/Minimal/death.c **** 	
+  74:FreeRTOS/Common/Minimal/death.c **** Changes from V3.1.0
+  75:FreeRTOS/Common/Minimal/death.c **** 	+ Changed the dummy calculation to use variables of type long, rather than
+  76:FreeRTOS/Common/Minimal/death.c **** 	  float.  This allows the file to be used with ports that do not support
+  77:FreeRTOS/Common/Minimal/death.c **** 	  floating point.
+  78:FreeRTOS/Common/Minimal/death.c **** 
+  79:FreeRTOS/Common/Minimal/death.c **** */
+  80:FreeRTOS/Common/Minimal/death.c **** 
+  81:FreeRTOS/Common/Minimal/death.c **** #include <stdlib.h>
+  82:FreeRTOS/Common/Minimal/death.c **** 
+  83:FreeRTOS/Common/Minimal/death.c **** /* Scheduler include files. */
+  84:FreeRTOS/Common/Minimal/death.c **** #include "FreeRTOS.h"
+  85:FreeRTOS/Common/Minimal/death.c **** #include "task.h"
+  86:FreeRTOS/Common/Minimal/death.c **** 
+  87:FreeRTOS/Common/Minimal/death.c **** /* Demo program include files. */
+  88:FreeRTOS/Common/Minimal/death.c **** #include "death.h"
+  89:FreeRTOS/Common/Minimal/death.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 3
+
+
+  90:FreeRTOS/Common/Minimal/death.c **** #define deathSTACK_SIZE		( configMINIMAL_STACK_SIZE + 60 )
+  91:FreeRTOS/Common/Minimal/death.c **** 
+  92:FreeRTOS/Common/Minimal/death.c **** /* The task originally created which is responsible for periodically dynamically
+  93:FreeRTOS/Common/Minimal/death.c **** creating another four tasks. */
+  94:FreeRTOS/Common/Minimal/death.c **** static portTASK_FUNCTION_PROTO( vCreateTasks, pvParameters );
+  95:FreeRTOS/Common/Minimal/death.c **** 
+  96:FreeRTOS/Common/Minimal/death.c **** /* The task function of the dynamically created tasks. */
+  97:FreeRTOS/Common/Minimal/death.c **** static portTASK_FUNCTION_PROTO( vSuicidalTask, pvParameters );
+  98:FreeRTOS/Common/Minimal/death.c **** 
+  99:FreeRTOS/Common/Minimal/death.c **** /* A variable which is incremented every time the dynamic tasks are created.  This
+ 100:FreeRTOS/Common/Minimal/death.c **** is used to check that the task is still running. */
+ 101:FreeRTOS/Common/Minimal/death.c **** static volatile unsigned portSHORT usCreationCount = 0;
+ 102:FreeRTOS/Common/Minimal/death.c **** 
+ 103:FreeRTOS/Common/Minimal/death.c **** /* Used to store the number of tasks that were originally running so the creator
+ 104:FreeRTOS/Common/Minimal/death.c **** task can tell if any of the suicidal tasks have failed to die.
+ 105:FreeRTOS/Common/Minimal/death.c **** */
+ 106:FreeRTOS/Common/Minimal/death.c **** static volatile unsigned portBASE_TYPE uxTasksRunningAtStart = 0;
+ 107:FreeRTOS/Common/Minimal/death.c **** 
+ 108:FreeRTOS/Common/Minimal/death.c **** /* Tasks are deleted by the idle task.  Under heavy load the idle task might
+ 109:FreeRTOS/Common/Minimal/death.c **** not get much processing time, so it would be legitimate for several tasks to
+ 110:FreeRTOS/Common/Minimal/death.c **** remain undeleted for a short period. */
+ 111:FreeRTOS/Common/Minimal/death.c **** static const unsigned portBASE_TYPE uxMaxNumberOfExtraTasksRunning = 2;
+ 112:FreeRTOS/Common/Minimal/death.c **** 
+ 113:FreeRTOS/Common/Minimal/death.c **** /* Used to store a handle to the task that should be killed by a suicidal task,
+ 114:FreeRTOS/Common/Minimal/death.c **** before it kills itself. */
+ 115:FreeRTOS/Common/Minimal/death.c **** xTaskHandle xCreatedTask;
+ 116:FreeRTOS/Common/Minimal/death.c **** 
+ 117:FreeRTOS/Common/Minimal/death.c **** /*-----------------------------------------------------------*/
+ 118:FreeRTOS/Common/Minimal/death.c **** 
+ 119:FreeRTOS/Common/Minimal/death.c **** void vCreateSuicidalTasks( unsigned portBASE_TYPE uxPriority )
+ 120:FreeRTOS/Common/Minimal/death.c **** {
+ 121:FreeRTOS/Common/Minimal/death.c **** unsigned portBASE_TYPE *puxPriority;
+ 122:FreeRTOS/Common/Minimal/death.c **** 
+ 123:FreeRTOS/Common/Minimal/death.c **** 	/* Create the Creator tasks - passing in as a parameter the priority at which
+ 124:FreeRTOS/Common/Minimal/death.c **** 	the suicidal tasks should be created. */
+ 125:FreeRTOS/Common/Minimal/death.c **** 	puxPriority = ( unsigned portBASE_TYPE * ) pvPortMalloc( sizeof( unsigned portBASE_TYPE ) );
+ 126:FreeRTOS/Common/Minimal/death.c **** 	*puxPriority = uxPriority;
+ 127:FreeRTOS/Common/Minimal/death.c **** 
+ 128:FreeRTOS/Common/Minimal/death.c **** 	xTaskCreate( vCreateTasks, ( signed portCHAR * ) "CREATOR", deathSTACK_SIZE, ( void * ) puxPriorit
+ 129:FreeRTOS/Common/Minimal/death.c **** 
+ 130:FreeRTOS/Common/Minimal/death.c **** 	/* Record the number of tasks that are running now so we know if any of the
+ 131:FreeRTOS/Common/Minimal/death.c **** 	suicidal tasks have failed to be killed. */
+ 132:FreeRTOS/Common/Minimal/death.c **** 	uxTasksRunningAtStart = ( unsigned portBASE_TYPE ) uxTaskGetNumberOfTasks();
+ 133:FreeRTOS/Common/Minimal/death.c **** 	
+ 134:FreeRTOS/Common/Minimal/death.c **** 	/* FreeRTOS.org versions before V3.0 started the idle-task as the very
+ 135:FreeRTOS/Common/Minimal/death.c **** 	first task. The idle task was then already included in uxTasksRunningAtStart.
+ 136:FreeRTOS/Common/Minimal/death.c **** 	From FreeRTOS V3.0 on, the idle task is started when the scheduler is
+ 137:FreeRTOS/Common/Minimal/death.c **** 	started. Therefore the idle task is not yet accounted for. We correct
+ 138:FreeRTOS/Common/Minimal/death.c **** 	this by increasing uxTasksRunningAtStart by 1. */
+ 139:FreeRTOS/Common/Minimal/death.c **** 	uxTasksRunningAtStart++;
+ 140:FreeRTOS/Common/Minimal/death.c **** }
+ 141:FreeRTOS/Common/Minimal/death.c **** /*-----------------------------------------------------------*/
+ 142:FreeRTOS/Common/Minimal/death.c **** 					
+ 143:FreeRTOS/Common/Minimal/death.c **** static portTASK_FUNCTION( vSuicidalTask, pvParameters )
+ 144:FreeRTOS/Common/Minimal/death.c **** {
+ 145:FreeRTOS/Common/Minimal/death.c **** volatile portLONG l1, l2;
+ 146:FreeRTOS/Common/Minimal/death.c **** xTaskHandle xTaskToKill;
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 4
+
+
+ 147:FreeRTOS/Common/Minimal/death.c **** const portTickType xDelay = ( portTickType ) 200 / portTICK_RATE_MS;
+ 148:FreeRTOS/Common/Minimal/death.c **** 
+ 149:FreeRTOS/Common/Minimal/death.c **** 	if( pvParameters != NULL )
+ 150:FreeRTOS/Common/Minimal/death.c **** 	{
+ 151:FreeRTOS/Common/Minimal/death.c **** 		/* This task is periodically created four times.  Two created tasks are
+ 152:FreeRTOS/Common/Minimal/death.c **** 		passed a handle to the other task so it can kill it before killing itself.
+ 153:FreeRTOS/Common/Minimal/death.c **** 		The other task is passed in null. */
+ 154:FreeRTOS/Common/Minimal/death.c **** 		xTaskToKill = *( xTaskHandle* )pvParameters;
+ 155:FreeRTOS/Common/Minimal/death.c **** 	}
+ 156:FreeRTOS/Common/Minimal/death.c **** 	else
+ 157:FreeRTOS/Common/Minimal/death.c **** 	{
+ 158:FreeRTOS/Common/Minimal/death.c **** 		xTaskToKill = NULL;
+ 159:FreeRTOS/Common/Minimal/death.c **** 	}
+ 160:FreeRTOS/Common/Minimal/death.c **** 
+ 161:FreeRTOS/Common/Minimal/death.c **** 	for( ;; )
+ 162:FreeRTOS/Common/Minimal/death.c **** 	{
+ 163:FreeRTOS/Common/Minimal/death.c **** 		/* Do something random just to use some stack and registers. */
+ 164:FreeRTOS/Common/Minimal/death.c **** 		l1 = 2;
+ 165:FreeRTOS/Common/Minimal/death.c **** 		l2 = 89;
+ 166:FreeRTOS/Common/Minimal/death.c **** 		l2 *= l1;
+ 167:FreeRTOS/Common/Minimal/death.c **** 		vTaskDelay( xDelay );
+ 168:FreeRTOS/Common/Minimal/death.c **** 
+ 169:FreeRTOS/Common/Minimal/death.c **** 		if( xTaskToKill != NULL )
+ 170:FreeRTOS/Common/Minimal/death.c **** 		{
+ 171:FreeRTOS/Common/Minimal/death.c **** 			/* Make sure the other task has a go before we delete it. */
+ 172:FreeRTOS/Common/Minimal/death.c **** 			vTaskDelay( ( portTickType ) 0 );
+ 173:FreeRTOS/Common/Minimal/death.c **** 
+ 174:FreeRTOS/Common/Minimal/death.c **** 			/* Kill the other task that was created by vCreateTasks(). */
+ 175:FreeRTOS/Common/Minimal/death.c **** 			vTaskDelete( xTaskToKill );
+ 176:FreeRTOS/Common/Minimal/death.c **** 
+ 177:FreeRTOS/Common/Minimal/death.c **** 			/* Kill ourselves. */
+ 178:FreeRTOS/Common/Minimal/death.c **** 			vTaskDelete( NULL );
+ 179:FreeRTOS/Common/Minimal/death.c **** 		}
+ 180:FreeRTOS/Common/Minimal/death.c **** 	}
+ 181:FreeRTOS/Common/Minimal/death.c **** }/*lint !e818 !e550 Function prototype must be as per standard for task functions. */
+ 182:FreeRTOS/Common/Minimal/death.c **** /*-----------------------------------------------------------*/
+ 183:FreeRTOS/Common/Minimal/death.c **** 
+ 184:FreeRTOS/Common/Minimal/death.c **** static portTASK_FUNCTION( vCreateTasks, pvParameters )
+ 185:FreeRTOS/Common/Minimal/death.c **** {
+  27              		.loc 1 185 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              	.LVL0:
+  32 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+  33              	.LCFI0:
+  34              		.cfi_def_cfa_offset 20
+  35              		.cfi_offset 4, -20
+  36              		.cfi_offset 5, -16
+  37              		.cfi_offset 6, -12
+  38              		.cfi_offset 7, -8
+  39              		.cfi_offset 14, -4
+  40 0002 83B0     		sub	sp, sp, #12
+  41              	.LCFI1:
+  42              		.cfi_def_cfa_offset 32
+  43              	.LVL1:
+ 186:FreeRTOS/Common/Minimal/death.c **** const portTickType xDelay = ( portTickType ) 1000 / portTICK_RATE_MS;
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 5
+
+
+ 187:FreeRTOS/Common/Minimal/death.c **** unsigned portBASE_TYPE uxPriority;
+ 188:FreeRTOS/Common/Minimal/death.c **** 
+ 189:FreeRTOS/Common/Minimal/death.c **** 	uxPriority = *( unsigned portBASE_TYPE * ) pvParameters;
+  44              		.loc 1 189 0
+  45 0004 0668     		ldr	r6, [r0]
+  46              	.LVL2:
+ 190:FreeRTOS/Common/Minimal/death.c **** 	vPortFree( pvParameters );
+  47              		.loc 1 190 0
+  48 0006 FFF7FEFF 		bl	vPortFree
+  49              	.LVL3:
+  50              	.L2:
+ 191:FreeRTOS/Common/Minimal/death.c **** 
+ 192:FreeRTOS/Common/Minimal/death.c **** 	for( ;; )
+ 193:FreeRTOS/Common/Minimal/death.c **** 	{
+ 194:FreeRTOS/Common/Minimal/death.c **** 		/* Just loop round, delaying then creating the four suicidal tasks. */
+ 195:FreeRTOS/Common/Minimal/death.c **** 		vTaskDelay( xDelay );
+  51              		.loc 1 195 0 discriminator 1
+  52 000a 4FF47A70 		mov	r0, #1000
+  53 000e FFF7FEFF 		bl	vTaskDelay
+  54              	.LVL4:
+ 196:FreeRTOS/Common/Minimal/death.c **** 
+ 197:FreeRTOS/Common/Minimal/death.c **** 		xCreatedTask = NULL;
+  55              		.loc 1 197 0 discriminator 1
+  56 0012 0D4C     		ldr	r4, .L4
+  57 0014 0025     		movs	r5, #0
+  58 0016 2560     		str	r5, [r4]
+ 198:FreeRTOS/Common/Minimal/death.c **** 
+ 199:FreeRTOS/Common/Minimal/death.c **** 		xTaskCreate( vSuicidalTask, ( signed portCHAR * ) "SUICID1", configMINIMAL_STACK_SIZE, NULL, uxPr
+  59              		.loc 1 199 0 discriminator 1
+  60 0018 0C4F     		ldr	r7, .L4+4
+  61 001a 0194     		str	r4, [sp, #4]
+  62 001c 0096     		str	r6, [sp]
+  63 001e 2B46     		mov	r3, r5
+  64 0020 8022     		movs	r2, #128
+  65 0022 0B49     		ldr	r1, .L4+8
+  66 0024 3846     		mov	r0, r7
+  67 0026 FFF7FEFF 		bl	xTaskCreate
+  68              	.LVL5:
+ 200:FreeRTOS/Common/Minimal/death.c **** 		xTaskCreate( vSuicidalTask, ( signed portCHAR * ) "SUICID2", configMINIMAL_STACK_SIZE, &xCreatedT
+  69              		.loc 1 200 0 discriminator 1
+  70 002a 0195     		str	r5, [sp, #4]
+  71 002c 0096     		str	r6, [sp]
+  72 002e 2346     		mov	r3, r4
+  73 0030 8022     		movs	r2, #128
+  74 0032 0849     		ldr	r1, .L4+12
+  75 0034 3846     		mov	r0, r7
+  76 0036 FFF7FEFF 		bl	xTaskCreate
+  77              	.LVL6:
+ 201:FreeRTOS/Common/Minimal/death.c **** 
+ 202:FreeRTOS/Common/Minimal/death.c **** 		++usCreationCount;
+  78              		.loc 1 202 0 discriminator 1
+  79 003a 074A     		ldr	r2, .L4+16
+  80 003c 1388     		ldrh	r3, [r2]
+  81 003e 9BB2     		uxth	r3, r3
+  82 0040 0133     		adds	r3, r3, #1
+  83 0042 9BB2     		uxth	r3, r3
+  84 0044 1380     		strh	r3, [r2]	@ movhi
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 6
+
+
+  85 0046 E0E7     		b	.L2
+  86              	.L5:
+  87              		.align	2
+  88              	.L4:
+  89 0048 00000000 		.word	xCreatedTask
+  90 004c 00000000 		.word	vSuicidalTask
+  91 0050 00000000 		.word	.LC0
+  92 0054 08000000 		.word	.LC1
+  93 0058 00000000 		.word	.LANCHOR0
+  94              		.cfi_endproc
+  95              	.LFE2:
+  97              		.section	.text.vSuicidalTask,"ax",%progbits
+  98              		.align	2
+  99              		.thumb
+ 100              		.thumb_func
+ 102              	vSuicidalTask:
+ 103              	.LFB1:
+ 144:FreeRTOS/Common/Minimal/death.c **** volatile portLONG l1, l2;
+ 104              		.loc 1 144 0
+ 105              		.cfi_startproc
+ 106              		@ args = 0, pretend = 0, frame = 8
+ 107              		@ frame_needed = 0, uses_anonymous_args = 0
+ 108              	.LVL7:
+ 109 0000 10B5     		push	{r4, lr}
+ 110              	.LCFI2:
+ 111              		.cfi_def_cfa_offset 8
+ 112              		.cfi_offset 4, -8
+ 113              		.cfi_offset 14, -4
+ 114 0002 82B0     		sub	sp, sp, #8
+ 115              	.LCFI3:
+ 116              		.cfi_def_cfa_offset 16
+ 117              	.LVL8:
+ 149:FreeRTOS/Common/Minimal/death.c **** 	{
+ 118              		.loc 1 149 0
+ 119 0004 08B1     		cbz	r0, .L10
+ 154:FreeRTOS/Common/Minimal/death.c **** 	}
+ 120              		.loc 1 154 0
+ 121 0006 0468     		ldr	r4, [r0]
+ 122              	.LVL9:
+ 123 0008 00E0     		b	.L8
+ 124              	.LVL10:
+ 125              	.L10:
+ 158:FreeRTOS/Common/Minimal/death.c **** 	}
+ 126              		.loc 1 158 0
+ 127 000a 0024     		movs	r4, #0
+ 128              	.LVL11:
+ 129              	.L8:
+ 164:FreeRTOS/Common/Minimal/death.c **** 		l2 = 89;
+ 130              		.loc 1 164 0
+ 131 000c 0223     		movs	r3, #2
+ 132 000e 0193     		str	r3, [sp, #4]
+ 165:FreeRTOS/Common/Minimal/death.c **** 		l2 *= l1;
+ 133              		.loc 1 165 0
+ 134 0010 5923     		movs	r3, #89
+ 135 0012 0093     		str	r3, [sp]
+ 166:FreeRTOS/Common/Minimal/death.c **** 		vTaskDelay( xDelay );
+ 136              		.loc 1 166 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 7
+
+
+ 137 0014 019A     		ldr	r2, [sp, #4]
+ 138 0016 009B     		ldr	r3, [sp]
+ 139 0018 03FB02F3 		mul	r3, r3, r2
+ 140 001c 0093     		str	r3, [sp]
+ 167:FreeRTOS/Common/Minimal/death.c **** 
+ 141              		.loc 1 167 0
+ 142 001e C820     		movs	r0, #200
+ 143 0020 FFF7FEFF 		bl	vTaskDelay
+ 144              	.LVL12:
+ 169:FreeRTOS/Common/Minimal/death.c **** 		{
+ 145              		.loc 1 169 0
+ 146 0024 002C     		cmp	r4, #0
+ 147 0026 F1D0     		beq	.L8
+ 172:FreeRTOS/Common/Minimal/death.c **** 
+ 148              		.loc 1 172 0
+ 149 0028 0020     		movs	r0, #0
+ 150 002a FFF7FEFF 		bl	vTaskDelay
+ 151              	.LVL13:
+ 175:FreeRTOS/Common/Minimal/death.c **** 
+ 152              		.loc 1 175 0
+ 153 002e 2046     		mov	r0, r4
+ 154 0030 FFF7FEFF 		bl	vTaskDelete
+ 155              	.LVL14:
+ 178:FreeRTOS/Common/Minimal/death.c **** 		}
+ 156              		.loc 1 178 0
+ 157 0034 0020     		movs	r0, #0
+ 158 0036 FFF7FEFF 		bl	vTaskDelete
+ 159              	.LVL15:
+ 160 003a E7E7     		b	.L8
+ 161              		.cfi_endproc
+ 162              	.LFE1:
+ 164              		.section	.text.vCreateSuicidalTasks,"ax",%progbits
+ 165              		.align	2
+ 166              		.global	vCreateSuicidalTasks
+ 167              		.thumb
+ 168              		.thumb_func
+ 170              	vCreateSuicidalTasks:
+ 171              	.LFB0:
+ 120:FreeRTOS/Common/Minimal/death.c **** unsigned portBASE_TYPE *puxPriority;
+ 172              		.loc 1 120 0
+ 173              		.cfi_startproc
+ 174              		@ args = 0, pretend = 0, frame = 0
+ 175              		@ frame_needed = 0, uses_anonymous_args = 0
+ 176              	.LVL16:
+ 177 0000 10B5     		push	{r4, lr}
+ 178              	.LCFI4:
+ 179              		.cfi_def_cfa_offset 8
+ 180              		.cfi_offset 4, -8
+ 181              		.cfi_offset 14, -4
+ 182 0002 82B0     		sub	sp, sp, #8
+ 183              	.LCFI5:
+ 184              		.cfi_def_cfa_offset 16
+ 185 0004 0446     		mov	r4, r0
+ 125:FreeRTOS/Common/Minimal/death.c **** 	*puxPriority = uxPriority;
+ 186              		.loc 1 125 0
+ 187 0006 0420     		movs	r0, #4
+ 188              	.LVL17:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 8
+
+
+ 189 0008 FFF7FEFF 		bl	pvPortMalloc
+ 190              	.LVL18:
+ 191 000c 0346     		mov	r3, r0
+ 192              	.LVL19:
+ 126:FreeRTOS/Common/Minimal/death.c **** 
+ 193              		.loc 1 126 0
+ 194 000e 0460     		str	r4, [r0]
+ 128:FreeRTOS/Common/Minimal/death.c **** 
+ 195              		.loc 1 128 0
+ 196 0010 0022     		movs	r2, #0
+ 197 0012 0192     		str	r2, [sp, #4]
+ 198 0014 0094     		str	r4, [sp]
+ 199 0016 BC22     		movs	r2, #188
+ 200 0018 0649     		ldr	r1, .L14
+ 201 001a 0748     		ldr	r0, .L14+4
+ 202              	.LVL20:
+ 203 001c FFF7FEFF 		bl	xTaskCreate
+ 204              	.LVL21:
+ 132:FreeRTOS/Common/Minimal/death.c **** 	
+ 205              		.loc 1 132 0
+ 206 0020 FFF7FEFF 		bl	uxTaskGetNumberOfTasks
+ 207              	.LVL22:
+ 208 0024 054B     		ldr	r3, .L14+8
+ 209 0026 1860     		str	r0, [r3]
+ 139:FreeRTOS/Common/Minimal/death.c **** }
+ 210              		.loc 1 139 0
+ 211 0028 1A68     		ldr	r2, [r3]
+ 212 002a 0132     		adds	r2, r2, #1
+ 213 002c 1A60     		str	r2, [r3]
+ 140:FreeRTOS/Common/Minimal/death.c **** /*-----------------------------------------------------------*/
+ 214              		.loc 1 140 0
+ 215 002e 02B0     		add	sp, sp, #8
+ 216              	.LCFI6:
+ 217              		.cfi_def_cfa_offset 8
+ 218              		@ sp needed
+ 219 0030 10BD     		pop	{r4, pc}
+ 220              	.LVL23:
+ 221              	.L15:
+ 222 0032 00BF     		.align	2
+ 223              	.L14:
+ 224 0034 10000000 		.word	.LC2
+ 225 0038 00000000 		.word	vCreateTasks
+ 226 003c 00000000 		.word	.LANCHOR1
+ 227              		.cfi_endproc
+ 228              	.LFE0:
+ 230              		.section	.text.xIsCreateTaskStillRunning,"ax",%progbits
+ 231              		.align	2
+ 232              		.global	xIsCreateTaskStillRunning
+ 233              		.thumb
+ 234              		.thumb_func
+ 236              	xIsCreateTaskStillRunning:
+ 237              	.LFB3:
+ 203:FreeRTOS/Common/Minimal/death.c **** 	}
+ 204:FreeRTOS/Common/Minimal/death.c **** }
+ 205:FreeRTOS/Common/Minimal/death.c **** /*-----------------------------------------------------------*/
+ 206:FreeRTOS/Common/Minimal/death.c **** 
+ 207:FreeRTOS/Common/Minimal/death.c **** /* This is called to check that the creator task is still running and that there
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 9
+
+
+ 208:FreeRTOS/Common/Minimal/death.c **** are not any more than four extra tasks. */
+ 209:FreeRTOS/Common/Minimal/death.c **** portBASE_TYPE xIsCreateTaskStillRunning( void )
+ 210:FreeRTOS/Common/Minimal/death.c **** {
+ 238              		.loc 1 210 0
+ 239              		.cfi_startproc
+ 240              		@ args = 0, pretend = 0, frame = 0
+ 241              		@ frame_needed = 0, uses_anonymous_args = 0
+ 242 0000 10B5     		push	{r4, lr}
+ 243              	.LCFI7:
+ 244              		.cfi_def_cfa_offset 8
+ 245              		.cfi_offset 4, -8
+ 246              		.cfi_offset 14, -4
+ 247              	.LVL24:
+ 211:FreeRTOS/Common/Minimal/death.c **** static unsigned portSHORT usLastCreationCount = 0xfff;
+ 212:FreeRTOS/Common/Minimal/death.c **** portBASE_TYPE xReturn = pdTRUE;
+ 213:FreeRTOS/Common/Minimal/death.c **** static unsigned portBASE_TYPE uxTasksRunningNow;
+ 214:FreeRTOS/Common/Minimal/death.c **** 
+ 215:FreeRTOS/Common/Minimal/death.c **** 	if( usLastCreationCount == usCreationCount )
+ 248              		.loc 1 215 0
+ 249 0002 0F4B     		ldr	r3, .L23
+ 250 0004 1A88     		ldrh	r2, [r3]
+ 251 0006 0F4B     		ldr	r3, .L23+4
+ 252 0008 1B88     		ldrh	r3, [r3]
+ 253 000a 9BB2     		uxth	r3, r3
+ 254 000c 9A42     		cmp	r2, r3
+ 255 000e 05D0     		beq	.L19
+ 216:FreeRTOS/Common/Minimal/death.c **** 	{
+ 217:FreeRTOS/Common/Minimal/death.c **** 		xReturn = pdFALSE;
+ 218:FreeRTOS/Common/Minimal/death.c **** 	}
+ 219:FreeRTOS/Common/Minimal/death.c **** 	else
+ 220:FreeRTOS/Common/Minimal/death.c **** 	{
+ 221:FreeRTOS/Common/Minimal/death.c **** 		usLastCreationCount = usCreationCount;
+ 256              		.loc 1 221 0
+ 257 0010 0C4B     		ldr	r3, .L23+4
+ 258 0012 1A88     		ldrh	r2, [r3]
+ 259 0014 0A4B     		ldr	r3, .L23
+ 260 0016 1A80     		strh	r2, [r3]	@ movhi
+ 212:FreeRTOS/Common/Minimal/death.c **** static unsigned portBASE_TYPE uxTasksRunningNow;
+ 261              		.loc 1 212 0
+ 262 0018 0124     		movs	r4, #1
+ 263 001a 00E0     		b	.L17
+ 264              	.L19:
+ 217:FreeRTOS/Common/Minimal/death.c **** 	}
+ 265              		.loc 1 217 0
+ 266 001c 0024     		movs	r4, #0
+ 267              	.L17:
+ 268              	.LVL25:
+ 222:FreeRTOS/Common/Minimal/death.c **** 	}
+ 223:FreeRTOS/Common/Minimal/death.c **** 	
+ 224:FreeRTOS/Common/Minimal/death.c **** 	uxTasksRunningNow = ( unsigned portBASE_TYPE ) uxTaskGetNumberOfTasks();
+ 269              		.loc 1 224 0
+ 270 001e FFF7FEFF 		bl	uxTaskGetNumberOfTasks
+ 271              	.LVL26:
+ 225:FreeRTOS/Common/Minimal/death.c **** 
+ 226:FreeRTOS/Common/Minimal/death.c **** 	if( uxTasksRunningNow < uxTasksRunningAtStart )
+ 272              		.loc 1 226 0
+ 273 0022 094B     		ldr	r3, .L23+8
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 10
+
+
+ 274 0024 1B68     		ldr	r3, [r3]
+ 275 0026 9842     		cmp	r0, r3
+ 276 0028 05D3     		bcc	.L20
+ 227:FreeRTOS/Common/Minimal/death.c **** 	{
+ 228:FreeRTOS/Common/Minimal/death.c **** 		xReturn = pdFALSE;
+ 229:FreeRTOS/Common/Minimal/death.c **** 	}
+ 230:FreeRTOS/Common/Minimal/death.c **** 	else if( ( uxTasksRunningNow - uxTasksRunningAtStart ) > uxMaxNumberOfExtraTasksRunning )
+ 277              		.loc 1 230 0
+ 278 002a 074B     		ldr	r3, .L23+8
+ 279 002c 1B68     		ldr	r3, [r3]
+ 280 002e C01A     		subs	r0, r0, r3
+ 281 0030 0228     		cmp	r0, #2
+ 282 0032 02D8     		bhi	.L21
+ 283 0034 02E0     		b	.L18
+ 284              	.L20:
+ 228:FreeRTOS/Common/Minimal/death.c **** 	}
+ 285              		.loc 1 228 0
+ 286 0036 0024     		movs	r4, #0
+ 287              	.LVL27:
+ 288 0038 00E0     		b	.L18
+ 289              	.LVL28:
+ 290              	.L21:
+ 231:FreeRTOS/Common/Minimal/death.c **** 	{
+ 232:FreeRTOS/Common/Minimal/death.c **** 		xReturn = pdFALSE;
+ 291              		.loc 1 232 0
+ 292 003a 0024     		movs	r4, #0
+ 293              	.LVL29:
+ 294              	.L18:
+ 233:FreeRTOS/Common/Minimal/death.c **** 	}
+ 234:FreeRTOS/Common/Minimal/death.c **** 	else
+ 235:FreeRTOS/Common/Minimal/death.c **** 	{
+ 236:FreeRTOS/Common/Minimal/death.c **** 		/* Everything is okay. */
+ 237:FreeRTOS/Common/Minimal/death.c **** 	}
+ 238:FreeRTOS/Common/Minimal/death.c **** 
+ 239:FreeRTOS/Common/Minimal/death.c **** 	return xReturn;
+ 240:FreeRTOS/Common/Minimal/death.c **** }
+ 295              		.loc 1 240 0
+ 296 003c 2046     		mov	r0, r4
+ 297 003e 10BD     		pop	{r4, pc}
+ 298              	.LVL30:
+ 299              	.L24:
+ 300              		.align	2
+ 301              	.L23:
+ 302 0040 00000000 		.word	.LANCHOR2
+ 303 0044 00000000 		.word	.LANCHOR0
+ 304 0048 00000000 		.word	.LANCHOR1
+ 305              		.cfi_endproc
+ 306              	.LFE3:
+ 308              		.comm	xCreatedTask,4,4
+ 309              		.section	.data.usLastCreationCount.4940,"aw",%progbits
+ 310              		.align	1
+ 311              		.set	.LANCHOR2,. + 0
+ 314              	usLastCreationCount.4940:
+ 315 0000 FF0F     		.short	4095
+ 316              		.section	.bss.usCreationCount,"aw",%nobits
+ 317              		.align	1
+ 318              		.set	.LANCHOR0,. + 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 11
+
+
+ 321              	usCreationCount:
+ 322 0000 0000     		.space	2
+ 323              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 324              		.align	2
+ 325              	.LC0:
+ 326 0000 53554943 		.ascii	"SUICID1\000"
+ 326      49443100 
+ 327              	.LC1:
+ 328 0008 53554943 		.ascii	"SUICID2\000"
+ 328      49443200 
+ 329              	.LC2:
+ 330 0010 43524541 		.ascii	"CREATOR\000"
+ 330      544F5200 
+ 331              		.section	.bss.uxTasksRunningAtStart,"aw",%nobits
+ 332              		.align	2
+ 333              		.set	.LANCHOR1,. + 0
+ 336              	uxTasksRunningAtStart:
+ 337 0000 00000000 		.space	4
+ 338              		.text
+ 339              	.Letext0:
+ 340              		.file 2 "FreeRTOS/ARMCM3/Inc/portmacro.h"
+ 341              		.file 3 "FreeRTOS/Inc/task.h"
+ 342              		.file 4 "FreeRTOS/Inc/portable.h"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s 			page 12
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 death.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:20     .text.vCreateTasks:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:24     .text.vCreateTasks:0000000000000000 vCreateTasks
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:89     .text.vCreateTasks:0000000000000048 $d
+                            *COM*:0000000000000004 xCreatedTask
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:102    .text.vSuicidalTask:0000000000000000 vSuicidalTask
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:98     .text.vSuicidalTask:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:165    .text.vCreateSuicidalTasks:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:170    .text.vCreateSuicidalTasks:0000000000000000 vCreateSuicidalTasks
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:224    .text.vCreateSuicidalTasks:0000000000000034 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:231    .text.xIsCreateTaskStillRunning:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:236    .text.xIsCreateTaskStillRunning:0000000000000000 xIsCreateTaskStillRunning
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:302    .text.xIsCreateTaskStillRunning:0000000000000040 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:310    .data.usLastCreationCount.4940:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:314    .data.usLastCreationCount.4940:0000000000000000 usLastCreationCount.4940
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:317    .bss.usCreationCount:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:321    .bss.usCreationCount:0000000000000000 usCreationCount
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:324    .rodata.str1.4:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:332    .bss.uxTasksRunningAtStart:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccj595kg.s:336    .bss.uxTasksRunningAtStart:0000000000000000 uxTasksRunningAtStart
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+vPortFree
+vTaskDelay
+xTaskCreate
+vTaskDelete
+pvPortMalloc
+uxTaskGetNumberOfTasks

@@ -1,53 +1,30 @@
 RTOS_SRC = \
-FreeRTOS/ARM_CM3/port.c          \
-FreeRTOS/Src/croutine.c          \
-FreeRTOS/Src/event_groups.c      \
-FreeRTOS/Src/list.c              \
-FreeRTOS/Src/queue.c             \
-FreeRTOS/Src/stream_buffer.c     \
-FreeRTOS/Src/tasks.c             \
-FreeRTOS/Src/timers.c            \
+FreeRTOS/Src/list.c   \
+FreeRTOS/Src/queue.c   \
+FreeRTOS/Src/tasks.c   \
 
 
 
-RTOS_CON_SRC = \
-FreeRTOS/control/Src/ParTest.c   \
+RTOS_ARMCM3_SRC = \
+FreeRTOS/ARMCM3/Src/port.c   \
+FreeRTOS/ARMCM3/Src/heap_2.c  \
 
-RTOS_TEST_CODE = \
-FreeRTOS/test_Src/BlockQ.c       \
-FreeRTOS/test_Src/blocktim.c     \
-FreeRTOS/test_Src/comtest.c   \
-FreeRTOS/test_Src/death.c \
-FreeRTOS/test_Src/flash.c \
-FreeRTOS/test_Src/PollQ.c \
-FreeRTOS/test_Src/semtest.c \
-FreeRTOS/test_Src/integer.c \
-FreeRTOS/test_Src/lcd.c     \
-FreeRTOS/test_Src/heap_2.c  \
-FreeRTOS/test_Src/serial.c   \
-FreeRTOS/test_Src/timertest.c  \
-#FreeRTOS/test_Src/comtest_strings.c \
-FreeRTOS/test_Src/QPeek.c \
-FreeRTOS/test_Src/QueueSetPolling.c \
-FreeRTOS/test_Src/recmutex.c \
-FreeRTOS/test_Src/sp_flop.c \
-FreeRTOS/test_Src/StaticAllocation.c \
-FreeRTOS/test_Src/StreamBufferDemo.c \
-FreeRTOS/test_Src/StreamBufferInterrupt.c \
-FreeRTOS/test_Src/TaskNotify.c \
-FreeRTOS/test_Src/flash_timer.c \
-FreeRTOS/test_Src/MessageBufferAMP.c \
-FreeRTOS/test_Src/MessageBufferDemo.c \
-FreeRTOS/test_Src/IntQueue.c \
-FreeRTOS/test_Src/GenQTest.c \
-FreeRTOS/test_Src/IntSemTest.c \
-FreeRTOS/test_Src/flop.c \
-FreeRTOS/test_Src/dynamic.c \
-FreeRTOS/test_Src/AbortDelay.c   \
-FreeRTOS/test_Src/crflash.c \
-FreeRTOS/test_Src/crhook.c \
-FreeRTOS/test_Src/EventGroupsDemo.c \
-FreeRTOS/test_Src/countsem.c \
-FreeRTOS/test_Src/TimerDemo.c \
+RTOS_COMMON_SRC = \
+FreeRTOS/Common/Minimal/BlockQ.c    \
+FreeRTOS/Common/Minimal/blocktim.c   \
+FreeRTOS/Common/Minimal/comtest.c    \
+FreeRTOS/Common/Minimal/death.c      \
+FreeRTOS/Common/Minimal/flash.c      \
+FreeRTOS/Common/Minimal/integer.c    \
+FreeRTOS/Common/Minimal/PollQ.c      \
+FreeRTOS/Common/Minimal/semtest.c    \
 
-RTOS_SOURCES = $(RTOS_SRC) $(RTOS_CON_SRC) $(RTOS_TEST_CODE)
+
+RTOS_TEST_SRC = \
+FreeRTOS/parTest/spi_flash.c   \
+FreeRTOS/parTest/timertest.c   \
+FreeRTOS/parTest/ParTest.c     \
+
+
+
+RTOS_SOURCES = $(RTOS_SRC) $(RTOS_ARMCM3_SRC) $(RTOS_COMMON_SRC) $(RTOS_TEST_SRC)
