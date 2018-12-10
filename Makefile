@@ -31,7 +31,7 @@ OPT = -Og
 # Build path
 BUILD_DIR = build
 
-RTOS_FLAGS = yes
+RTOS_FLAGS = no
 
 
 include exinc.mk
@@ -183,8 +183,6 @@ down_load: $(BUILD_DIR)/$(TARGET).bin
 	~/stm32ld /dev/tty.usbserial-14201 115200 ./$(BUILD_DIR)/$(TARGET).bin
 	st-flash write $(TARGET).bin 0x8000000
 
-down_load: $(BUILD_DIR)/$(TARGET).bin
-	~/stm32ld /dev/tty.usbserial14201 115200 ./$(BUILD_DIR)/$(TARGET).bin
 
 erase:
 	st-flash erase
