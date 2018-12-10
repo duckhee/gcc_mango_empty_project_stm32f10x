@@ -130,7 +130,7 @@ void NVIC_Configuration(void)
 #endif
 
     /* Configure one bit for preemption priority */
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
     /* Enable the EXTI0 Interrupt */
     NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
