@@ -1,0 +1,602 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"death.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.vCreateTasks,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  24              	vCreateTasks:
+  25              	.LFB34:
+  26              		.file 1 "FreeRTOS/test_Src/death.c"
+   1:FreeRTOS/test_Src/death.c **** /*
+   2:FreeRTOS/test_Src/death.c ****  * FreeRTOS Kernel V10.1.1
+   3:FreeRTOS/test_Src/death.c ****  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+   4:FreeRTOS/test_Src/death.c ****  *
+   5:FreeRTOS/test_Src/death.c ****  * Permission is hereby granted, free of charge, to any person obtaining a copy of
+   6:FreeRTOS/test_Src/death.c ****  * this software and associated documentation files (the "Software"), to deal in
+   7:FreeRTOS/test_Src/death.c ****  * the Software without restriction, including without limitation the rights to
+   8:FreeRTOS/test_Src/death.c ****  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   9:FreeRTOS/test_Src/death.c ****  * the Software, and to permit persons to whom the Software is furnished to do so,
+  10:FreeRTOS/test_Src/death.c ****  * subject to the following conditions:
+  11:FreeRTOS/test_Src/death.c ****  *
+  12:FreeRTOS/test_Src/death.c ****  * The above copyright notice and this permission notice shall be included in all
+  13:FreeRTOS/test_Src/death.c ****  * copies or substantial portions of the Software.
+  14:FreeRTOS/test_Src/death.c ****  *
+  15:FreeRTOS/test_Src/death.c ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  16:FreeRTOS/test_Src/death.c ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  17:FreeRTOS/test_Src/death.c ****  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  18:FreeRTOS/test_Src/death.c ****  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  19:FreeRTOS/test_Src/death.c ****  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  20:FreeRTOS/test_Src/death.c ****  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  21:FreeRTOS/test_Src/death.c ****  *
+  22:FreeRTOS/test_Src/death.c ****  * http://www.FreeRTOS.org
+  23:FreeRTOS/test_Src/death.c ****  * http://aws.amazon.com/freertos
+  24:FreeRTOS/test_Src/death.c ****  *
+  25:FreeRTOS/test_Src/death.c ****  * 1 tab == 4 spaces!
+  26:FreeRTOS/test_Src/death.c ****  */
+  27:FreeRTOS/test_Src/death.c **** 
+  28:FreeRTOS/test_Src/death.c **** /**
+  29:FreeRTOS/test_Src/death.c ****  * Create a single persistent task which periodically dynamically creates another
+  30:FreeRTOS/test_Src/death.c ****  * two tasks.  The original task is called the creator task, the two tasks it
+  31:FreeRTOS/test_Src/death.c ****  * creates are called suicidal tasks.
+  32:FreeRTOS/test_Src/death.c ****  *
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 2
+
+
+  33:FreeRTOS/test_Src/death.c ****  * One of the created suicidal tasks kill one other suicidal task before killing
+  34:FreeRTOS/test_Src/death.c ****  * itself - leaving just the original task remaining.
+  35:FreeRTOS/test_Src/death.c ****  *
+  36:FreeRTOS/test_Src/death.c ****  * The creator task must be spawned after all of the other demo application tasks
+  37:FreeRTOS/test_Src/death.c ****  * as it keeps a check on the number of tasks under the scheduler control.  The
+  38:FreeRTOS/test_Src/death.c ****  * number of tasks it expects to see running should never be greater than the
+  39:FreeRTOS/test_Src/death.c ****  * number of tasks that were in existence when the creator task was spawned, plus
+  40:FreeRTOS/test_Src/death.c ****  * one set of four suicidal tasks.  If this number is exceeded an error is flagged.
+  41:FreeRTOS/test_Src/death.c ****  *
+  42:FreeRTOS/test_Src/death.c ****  * \page DeathC death.c
+  43:FreeRTOS/test_Src/death.c ****  * \ingroup DemoFiles
+  44:FreeRTOS/test_Src/death.c ****  * <HR>
+  45:FreeRTOS/test_Src/death.c ****  */
+  46:FreeRTOS/test_Src/death.c **** 
+  47:FreeRTOS/test_Src/death.c **** 
+  48:FreeRTOS/test_Src/death.c **** #include <stdlib.h>
+  49:FreeRTOS/test_Src/death.c **** 
+  50:FreeRTOS/test_Src/death.c **** /* Scheduler include files. */
+  51:FreeRTOS/test_Src/death.c **** #include "FreeRTOS.h"
+  52:FreeRTOS/test_Src/death.c **** #include "task.h"
+  53:FreeRTOS/test_Src/death.c **** 
+  54:FreeRTOS/test_Src/death.c **** /* Demo program include files. */
+  55:FreeRTOS/test_Src/death.c **** #include "death.h"
+  56:FreeRTOS/test_Src/death.c **** 
+  57:FreeRTOS/test_Src/death.c **** #define deathSTACK_SIZE		( configMINIMAL_STACK_SIZE + 60 )
+  58:FreeRTOS/test_Src/death.c **** 
+  59:FreeRTOS/test_Src/death.c **** /* The task originally created which is responsible for periodically dynamically
+  60:FreeRTOS/test_Src/death.c **** creating another four tasks. */
+  61:FreeRTOS/test_Src/death.c **** static portTASK_FUNCTION_PROTO( vCreateTasks, pvParameters );
+  62:FreeRTOS/test_Src/death.c **** 
+  63:FreeRTOS/test_Src/death.c **** /* The task function of the dynamically created tasks. */
+  64:FreeRTOS/test_Src/death.c **** static portTASK_FUNCTION_PROTO( vSuicidalTask, pvParameters );
+  65:FreeRTOS/test_Src/death.c **** 
+  66:FreeRTOS/test_Src/death.c **** /* A variable which is incremented every time the dynamic tasks are created.  This
+  67:FreeRTOS/test_Src/death.c **** is used to check that the task is still running. */
+  68:FreeRTOS/test_Src/death.c **** static volatile uint16_t usCreationCount = 0;
+  69:FreeRTOS/test_Src/death.c **** 
+  70:FreeRTOS/test_Src/death.c **** /* Used to store the number of tasks that were originally running so the creator
+  71:FreeRTOS/test_Src/death.c **** task can tell if any of the suicidal tasks have failed to die.
+  72:FreeRTOS/test_Src/death.c **** */
+  73:FreeRTOS/test_Src/death.c **** static volatile UBaseType_t uxTasksRunningAtStart = 0;
+  74:FreeRTOS/test_Src/death.c **** 
+  75:FreeRTOS/test_Src/death.c **** /* When a task deletes itself, it stack and TCB are cleaned up by the Idle task.
+  76:FreeRTOS/test_Src/death.c **** Under heavy load the idle task might not get much processing time, so it would
+  77:FreeRTOS/test_Src/death.c **** be legitimate for several tasks to remain undeleted for a short period.  There
+  78:FreeRTOS/test_Src/death.c **** may also be a few other unexpected tasks if, for example, the tasks that test
+  79:FreeRTOS/test_Src/death.c **** static allocation are also being used. */
+  80:FreeRTOS/test_Src/death.c **** static const UBaseType_t uxMaxNumberOfExtraTasksRunning = 3;
+  81:FreeRTOS/test_Src/death.c **** 
+  82:FreeRTOS/test_Src/death.c **** /* Used to store a handle to the task that should be killed by a suicidal task,
+  83:FreeRTOS/test_Src/death.c **** before it kills itself. */
+  84:FreeRTOS/test_Src/death.c **** TaskHandle_t xCreatedTask;
+  85:FreeRTOS/test_Src/death.c **** 
+  86:FreeRTOS/test_Src/death.c **** /*-----------------------------------------------------------*/
+  87:FreeRTOS/test_Src/death.c **** 
+  88:FreeRTOS/test_Src/death.c **** void vCreateSuicidalTasks( UBaseType_t uxPriority )
+  89:FreeRTOS/test_Src/death.c **** {
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 3
+
+
+  90:FreeRTOS/test_Src/death.c **** 	xTaskCreate( vCreateTasks, "CREATOR", deathSTACK_SIZE, ( void * ) NULL, uxPriority, NULL );
+  91:FreeRTOS/test_Src/death.c **** }
+  92:FreeRTOS/test_Src/death.c **** /*-----------------------------------------------------------*/
+  93:FreeRTOS/test_Src/death.c **** 
+  94:FreeRTOS/test_Src/death.c **** static portTASK_FUNCTION( vSuicidalTask, pvParameters )
+  95:FreeRTOS/test_Src/death.c **** {
+  96:FreeRTOS/test_Src/death.c **** volatile long l1, l2;
+  97:FreeRTOS/test_Src/death.c **** TaskHandle_t xTaskToKill;
+  98:FreeRTOS/test_Src/death.c **** const TickType_t xDelay = pdMS_TO_TICKS( ( TickType_t ) 200 );
+  99:FreeRTOS/test_Src/death.c **** 
+ 100:FreeRTOS/test_Src/death.c **** 	/* Test deletion of a task's secure context, if any. */
+ 101:FreeRTOS/test_Src/death.c **** 	portTASK_CALLS_SECURE_FUNCTIONS();
+ 102:FreeRTOS/test_Src/death.c **** 
+ 103:FreeRTOS/test_Src/death.c **** 	if( pvParameters != NULL )
+ 104:FreeRTOS/test_Src/death.c **** 	{
+ 105:FreeRTOS/test_Src/death.c **** 		/* This task is periodically created four times.  Two created tasks are
+ 106:FreeRTOS/test_Src/death.c **** 		passed a handle to the other task so it can kill it before killing itself.
+ 107:FreeRTOS/test_Src/death.c **** 		The other task is passed in null. */
+ 108:FreeRTOS/test_Src/death.c **** 		xTaskToKill = *( TaskHandle_t* )pvParameters;
+ 109:FreeRTOS/test_Src/death.c **** 	}
+ 110:FreeRTOS/test_Src/death.c **** 	else
+ 111:FreeRTOS/test_Src/death.c **** 	{
+ 112:FreeRTOS/test_Src/death.c **** 		xTaskToKill = NULL;
+ 113:FreeRTOS/test_Src/death.c **** 	}
+ 114:FreeRTOS/test_Src/death.c **** 
+ 115:FreeRTOS/test_Src/death.c **** 	for( ;; )
+ 116:FreeRTOS/test_Src/death.c **** 	{
+ 117:FreeRTOS/test_Src/death.c **** 		/* Do something random just to use some stack and registers. */
+ 118:FreeRTOS/test_Src/death.c **** 		l1 = 2;
+ 119:FreeRTOS/test_Src/death.c **** 		l2 = 89;
+ 120:FreeRTOS/test_Src/death.c **** 		l2 *= l1;
+ 121:FreeRTOS/test_Src/death.c **** 		vTaskDelay( xDelay );
+ 122:FreeRTOS/test_Src/death.c **** 
+ 123:FreeRTOS/test_Src/death.c **** 		if( xTaskToKill != NULL )
+ 124:FreeRTOS/test_Src/death.c **** 		{
+ 125:FreeRTOS/test_Src/death.c **** 			/* Make sure the other task has a go before we delete it. */
+ 126:FreeRTOS/test_Src/death.c **** 			vTaskDelay( ( TickType_t ) 0 );
+ 127:FreeRTOS/test_Src/death.c **** 
+ 128:FreeRTOS/test_Src/death.c **** 			/* Kill the other task that was created by vCreateTasks(). */
+ 129:FreeRTOS/test_Src/death.c **** 			vTaskDelete( xTaskToKill );
+ 130:FreeRTOS/test_Src/death.c **** 
+ 131:FreeRTOS/test_Src/death.c **** 			/* Kill ourselves. */
+ 132:FreeRTOS/test_Src/death.c **** 			vTaskDelete( NULL );
+ 133:FreeRTOS/test_Src/death.c **** 		}
+ 134:FreeRTOS/test_Src/death.c **** 	}
+ 135:FreeRTOS/test_Src/death.c **** }/*lint !e818 !e550 Function prototype must be as per standard for task functions. */
+ 136:FreeRTOS/test_Src/death.c **** /*-----------------------------------------------------------*/
+ 137:FreeRTOS/test_Src/death.c **** 
+ 138:FreeRTOS/test_Src/death.c **** static portTASK_FUNCTION( vCreateTasks, pvParameters )
+ 139:FreeRTOS/test_Src/death.c **** {
+  27              		.loc 1 139 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              	.LVL0:
+  32 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+  33              	.LCFI0:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 4
+
+
+  34              		.cfi_def_cfa_offset 20
+  35              		.cfi_offset 4, -20
+  36              		.cfi_offset 5, -16
+  37              		.cfi_offset 6, -12
+  38              		.cfi_offset 7, -8
+  39              		.cfi_offset 14, -4
+  40 0002 83B0     		sub	sp, sp, #12
+  41              	.LCFI1:
+  42              		.cfi_def_cfa_offset 32
+  43              	.LVL1:
+ 140:FreeRTOS/test_Src/death.c **** const TickType_t xDelay = pdMS_TO_TICKS( ( TickType_t ) 1000 );
+ 141:FreeRTOS/test_Src/death.c **** UBaseType_t uxPriority;
+ 142:FreeRTOS/test_Src/death.c **** 
+ 143:FreeRTOS/test_Src/death.c **** 	/* Remove compiler warning about unused parameter. */
+ 144:FreeRTOS/test_Src/death.c **** 	( void ) pvParameters;
+ 145:FreeRTOS/test_Src/death.c **** 
+ 146:FreeRTOS/test_Src/death.c **** 	/* Delay at the start to ensure tasks created by other demos have been
+ 147:FreeRTOS/test_Src/death.c **** 	created before storing the current number of tasks. */
+ 148:FreeRTOS/test_Src/death.c **** 	vTaskDelay( xDelay );
+  44              		.loc 1 148 0
+  45 0004 4FF47A70 		mov	r0, #1000
+  46              	.LVL2:
+  47 0008 FFF7FEFF 		bl	vTaskDelay
+  48              	.LVL3:
+ 149:FreeRTOS/test_Src/death.c **** 	uxTasksRunningAtStart = ( UBaseType_t ) uxTaskGetNumberOfTasks();
+  49              		.loc 1 149 0
+  50 000c FFF7FEFF 		bl	uxTaskGetNumberOfTasks
+  51              	.LVL4:
+  52 0010 124B     		ldr	r3, .L4
+  53 0012 1860     		str	r0, [r3]
+ 150:FreeRTOS/test_Src/death.c **** 
+ 151:FreeRTOS/test_Src/death.c **** 	uxPriority = uxTaskPriorityGet( NULL );
+  54              		.loc 1 151 0
+  55 0014 0020     		movs	r0, #0
+  56 0016 FFF7FEFF 		bl	uxTaskPriorityGet
+  57              	.LVL5:
+  58 001a 0646     		mov	r6, r0
+  59              	.LVL6:
+  60              	.L2:
+ 152:FreeRTOS/test_Src/death.c **** 
+ 153:FreeRTOS/test_Src/death.c **** 	for( ;; )
+ 154:FreeRTOS/test_Src/death.c **** 	{
+ 155:FreeRTOS/test_Src/death.c **** 		/* Just loop round, delaying then creating the four suicidal tasks. */
+ 156:FreeRTOS/test_Src/death.c **** 		vTaskDelay( xDelay );
+  61              		.loc 1 156 0 discriminator 1
+  62 001c 4FF47A70 		mov	r0, #1000
+  63 0020 FFF7FEFF 		bl	vTaskDelay
+  64              	.LVL7:
+ 157:FreeRTOS/test_Src/death.c **** 
+ 158:FreeRTOS/test_Src/death.c **** 		xCreatedTask = NULL;
+  65              		.loc 1 158 0 discriminator 1
+  66 0024 0E4C     		ldr	r4, .L4+4
+  67 0026 0025     		movs	r5, #0
+  68 0028 2560     		str	r5, [r4]
+ 159:FreeRTOS/test_Src/death.c **** 
+ 160:FreeRTOS/test_Src/death.c **** 		xTaskCreate( vSuicidalTask, "SUICID1", configMINIMAL_STACK_SIZE, NULL, uxPriority, &xCreatedTask 
+  69              		.loc 1 160 0 discriminator 1
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 5
+
+
+  70 002a 0E4F     		ldr	r7, .L4+8
+  71 002c 0194     		str	r4, [sp, #4]
+  72 002e 0096     		str	r6, [sp]
+  73 0030 2B46     		mov	r3, r5
+  74 0032 8022     		movs	r2, #128
+  75 0034 0C49     		ldr	r1, .L4+12
+  76 0036 3846     		mov	r0, r7
+  77 0038 FFF7FEFF 		bl	xTaskCreate
+  78              	.LVL8:
+ 161:FreeRTOS/test_Src/death.c **** 		xTaskCreate( vSuicidalTask, "SUICID2", configMINIMAL_STACK_SIZE, &xCreatedTask, uxPriority, NULL 
+  79              		.loc 1 161 0 discriminator 1
+  80 003c 0195     		str	r5, [sp, #4]
+  81 003e 0096     		str	r6, [sp]
+  82 0040 2346     		mov	r3, r4
+  83 0042 8022     		movs	r2, #128
+  84 0044 0949     		ldr	r1, .L4+16
+  85 0046 3846     		mov	r0, r7
+  86 0048 FFF7FEFF 		bl	xTaskCreate
+  87              	.LVL9:
+ 162:FreeRTOS/test_Src/death.c **** 
+ 163:FreeRTOS/test_Src/death.c **** 		++usCreationCount;
+  88              		.loc 1 163 0 discriminator 1
+  89 004c 084A     		ldr	r2, .L4+20
+  90 004e 1388     		ldrh	r3, [r2]
+  91 0050 9BB2     		uxth	r3, r3
+  92 0052 0133     		adds	r3, r3, #1
+  93 0054 9BB2     		uxth	r3, r3
+  94 0056 1380     		strh	r3, [r2]	@ movhi
+  95 0058 E0E7     		b	.L2
+  96              	.L5:
+  97 005a 00BF     		.align	2
+  98              	.L4:
+  99 005c 00000000 		.word	.LANCHOR0
+ 100 0060 00000000 		.word	xCreatedTask
+ 101 0064 00000000 		.word	vSuicidalTask
+ 102 0068 00000000 		.word	.LC0
+ 103 006c 08000000 		.word	.LC1
+ 104 0070 00000000 		.word	.LANCHOR1
+ 105              		.cfi_endproc
+ 106              	.LFE34:
+ 108              		.section	.text.vSuicidalTask,"ax",%progbits
+ 109              		.align	2
+ 110              		.thumb
+ 111              		.thumb_func
+ 113              	vSuicidalTask:
+ 114              	.LFB33:
+  95:FreeRTOS/test_Src/death.c **** volatile long l1, l2;
+ 115              		.loc 1 95 0
+ 116              		.cfi_startproc
+ 117              		@ args = 0, pretend = 0, frame = 8
+ 118              		@ frame_needed = 0, uses_anonymous_args = 0
+ 119              	.LVL10:
+ 120 0000 10B5     		push	{r4, lr}
+ 121              	.LCFI2:
+ 122              		.cfi_def_cfa_offset 8
+ 123              		.cfi_offset 4, -8
+ 124              		.cfi_offset 14, -4
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 6
+
+
+ 125 0002 82B0     		sub	sp, sp, #8
+ 126              	.LCFI3:
+ 127              		.cfi_def_cfa_offset 16
+ 128              	.LVL11:
+ 103:FreeRTOS/test_Src/death.c **** 	{
+ 129              		.loc 1 103 0
+ 130 0004 08B1     		cbz	r0, .L10
+ 108:FreeRTOS/test_Src/death.c **** 	}
+ 131              		.loc 1 108 0
+ 132 0006 0468     		ldr	r4, [r0]
+ 133              	.LVL12:
+ 134 0008 00E0     		b	.L8
+ 135              	.LVL13:
+ 136              	.L10:
+ 112:FreeRTOS/test_Src/death.c **** 	}
+ 137              		.loc 1 112 0
+ 138 000a 0024     		movs	r4, #0
+ 139              	.LVL14:
+ 140              	.L8:
+ 118:FreeRTOS/test_Src/death.c **** 		l2 = 89;
+ 141              		.loc 1 118 0
+ 142 000c 0223     		movs	r3, #2
+ 143 000e 0193     		str	r3, [sp, #4]
+ 119:FreeRTOS/test_Src/death.c **** 		l2 *= l1;
+ 144              		.loc 1 119 0
+ 145 0010 5923     		movs	r3, #89
+ 146 0012 0093     		str	r3, [sp]
+ 120:FreeRTOS/test_Src/death.c **** 		vTaskDelay( xDelay );
+ 147              		.loc 1 120 0
+ 148 0014 019A     		ldr	r2, [sp, #4]
+ 149 0016 009B     		ldr	r3, [sp]
+ 150 0018 03FB02F3 		mul	r3, r3, r2
+ 151 001c 0093     		str	r3, [sp]
+ 121:FreeRTOS/test_Src/death.c **** 
+ 152              		.loc 1 121 0
+ 153 001e C820     		movs	r0, #200
+ 154 0020 FFF7FEFF 		bl	vTaskDelay
+ 155              	.LVL15:
+ 123:FreeRTOS/test_Src/death.c **** 		{
+ 156              		.loc 1 123 0
+ 157 0024 002C     		cmp	r4, #0
+ 158 0026 F1D0     		beq	.L8
+ 126:FreeRTOS/test_Src/death.c **** 
+ 159              		.loc 1 126 0
+ 160 0028 0020     		movs	r0, #0
+ 161 002a FFF7FEFF 		bl	vTaskDelay
+ 162              	.LVL16:
+ 129:FreeRTOS/test_Src/death.c **** 
+ 163              		.loc 1 129 0
+ 164 002e 2046     		mov	r0, r4
+ 165 0030 FFF7FEFF 		bl	vTaskDelete
+ 166              	.LVL17:
+ 132:FreeRTOS/test_Src/death.c **** 		}
+ 167              		.loc 1 132 0
+ 168 0034 0020     		movs	r0, #0
+ 169 0036 FFF7FEFF 		bl	vTaskDelete
+ 170              	.LVL18:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 7
+
+
+ 171 003a E7E7     		b	.L8
+ 172              		.cfi_endproc
+ 173              	.LFE33:
+ 175              		.section	.text.vCreateSuicidalTasks,"ax",%progbits
+ 176              		.align	2
+ 177              		.global	vCreateSuicidalTasks
+ 178              		.thumb
+ 179              		.thumb_func
+ 181              	vCreateSuicidalTasks:
+ 182              	.LFB32:
+  89:FreeRTOS/test_Src/death.c **** 	xTaskCreate( vCreateTasks, "CREATOR", deathSTACK_SIZE, ( void * ) NULL, uxPriority, NULL );
+ 183              		.loc 1 89 0
+ 184              		.cfi_startproc
+ 185              		@ args = 0, pretend = 0, frame = 0
+ 186              		@ frame_needed = 0, uses_anonymous_args = 0
+ 187              	.LVL19:
+ 188 0000 00B5     		push	{lr}
+ 189              	.LCFI4:
+ 190              		.cfi_def_cfa_offset 4
+ 191              		.cfi_offset 14, -4
+ 192 0002 83B0     		sub	sp, sp, #12
+ 193              	.LCFI5:
+ 194              		.cfi_def_cfa_offset 16
+  90:FreeRTOS/test_Src/death.c **** }
+ 195              		.loc 1 90 0
+ 196 0004 0023     		movs	r3, #0
+ 197 0006 0193     		str	r3, [sp, #4]
+ 198 0008 0090     		str	r0, [sp]
+ 199 000a BC22     		movs	r2, #188
+ 200 000c 0349     		ldr	r1, .L14
+ 201 000e 0448     		ldr	r0, .L14+4
+ 202              	.LVL20:
+ 203 0010 FFF7FEFF 		bl	xTaskCreate
+ 204              	.LVL21:
+  91:FreeRTOS/test_Src/death.c **** /*-----------------------------------------------------------*/
+ 205              		.loc 1 91 0
+ 206 0014 03B0     		add	sp, sp, #12
+ 207              	.LCFI6:
+ 208              		.cfi_def_cfa_offset 4
+ 209              		@ sp needed
+ 210 0016 5DF804FB 		ldr	pc, [sp], #4
+ 211              	.L15:
+ 212 001a 00BF     		.align	2
+ 213              	.L14:
+ 214 001c 10000000 		.word	.LC2
+ 215 0020 00000000 		.word	vCreateTasks
+ 216              		.cfi_endproc
+ 217              	.LFE32:
+ 219              		.section	.text.xIsCreateTaskStillRunning,"ax",%progbits
+ 220              		.align	2
+ 221              		.global	xIsCreateTaskStillRunning
+ 222              		.thumb
+ 223              		.thumb_func
+ 225              	xIsCreateTaskStillRunning:
+ 226              	.LFB35:
+ 164:FreeRTOS/test_Src/death.c **** 	}
+ 165:FreeRTOS/test_Src/death.c **** }
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 8
+
+
+ 166:FreeRTOS/test_Src/death.c **** /*-----------------------------------------------------------*/
+ 167:FreeRTOS/test_Src/death.c **** 
+ 168:FreeRTOS/test_Src/death.c **** /* This is called to check that the creator task is still running and that there
+ 169:FreeRTOS/test_Src/death.c **** are not any more than four extra tasks. */
+ 170:FreeRTOS/test_Src/death.c **** BaseType_t xIsCreateTaskStillRunning( void )
+ 171:FreeRTOS/test_Src/death.c **** {
+ 227              		.loc 1 171 0
+ 228              		.cfi_startproc
+ 229              		@ args = 0, pretend = 0, frame = 0
+ 230              		@ frame_needed = 0, uses_anonymous_args = 0
+ 231 0000 10B5     		push	{r4, lr}
+ 232              	.LCFI7:
+ 233              		.cfi_def_cfa_offset 8
+ 234              		.cfi_offset 4, -8
+ 235              		.cfi_offset 14, -4
+ 236              	.LVL22:
+ 172:FreeRTOS/test_Src/death.c **** static uint16_t usLastCreationCount = 0xfff;
+ 173:FreeRTOS/test_Src/death.c **** BaseType_t xReturn = pdTRUE;
+ 174:FreeRTOS/test_Src/death.c **** static UBaseType_t uxTasksRunningNow;
+ 175:FreeRTOS/test_Src/death.c **** 
+ 176:FreeRTOS/test_Src/death.c **** 	if( usLastCreationCount == usCreationCount )
+ 237              		.loc 1 176 0
+ 238 0002 0F4B     		ldr	r3, .L23
+ 239 0004 1A88     		ldrh	r2, [r3]
+ 240 0006 0F4B     		ldr	r3, .L23+4
+ 241 0008 1B88     		ldrh	r3, [r3]
+ 242 000a 9BB2     		uxth	r3, r3
+ 243 000c 9A42     		cmp	r2, r3
+ 244 000e 05D0     		beq	.L19
+ 177:FreeRTOS/test_Src/death.c **** 	{
+ 178:FreeRTOS/test_Src/death.c **** 		xReturn = pdFALSE;
+ 179:FreeRTOS/test_Src/death.c **** 	}
+ 180:FreeRTOS/test_Src/death.c **** 	else
+ 181:FreeRTOS/test_Src/death.c **** 	{
+ 182:FreeRTOS/test_Src/death.c **** 		usLastCreationCount = usCreationCount;
+ 245              		.loc 1 182 0
+ 246 0010 0C4B     		ldr	r3, .L23+4
+ 247 0012 1A88     		ldrh	r2, [r3]
+ 248 0014 0A4B     		ldr	r3, .L23
+ 249 0016 1A80     		strh	r2, [r3]	@ movhi
+ 173:FreeRTOS/test_Src/death.c **** static UBaseType_t uxTasksRunningNow;
+ 250              		.loc 1 173 0
+ 251 0018 0124     		movs	r4, #1
+ 252 001a 00E0     		b	.L17
+ 253              	.L19:
+ 178:FreeRTOS/test_Src/death.c **** 	}
+ 254              		.loc 1 178 0
+ 255 001c 0024     		movs	r4, #0
+ 256              	.L17:
+ 257              	.LVL23:
+ 183:FreeRTOS/test_Src/death.c **** 	}
+ 184:FreeRTOS/test_Src/death.c **** 
+ 185:FreeRTOS/test_Src/death.c **** 	uxTasksRunningNow = ( UBaseType_t ) uxTaskGetNumberOfTasks();
+ 258              		.loc 1 185 0
+ 259 001e FFF7FEFF 		bl	uxTaskGetNumberOfTasks
+ 260              	.LVL24:
+ 186:FreeRTOS/test_Src/death.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 9
+
+
+ 187:FreeRTOS/test_Src/death.c **** 	if( uxTasksRunningNow < uxTasksRunningAtStart )
+ 261              		.loc 1 187 0
+ 262 0022 094B     		ldr	r3, .L23+8
+ 263 0024 1B68     		ldr	r3, [r3]
+ 264 0026 9842     		cmp	r0, r3
+ 265 0028 05D3     		bcc	.L20
+ 188:FreeRTOS/test_Src/death.c **** 	{
+ 189:FreeRTOS/test_Src/death.c **** 		xReturn = pdFALSE;
+ 190:FreeRTOS/test_Src/death.c **** 	}
+ 191:FreeRTOS/test_Src/death.c **** 	else if( ( uxTasksRunningNow - uxTasksRunningAtStart ) > uxMaxNumberOfExtraTasksRunning )
+ 266              		.loc 1 191 0
+ 267 002a 074B     		ldr	r3, .L23+8
+ 268 002c 1B68     		ldr	r3, [r3]
+ 269 002e C01A     		subs	r0, r0, r3
+ 270 0030 0328     		cmp	r0, #3
+ 271 0032 02D8     		bhi	.L21
+ 272 0034 02E0     		b	.L18
+ 273              	.L20:
+ 189:FreeRTOS/test_Src/death.c **** 	}
+ 274              		.loc 1 189 0
+ 275 0036 0024     		movs	r4, #0
+ 276              	.LVL25:
+ 277 0038 00E0     		b	.L18
+ 278              	.LVL26:
+ 279              	.L21:
+ 192:FreeRTOS/test_Src/death.c **** 	{
+ 193:FreeRTOS/test_Src/death.c **** 		xReturn = pdFALSE;
+ 280              		.loc 1 193 0
+ 281 003a 0024     		movs	r4, #0
+ 282              	.LVL27:
+ 283              	.L18:
+ 194:FreeRTOS/test_Src/death.c **** 	}
+ 195:FreeRTOS/test_Src/death.c **** 	else
+ 196:FreeRTOS/test_Src/death.c **** 	{
+ 197:FreeRTOS/test_Src/death.c **** 		/* Everything is okay. */
+ 198:FreeRTOS/test_Src/death.c **** 	}
+ 199:FreeRTOS/test_Src/death.c **** 
+ 200:FreeRTOS/test_Src/death.c **** 	return xReturn;
+ 201:FreeRTOS/test_Src/death.c **** }
+ 284              		.loc 1 201 0
+ 285 003c 2046     		mov	r0, r4
+ 286 003e 10BD     		pop	{r4, pc}
+ 287              	.LVL28:
+ 288              	.L24:
+ 289              		.align	2
+ 290              	.L23:
+ 291 0040 00000000 		.word	.LANCHOR2
+ 292 0044 00000000 		.word	.LANCHOR1
+ 293 0048 00000000 		.word	.LANCHOR0
+ 294              		.cfi_endproc
+ 295              	.LFE35:
+ 297              		.comm	xCreatedTask,4,4
+ 298              		.section	.bss.usCreationCount,"aw",%nobits
+ 299              		.align	1
+ 300              		.set	.LANCHOR1,. + 0
+ 303              	usCreationCount:
+ 304 0000 0000     		.space	2
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 10
+
+
+ 305              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 306              		.align	2
+ 307              	.LC0:
+ 308 0000 53554943 		.ascii	"SUICID1\000"
+ 308      49443100 
+ 309              	.LC1:
+ 310 0008 53554943 		.ascii	"SUICID2\000"
+ 310      49443200 
+ 311              	.LC2:
+ 312 0010 43524541 		.ascii	"CREATOR\000"
+ 312      544F5200 
+ 313              		.section	.bss.uxTasksRunningAtStart,"aw",%nobits
+ 314              		.align	2
+ 315              		.set	.LANCHOR0,. + 0
+ 318              	uxTasksRunningAtStart:
+ 319 0000 00000000 		.space	4
+ 320              		.section	.data.usLastCreationCount.7403,"aw",%progbits
+ 321              		.align	1
+ 322              		.set	.LANCHOR2,. + 0
+ 325              	usLastCreationCount.7403:
+ 326 0000 FF0F     		.short	4095
+ 327              		.text
+ 328              	.Letext0:
+ 329              		.file 2 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/machine/_default_types
+ 330              		.file 3 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/sys/_stdint.h"
+ 331              		.file 4 "FreeRTOS/ARM_CM3/portmacro.h"
+ 332              		.file 5 "FreeRTOS/Inc/task.h"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s 			page 11
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 death.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:20     .text.vCreateTasks:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:24     .text.vCreateTasks:0000000000000000 vCreateTasks
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:99     .text.vCreateTasks:000000000000005c $d
+                            *COM*:0000000000000004 xCreatedTask
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:113    .text.vSuicidalTask:0000000000000000 vSuicidalTask
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:109    .text.vSuicidalTask:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:176    .text.vCreateSuicidalTasks:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:181    .text.vCreateSuicidalTasks:0000000000000000 vCreateSuicidalTasks
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:214    .text.vCreateSuicidalTasks:000000000000001c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:220    .text.xIsCreateTaskStillRunning:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:225    .text.xIsCreateTaskStillRunning:0000000000000000 xIsCreateTaskStillRunning
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:291    .text.xIsCreateTaskStillRunning:0000000000000040 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:299    .bss.usCreationCount:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:303    .bss.usCreationCount:0000000000000000 usCreationCount
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:306    .rodata.str1.4:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:314    .bss.uxTasksRunningAtStart:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:318    .bss.uxTasksRunningAtStart:0000000000000000 uxTasksRunningAtStart
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:321    .data.usLastCreationCount.7403:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccFW8nFc.s:325    .data.usLastCreationCount.7403:0000000000000000 usLastCreationCount.7403
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+vTaskDelay
+uxTaskGetNumberOfTasks
+uxTaskPriorityGet
+xTaskCreate
+vTaskDelete

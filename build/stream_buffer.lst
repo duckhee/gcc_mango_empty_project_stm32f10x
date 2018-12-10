@@ -1,0 +1,3512 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"stream_buffer.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.prvBytesInBuffer,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  24              	prvBytesInBuffer:
+  25              	.LFB51:
+  26              		.file 1 "FreeRTOS/Src/stream_buffer.c"
+   1:FreeRTOS/Src/stream_buffer.c **** /*
+   2:FreeRTOS/Src/stream_buffer.c ****  * FreeRTOS Kernel V10.1.1
+   3:FreeRTOS/Src/stream_buffer.c ****  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+   4:FreeRTOS/Src/stream_buffer.c ****  *
+   5:FreeRTOS/Src/stream_buffer.c ****  * Permission is hereby granted, free of charge, to any person obtaining a copy of
+   6:FreeRTOS/Src/stream_buffer.c ****  * this software and associated documentation files (the "Software"), to deal in
+   7:FreeRTOS/Src/stream_buffer.c ****  * the Software without restriction, including without limitation the rights to
+   8:FreeRTOS/Src/stream_buffer.c ****  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   9:FreeRTOS/Src/stream_buffer.c ****  * the Software, and to permit persons to whom the Software is furnished to do so,
+  10:FreeRTOS/Src/stream_buffer.c ****  * subject to the following conditions:
+  11:FreeRTOS/Src/stream_buffer.c ****  *
+  12:FreeRTOS/Src/stream_buffer.c ****  * The above copyright notice and this permission notice shall be included in all
+  13:FreeRTOS/Src/stream_buffer.c ****  * copies or substantial portions of the Software.
+  14:FreeRTOS/Src/stream_buffer.c ****  *
+  15:FreeRTOS/Src/stream_buffer.c ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  16:FreeRTOS/Src/stream_buffer.c ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  17:FreeRTOS/Src/stream_buffer.c ****  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  18:FreeRTOS/Src/stream_buffer.c ****  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  19:FreeRTOS/Src/stream_buffer.c ****  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  20:FreeRTOS/Src/stream_buffer.c ****  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  21:FreeRTOS/Src/stream_buffer.c ****  *
+  22:FreeRTOS/Src/stream_buffer.c ****  * http://www.FreeRTOS.org
+  23:FreeRTOS/Src/stream_buffer.c ****  * http://aws.amazon.com/freertos
+  24:FreeRTOS/Src/stream_buffer.c ****  *
+  25:FreeRTOS/Src/stream_buffer.c ****  * 1 tab == 4 spaces!
+  26:FreeRTOS/Src/stream_buffer.c ****  */
+  27:FreeRTOS/Src/stream_buffer.c **** 
+  28:FreeRTOS/Src/stream_buffer.c **** /* Standard includes. */
+  29:FreeRTOS/Src/stream_buffer.c **** #include <stdint.h>
+  30:FreeRTOS/Src/stream_buffer.c **** #include <string.h>
+  31:FreeRTOS/Src/stream_buffer.c **** 
+  32:FreeRTOS/Src/stream_buffer.c **** /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 2
+
+
+  33:FreeRTOS/Src/stream_buffer.c **** all the API functions to use the MPU wrappers.  That should only be done when
+  34:FreeRTOS/Src/stream_buffer.c **** task.h is included from an application file. */
+  35:FreeRTOS/Src/stream_buffer.c **** #define MPU_WRAPPERS_INCLUDED_FROM_API_FILE
+  36:FreeRTOS/Src/stream_buffer.c **** 
+  37:FreeRTOS/Src/stream_buffer.c **** /* FreeRTOS includes. */
+  38:FreeRTOS/Src/stream_buffer.c **** #include "FreeRTOS.h"
+  39:FreeRTOS/Src/stream_buffer.c **** #include "task.h"
+  40:FreeRTOS/Src/stream_buffer.c **** #include "stream_buffer.h"
+  41:FreeRTOS/Src/stream_buffer.c **** 
+  42:FreeRTOS/Src/stream_buffer.c **** #if( configUSE_TASK_NOTIFICATIONS != 1 )
+  43:FreeRTOS/Src/stream_buffer.c **** 	#error configUSE_TASK_NOTIFICATIONS must be set to 1 to build stream_buffer.c
+  44:FreeRTOS/Src/stream_buffer.c **** #endif
+  45:FreeRTOS/Src/stream_buffer.c **** 
+  46:FreeRTOS/Src/stream_buffer.c **** /* Lint e961, e9021 and e750 are suppressed as a MISRA exception justified
+  47:FreeRTOS/Src/stream_buffer.c **** because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
+  48:FreeRTOS/Src/stream_buffer.c **** for the header files above, but not in this file, in order to generate the
+  49:FreeRTOS/Src/stream_buffer.c **** correct privileged Vs unprivileged linkage and placement. */
+  50:FreeRTOS/Src/stream_buffer.c **** #undef MPU_WRAPPERS_INCLUDED_FROM_API_FILE /*lint !e961 !e750 !e9021. */
+  51:FreeRTOS/Src/stream_buffer.c **** 
+  52:FreeRTOS/Src/stream_buffer.c **** /* If the user has not provided application specific Rx notification macros,
+  53:FreeRTOS/Src/stream_buffer.c **** or #defined the notification macros away, them provide default implementations
+  54:FreeRTOS/Src/stream_buffer.c **** that uses task notifications. */
+  55:FreeRTOS/Src/stream_buffer.c **** /*lint -save -e9026 Function like macros allowed and needed here so they can be overidden. */
+  56:FreeRTOS/Src/stream_buffer.c **** #ifndef sbRECEIVE_COMPLETED
+  57:FreeRTOS/Src/stream_buffer.c **** 	#define sbRECEIVE_COMPLETED( pxStreamBuffer )										\
+  58:FreeRTOS/Src/stream_buffer.c **** 		vTaskSuspendAll();																\
+  59:FreeRTOS/Src/stream_buffer.c **** 		{																				\
+  60:FreeRTOS/Src/stream_buffer.c **** 			if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )						\
+  61:FreeRTOS/Src/stream_buffer.c **** 			{																			\
+  62:FreeRTOS/Src/stream_buffer.c **** 				( void ) xTaskNotify( ( pxStreamBuffer )->xTaskWaitingToSend,			\
+  63:FreeRTOS/Src/stream_buffer.c **** 									  ( uint32_t ) 0,									\
+  64:FreeRTOS/Src/stream_buffer.c **** 									  eNoAction );										\
+  65:FreeRTOS/Src/stream_buffer.c **** 				( pxStreamBuffer )->xTaskWaitingToSend = NULL;							\
+  66:FreeRTOS/Src/stream_buffer.c **** 			}																			\
+  67:FreeRTOS/Src/stream_buffer.c **** 		}																				\
+  68:FreeRTOS/Src/stream_buffer.c **** 		( void ) xTaskResumeAll();
+  69:FreeRTOS/Src/stream_buffer.c **** #endif /* sbRECEIVE_COMPLETED */
+  70:FreeRTOS/Src/stream_buffer.c **** 
+  71:FreeRTOS/Src/stream_buffer.c **** #ifndef sbRECEIVE_COMPLETED_FROM_ISR
+  72:FreeRTOS/Src/stream_buffer.c **** 	#define sbRECEIVE_COMPLETED_FROM_ISR( pxStreamBuffer,								\
+  73:FreeRTOS/Src/stream_buffer.c **** 										  pxHigherPriorityTaskWoken )					\
+  74:FreeRTOS/Src/stream_buffer.c **** 	{																					\
+  75:FreeRTOS/Src/stream_buffer.c **** 	UBaseType_t uxSavedInterruptStatus;													\
+  76:FreeRTOS/Src/stream_buffer.c **** 																						\
+  77:FreeRTOS/Src/stream_buffer.c **** 		uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();		\
+  78:FreeRTOS/Src/stream_buffer.c **** 		{																				\
+  79:FreeRTOS/Src/stream_buffer.c **** 			if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )						\
+  80:FreeRTOS/Src/stream_buffer.c **** 			{																			\
+  81:FreeRTOS/Src/stream_buffer.c **** 				( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToSend,	\
+  82:FreeRTOS/Src/stream_buffer.c **** 											 ( uint32_t ) 0,							\
+  83:FreeRTOS/Src/stream_buffer.c **** 											 eNoAction,									\
+  84:FreeRTOS/Src/stream_buffer.c **** 											 pxHigherPriorityTaskWoken );				\
+  85:FreeRTOS/Src/stream_buffer.c **** 				( pxStreamBuffer )->xTaskWaitingToSend = NULL;							\
+  86:FreeRTOS/Src/stream_buffer.c **** 			}																			\
+  87:FreeRTOS/Src/stream_buffer.c **** 		}																				\
+  88:FreeRTOS/Src/stream_buffer.c **** 		portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );					\
+  89:FreeRTOS/Src/stream_buffer.c **** 	}
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 3
+
+
+  90:FreeRTOS/Src/stream_buffer.c **** #endif /* sbRECEIVE_COMPLETED_FROM_ISR */
+  91:FreeRTOS/Src/stream_buffer.c **** 
+  92:FreeRTOS/Src/stream_buffer.c **** /* If the user has not provided an application specific Tx notification macro,
+  93:FreeRTOS/Src/stream_buffer.c **** or #defined the notification macro away, them provide a default implementation
+  94:FreeRTOS/Src/stream_buffer.c **** that uses task notifications. */
+  95:FreeRTOS/Src/stream_buffer.c **** #ifndef sbSEND_COMPLETED
+  96:FreeRTOS/Src/stream_buffer.c **** 	#define sbSEND_COMPLETED( pxStreamBuffer )											\
+  97:FreeRTOS/Src/stream_buffer.c **** 		vTaskSuspendAll();																\
+  98:FreeRTOS/Src/stream_buffer.c **** 		{																				\
+  99:FreeRTOS/Src/stream_buffer.c **** 			if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )						\
+ 100:FreeRTOS/Src/stream_buffer.c **** 			{																			\
+ 101:FreeRTOS/Src/stream_buffer.c **** 				( void ) xTaskNotify( ( pxStreamBuffer )->xTaskWaitingToReceive,		\
+ 102:FreeRTOS/Src/stream_buffer.c **** 									  ( uint32_t ) 0,									\
+ 103:FreeRTOS/Src/stream_buffer.c **** 									  eNoAction );										\
+ 104:FreeRTOS/Src/stream_buffer.c **** 				( pxStreamBuffer )->xTaskWaitingToReceive = NULL;						\
+ 105:FreeRTOS/Src/stream_buffer.c **** 			}																			\
+ 106:FreeRTOS/Src/stream_buffer.c **** 		}																				\
+ 107:FreeRTOS/Src/stream_buffer.c **** 		( void ) xTaskResumeAll();
+ 108:FreeRTOS/Src/stream_buffer.c **** #endif /* sbSEND_COMPLETED */
+ 109:FreeRTOS/Src/stream_buffer.c **** 
+ 110:FreeRTOS/Src/stream_buffer.c **** #ifndef sbSEND_COMPLETE_FROM_ISR
+ 111:FreeRTOS/Src/stream_buffer.c **** 	#define sbSEND_COMPLETE_FROM_ISR( pxStreamBuffer, pxHigherPriorityTaskWoken )		\
+ 112:FreeRTOS/Src/stream_buffer.c **** 	{																					\
+ 113:FreeRTOS/Src/stream_buffer.c **** 	UBaseType_t uxSavedInterruptStatus;													\
+ 114:FreeRTOS/Src/stream_buffer.c **** 																						\
+ 115:FreeRTOS/Src/stream_buffer.c **** 		uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();		\
+ 116:FreeRTOS/Src/stream_buffer.c **** 		{																				\
+ 117:FreeRTOS/Src/stream_buffer.c **** 			if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )						\
+ 118:FreeRTOS/Src/stream_buffer.c **** 			{																			\
+ 119:FreeRTOS/Src/stream_buffer.c **** 				( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToReceive,	\
+ 120:FreeRTOS/Src/stream_buffer.c **** 											 ( uint32_t ) 0,							\
+ 121:FreeRTOS/Src/stream_buffer.c **** 											 eNoAction,									\
+ 122:FreeRTOS/Src/stream_buffer.c **** 											 pxHigherPriorityTaskWoken );				\
+ 123:FreeRTOS/Src/stream_buffer.c **** 				( pxStreamBuffer )->xTaskWaitingToReceive = NULL;						\
+ 124:FreeRTOS/Src/stream_buffer.c **** 			}																			\
+ 125:FreeRTOS/Src/stream_buffer.c **** 		}																				\
+ 126:FreeRTOS/Src/stream_buffer.c **** 		portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );					\
+ 127:FreeRTOS/Src/stream_buffer.c **** 	}
+ 128:FreeRTOS/Src/stream_buffer.c **** #endif /* sbSEND_COMPLETE_FROM_ISR */
+ 129:FreeRTOS/Src/stream_buffer.c **** /*lint -restore (9026) */
+ 130:FreeRTOS/Src/stream_buffer.c **** 
+ 131:FreeRTOS/Src/stream_buffer.c **** /* The number of bytes used to hold the length of a message in the buffer. */
+ 132:FreeRTOS/Src/stream_buffer.c **** #define sbBYTES_TO_STORE_MESSAGE_LENGTH ( sizeof( configMESSAGE_BUFFER_LENGTH_TYPE ) )
+ 133:FreeRTOS/Src/stream_buffer.c **** 
+ 134:FreeRTOS/Src/stream_buffer.c **** /* Bits stored in the ucFlags field of the stream buffer. */
+ 135:FreeRTOS/Src/stream_buffer.c **** #define sbFLAGS_IS_MESSAGE_BUFFER		( ( uint8_t ) 1 ) /* Set if the stream buffer was created as a m
+ 136:FreeRTOS/Src/stream_buffer.c **** #define sbFLAGS_IS_STATICALLY_ALLOCATED ( ( uint8_t ) 2 ) /* Set if the stream buffer was created u
+ 137:FreeRTOS/Src/stream_buffer.c **** 
+ 138:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 139:FreeRTOS/Src/stream_buffer.c **** 
+ 140:FreeRTOS/Src/stream_buffer.c **** /* Structure that hold state information on the buffer. */
+ 141:FreeRTOS/Src/stream_buffer.c **** typedef struct StreamBufferDef_t /*lint !e9058 Style convention uses tag. */
+ 142:FreeRTOS/Src/stream_buffer.c **** {
+ 143:FreeRTOS/Src/stream_buffer.c **** 	volatile size_t xTail;				/* Index to the next item to read within the buffer. */
+ 144:FreeRTOS/Src/stream_buffer.c **** 	volatile size_t xHead;				/* Index to the next item to write within the buffer. */
+ 145:FreeRTOS/Src/stream_buffer.c **** 	size_t xLength;						/* The length of the buffer pointed to by pucBuffer. */
+ 146:FreeRTOS/Src/stream_buffer.c **** 	size_t xTriggerLevelBytes;			/* The number of bytes that must be in the stream buffer before a tas
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 4
+
+
+ 147:FreeRTOS/Src/stream_buffer.c **** 	volatile TaskHandle_t xTaskWaitingToReceive; /* Holds the handle of a task waiting for data, or NU
+ 148:FreeRTOS/Src/stream_buffer.c **** 	volatile TaskHandle_t xTaskWaitingToSend;	/* Holds the handle of a task waiting to send data to a 
+ 149:FreeRTOS/Src/stream_buffer.c **** 	uint8_t *pucBuffer;					/* Points to the buffer itself - that is - the RAM that stores the data pa
+ 150:FreeRTOS/Src/stream_buffer.c **** 	uint8_t ucFlags;
+ 151:FreeRTOS/Src/stream_buffer.c **** 
+ 152:FreeRTOS/Src/stream_buffer.c **** 	#if ( configUSE_TRACE_FACILITY == 1 )
+ 153:FreeRTOS/Src/stream_buffer.c **** 		UBaseType_t uxStreamBufferNumber;		/* Used for tracing purposes. */
+ 154:FreeRTOS/Src/stream_buffer.c **** 	#endif
+ 155:FreeRTOS/Src/stream_buffer.c **** } StreamBuffer_t;
+ 156:FreeRTOS/Src/stream_buffer.c **** 
+ 157:FreeRTOS/Src/stream_buffer.c **** /*
+ 158:FreeRTOS/Src/stream_buffer.c ****  * The number of bytes available to be read from the buffer.
+ 159:FreeRTOS/Src/stream_buffer.c ****  */
+ 160:FreeRTOS/Src/stream_buffer.c **** static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer ) PRIVILEGED_FUNCTION;
+ 161:FreeRTOS/Src/stream_buffer.c **** 
+ 162:FreeRTOS/Src/stream_buffer.c **** /*
+ 163:FreeRTOS/Src/stream_buffer.c ****  * Add xCount bytes from pucData into the pxStreamBuffer message buffer.
+ 164:FreeRTOS/Src/stream_buffer.c ****  * Returns the number of bytes written, which will either equal xCount in the
+ 165:FreeRTOS/Src/stream_buffer.c ****  * success case, or 0 if there was not enough space in the buffer (in which case
+ 166:FreeRTOS/Src/stream_buffer.c ****  * no data is written into the buffer).
+ 167:FreeRTOS/Src/stream_buffer.c ****  */
+ 168:FreeRTOS/Src/stream_buffer.c **** static size_t prvWriteBytesToBuffer( StreamBuffer_t * const pxStreamBuffer, const uint8_t *pucData,
+ 169:FreeRTOS/Src/stream_buffer.c **** 
+ 170:FreeRTOS/Src/stream_buffer.c **** /*
+ 171:FreeRTOS/Src/stream_buffer.c ****  * If the stream buffer is being used as a message buffer, then reads an entire
+ 172:FreeRTOS/Src/stream_buffer.c ****  * message out of the buffer.  If the stream buffer is being used as a stream
+ 173:FreeRTOS/Src/stream_buffer.c ****  * buffer then read as many bytes as possible from the buffer.
+ 174:FreeRTOS/Src/stream_buffer.c ****  * prvReadBytesFromBuffer() is called to actually extract the bytes from the
+ 175:FreeRTOS/Src/stream_buffer.c ****  * buffer's data storage area.
+ 176:FreeRTOS/Src/stream_buffer.c ****  */
+ 177:FreeRTOS/Src/stream_buffer.c **** static size_t prvReadMessageFromBuffer( StreamBuffer_t *pxStreamBuffer,
+ 178:FreeRTOS/Src/stream_buffer.c **** 										void *pvRxData,
+ 179:FreeRTOS/Src/stream_buffer.c **** 										size_t xBufferLengthBytes,
+ 180:FreeRTOS/Src/stream_buffer.c **** 										size_t xBytesAvailable,
+ 181:FreeRTOS/Src/stream_buffer.c **** 										size_t xBytesToStoreMessageLength ) PRIVILEGED_FUNCTION;
+ 182:FreeRTOS/Src/stream_buffer.c **** 
+ 183:FreeRTOS/Src/stream_buffer.c **** /*
+ 184:FreeRTOS/Src/stream_buffer.c ****  * If the stream buffer is being used as a message buffer, then writes an entire
+ 185:FreeRTOS/Src/stream_buffer.c ****  * message to the buffer.  If the stream buffer is being used as a stream
+ 186:FreeRTOS/Src/stream_buffer.c ****  * buffer then write as many bytes as possible to the buffer.
+ 187:FreeRTOS/Src/stream_buffer.c ****  * prvWriteBytestoBuffer() is called to actually send the bytes to the buffer's
+ 188:FreeRTOS/Src/stream_buffer.c ****  * data storage area.
+ 189:FreeRTOS/Src/stream_buffer.c ****  */
+ 190:FreeRTOS/Src/stream_buffer.c **** static size_t prvWriteMessageToBuffer(  StreamBuffer_t * const pxStreamBuffer,
+ 191:FreeRTOS/Src/stream_buffer.c **** 										const void * pvTxData,
+ 192:FreeRTOS/Src/stream_buffer.c **** 										size_t xDataLengthBytes,
+ 193:FreeRTOS/Src/stream_buffer.c **** 										size_t xSpace,
+ 194:FreeRTOS/Src/stream_buffer.c **** 										size_t xRequiredSpace ) PRIVILEGED_FUNCTION;
+ 195:FreeRTOS/Src/stream_buffer.c **** 
+ 196:FreeRTOS/Src/stream_buffer.c **** /*
+ 197:FreeRTOS/Src/stream_buffer.c ****  * Read xMaxCount bytes from the pxStreamBuffer message buffer and write them
+ 198:FreeRTOS/Src/stream_buffer.c ****  * to pucData.
+ 199:FreeRTOS/Src/stream_buffer.c ****  */
+ 200:FreeRTOS/Src/stream_buffer.c **** static size_t prvReadBytesFromBuffer( StreamBuffer_t *pxStreamBuffer,
+ 201:FreeRTOS/Src/stream_buffer.c **** 									  uint8_t *pucData,
+ 202:FreeRTOS/Src/stream_buffer.c **** 									  size_t xMaxCount,
+ 203:FreeRTOS/Src/stream_buffer.c **** 									  size_t xBytesAvailable ) PRIVILEGED_FUNCTION;
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 5
+
+
+ 204:FreeRTOS/Src/stream_buffer.c **** 
+ 205:FreeRTOS/Src/stream_buffer.c **** /*
+ 206:FreeRTOS/Src/stream_buffer.c ****  * Called by both pxStreamBufferCreate() and pxStreamBufferCreateStatic() to
+ 207:FreeRTOS/Src/stream_buffer.c ****  * initialise the members of the newly created stream buffer structure.
+ 208:FreeRTOS/Src/stream_buffer.c ****  */
+ 209:FreeRTOS/Src/stream_buffer.c **** static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
+ 210:FreeRTOS/Src/stream_buffer.c **** 										  uint8_t * const pucBuffer,
+ 211:FreeRTOS/Src/stream_buffer.c **** 										  size_t xBufferSizeBytes,
+ 212:FreeRTOS/Src/stream_buffer.c **** 										  size_t xTriggerLevelBytes,
+ 213:FreeRTOS/Src/stream_buffer.c **** 										  uint8_t ucFlags ) PRIVILEGED_FUNCTION;
+ 214:FreeRTOS/Src/stream_buffer.c **** 
+ 215:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 216:FreeRTOS/Src/stream_buffer.c **** 
+ 217:FreeRTOS/Src/stream_buffer.c **** #if( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
+ 218:FreeRTOS/Src/stream_buffer.c **** 
+ 219:FreeRTOS/Src/stream_buffer.c **** 	StreamBufferHandle_t xStreamBufferGenericCreate( size_t xBufferSizeBytes, size_t xTriggerLevelByte
+ 220:FreeRTOS/Src/stream_buffer.c **** 	{
+ 221:FreeRTOS/Src/stream_buffer.c **** 	uint8_t *pucAllocatedMemory;
+ 222:FreeRTOS/Src/stream_buffer.c **** 	uint8_t ucFlags;
+ 223:FreeRTOS/Src/stream_buffer.c **** 
+ 224:FreeRTOS/Src/stream_buffer.c **** 		/* In case the stream buffer is going to be used as a message buffer
+ 225:FreeRTOS/Src/stream_buffer.c **** 		(that is, it will hold discrete messages with a little meta data that
+ 226:FreeRTOS/Src/stream_buffer.c **** 		says how big the next message is) check the buffer will be large enough
+ 227:FreeRTOS/Src/stream_buffer.c **** 		to hold at least one message. */
+ 228:FreeRTOS/Src/stream_buffer.c **** 		if( xIsMessageBuffer == pdTRUE )
+ 229:FreeRTOS/Src/stream_buffer.c **** 		{
+ 230:FreeRTOS/Src/stream_buffer.c **** 			/* Is a message buffer but not statically allocated. */
+ 231:FreeRTOS/Src/stream_buffer.c **** 			ucFlags = sbFLAGS_IS_MESSAGE_BUFFER;
+ 232:FreeRTOS/Src/stream_buffer.c **** 			configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
+ 233:FreeRTOS/Src/stream_buffer.c **** 		}
+ 234:FreeRTOS/Src/stream_buffer.c **** 		else
+ 235:FreeRTOS/Src/stream_buffer.c **** 		{
+ 236:FreeRTOS/Src/stream_buffer.c **** 			/* Not a message buffer and not statically allocated. */
+ 237:FreeRTOS/Src/stream_buffer.c **** 			ucFlags = 0;
+ 238:FreeRTOS/Src/stream_buffer.c **** 			configASSERT( xBufferSizeBytes > 0 );
+ 239:FreeRTOS/Src/stream_buffer.c **** 		}
+ 240:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( xTriggerLevelBytes <= xBufferSizeBytes );
+ 241:FreeRTOS/Src/stream_buffer.c **** 
+ 242:FreeRTOS/Src/stream_buffer.c **** 		/* A trigger level of 0 would cause a waiting task to unblock even when
+ 243:FreeRTOS/Src/stream_buffer.c **** 		the buffer was empty. */
+ 244:FreeRTOS/Src/stream_buffer.c **** 		if( xTriggerLevelBytes == ( size_t ) 0 )
+ 245:FreeRTOS/Src/stream_buffer.c **** 		{
+ 246:FreeRTOS/Src/stream_buffer.c **** 			xTriggerLevelBytes = ( size_t ) 1;
+ 247:FreeRTOS/Src/stream_buffer.c **** 		}
+ 248:FreeRTOS/Src/stream_buffer.c **** 
+ 249:FreeRTOS/Src/stream_buffer.c **** 		/* A stream buffer requires a StreamBuffer_t structure and a buffer.
+ 250:FreeRTOS/Src/stream_buffer.c **** 		Both are allocated in a single call to pvPortMalloc().  The
+ 251:FreeRTOS/Src/stream_buffer.c **** 		StreamBuffer_t structure is placed at the start of the allocated memory
+ 252:FreeRTOS/Src/stream_buffer.c **** 		and the buffer follows immediately after.  The requested size is
+ 253:FreeRTOS/Src/stream_buffer.c **** 		incremented so the free space is returned as the user would expect -
+ 254:FreeRTOS/Src/stream_buffer.c **** 		this is a quirk of the implementation that means otherwise the free
+ 255:FreeRTOS/Src/stream_buffer.c **** 		space would be reported as one byte smaller than would be logically
+ 256:FreeRTOS/Src/stream_buffer.c **** 		expected. */
+ 257:FreeRTOS/Src/stream_buffer.c **** 		xBufferSizeBytes++;
+ 258:FreeRTOS/Src/stream_buffer.c **** 		pucAllocatedMemory = ( uint8_t * ) pvPortMalloc( xBufferSizeBytes + sizeof( StreamBuffer_t ) ); /
+ 259:FreeRTOS/Src/stream_buffer.c **** 
+ 260:FreeRTOS/Src/stream_buffer.c **** 		if( pucAllocatedMemory != NULL )
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 6
+
+
+ 261:FreeRTOS/Src/stream_buffer.c **** 		{
+ 262:FreeRTOS/Src/stream_buffer.c **** 			prvInitialiseNewStreamBuffer( ( StreamBuffer_t * ) pucAllocatedMemory, /* Structure at the start
+ 263:FreeRTOS/Src/stream_buffer.c **** 										   pucAllocatedMemory + sizeof( StreamBuffer_t ),  /* Storage area follows. */ /*lint !e9
+ 264:FreeRTOS/Src/stream_buffer.c **** 										   xBufferSizeBytes,
+ 265:FreeRTOS/Src/stream_buffer.c **** 										   xTriggerLevelBytes,
+ 266:FreeRTOS/Src/stream_buffer.c **** 										   ucFlags );
+ 267:FreeRTOS/Src/stream_buffer.c **** 
+ 268:FreeRTOS/Src/stream_buffer.c **** 			traceSTREAM_BUFFER_CREATE( ( ( StreamBuffer_t * ) pucAllocatedMemory ), xIsMessageBuffer );
+ 269:FreeRTOS/Src/stream_buffer.c **** 		}
+ 270:FreeRTOS/Src/stream_buffer.c **** 		else
+ 271:FreeRTOS/Src/stream_buffer.c **** 		{
+ 272:FreeRTOS/Src/stream_buffer.c **** 			traceSTREAM_BUFFER_CREATE_FAILED( xIsMessageBuffer );
+ 273:FreeRTOS/Src/stream_buffer.c **** 		}
+ 274:FreeRTOS/Src/stream_buffer.c **** 
+ 275:FreeRTOS/Src/stream_buffer.c **** 		return ( StreamBufferHandle_t ) pucAllocatedMemory; /*lint !e9087 !e826 Safe cast as allocated me
+ 276:FreeRTOS/Src/stream_buffer.c **** 	}
+ 277:FreeRTOS/Src/stream_buffer.c **** 
+ 278:FreeRTOS/Src/stream_buffer.c **** #endif /* configSUPPORT_DYNAMIC_ALLOCATION */
+ 279:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 280:FreeRTOS/Src/stream_buffer.c **** 
+ 281:FreeRTOS/Src/stream_buffer.c **** #if( configSUPPORT_STATIC_ALLOCATION == 1 )
+ 282:FreeRTOS/Src/stream_buffer.c **** 
+ 283:FreeRTOS/Src/stream_buffer.c **** 	StreamBufferHandle_t xStreamBufferGenericCreateStatic( size_t xBufferSizeBytes,
+ 284:FreeRTOS/Src/stream_buffer.c **** 														   size_t xTriggerLevelBytes,
+ 285:FreeRTOS/Src/stream_buffer.c **** 														   BaseType_t xIsMessageBuffer,
+ 286:FreeRTOS/Src/stream_buffer.c **** 														   uint8_t * const pucStreamBufferStorageArea,
+ 287:FreeRTOS/Src/stream_buffer.c **** 														   StaticStreamBuffer_t * const pxStaticStreamBuffer )
+ 288:FreeRTOS/Src/stream_buffer.c **** 	{
+ 289:FreeRTOS/Src/stream_buffer.c **** 	StreamBuffer_t * const pxStreamBuffer = ( StreamBuffer_t * ) pxStaticStreamBuffer; /*lint !e740 !e
+ 290:FreeRTOS/Src/stream_buffer.c **** 	StreamBufferHandle_t xReturn;
+ 291:FreeRTOS/Src/stream_buffer.c **** 	uint8_t ucFlags;
+ 292:FreeRTOS/Src/stream_buffer.c **** 
+ 293:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( pucStreamBufferStorageArea );
+ 294:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( pxStaticStreamBuffer );
+ 295:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( xTriggerLevelBytes <= xBufferSizeBytes );
+ 296:FreeRTOS/Src/stream_buffer.c **** 
+ 297:FreeRTOS/Src/stream_buffer.c **** 		/* A trigger level of 0 would cause a waiting task to unblock even when
+ 298:FreeRTOS/Src/stream_buffer.c **** 		the buffer was empty. */
+ 299:FreeRTOS/Src/stream_buffer.c **** 		if( xTriggerLevelBytes == ( size_t ) 0 )
+ 300:FreeRTOS/Src/stream_buffer.c **** 		{
+ 301:FreeRTOS/Src/stream_buffer.c **** 			xTriggerLevelBytes = ( size_t ) 1;
+ 302:FreeRTOS/Src/stream_buffer.c **** 		}
+ 303:FreeRTOS/Src/stream_buffer.c **** 
+ 304:FreeRTOS/Src/stream_buffer.c **** 		if( xIsMessageBuffer != pdFALSE )
+ 305:FreeRTOS/Src/stream_buffer.c **** 		{
+ 306:FreeRTOS/Src/stream_buffer.c **** 			/* Statically allocated message buffer. */
+ 307:FreeRTOS/Src/stream_buffer.c **** 			ucFlags = sbFLAGS_IS_MESSAGE_BUFFER | sbFLAGS_IS_STATICALLY_ALLOCATED;
+ 308:FreeRTOS/Src/stream_buffer.c **** 		}
+ 309:FreeRTOS/Src/stream_buffer.c **** 		else
+ 310:FreeRTOS/Src/stream_buffer.c **** 		{
+ 311:FreeRTOS/Src/stream_buffer.c **** 			/* Statically allocated stream buffer. */
+ 312:FreeRTOS/Src/stream_buffer.c **** 			ucFlags = sbFLAGS_IS_STATICALLY_ALLOCATED;
+ 313:FreeRTOS/Src/stream_buffer.c **** 		}
+ 314:FreeRTOS/Src/stream_buffer.c **** 
+ 315:FreeRTOS/Src/stream_buffer.c **** 		/* In case the stream buffer is going to be used as a message buffer
+ 316:FreeRTOS/Src/stream_buffer.c **** 		(that is, it will hold discrete messages with a little meta data that
+ 317:FreeRTOS/Src/stream_buffer.c **** 		says how big the next message is) check the buffer will be large enough
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 7
+
+
+ 318:FreeRTOS/Src/stream_buffer.c **** 		to hold at least one message. */
+ 319:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
+ 320:FreeRTOS/Src/stream_buffer.c **** 
+ 321:FreeRTOS/Src/stream_buffer.c **** 		#if( configASSERT_DEFINED == 1 )
+ 322:FreeRTOS/Src/stream_buffer.c **** 		{
+ 323:FreeRTOS/Src/stream_buffer.c **** 			/* Sanity check that the size of the structure used to declare a
+ 324:FreeRTOS/Src/stream_buffer.c **** 			variable of type StaticStreamBuffer_t equals the size of the real
+ 325:FreeRTOS/Src/stream_buffer.c **** 			message buffer structure. */
+ 326:FreeRTOS/Src/stream_buffer.c **** 			volatile size_t xSize = sizeof( StaticStreamBuffer_t );
+ 327:FreeRTOS/Src/stream_buffer.c **** 			configASSERT( xSize == sizeof( StreamBuffer_t ) );
+ 328:FreeRTOS/Src/stream_buffer.c **** 		} /*lint !e529 xSize is referenced is configASSERT() is defined. */
+ 329:FreeRTOS/Src/stream_buffer.c **** 		#endif /* configASSERT_DEFINED */
+ 330:FreeRTOS/Src/stream_buffer.c **** 
+ 331:FreeRTOS/Src/stream_buffer.c **** 		if( ( pucStreamBufferStorageArea != NULL ) && ( pxStaticStreamBuffer != NULL ) )
+ 332:FreeRTOS/Src/stream_buffer.c **** 		{
+ 333:FreeRTOS/Src/stream_buffer.c **** 			prvInitialiseNewStreamBuffer( pxStreamBuffer,
+ 334:FreeRTOS/Src/stream_buffer.c **** 										  pucStreamBufferStorageArea,
+ 335:FreeRTOS/Src/stream_buffer.c **** 										  xBufferSizeBytes,
+ 336:FreeRTOS/Src/stream_buffer.c **** 										  xTriggerLevelBytes,
+ 337:FreeRTOS/Src/stream_buffer.c **** 										  ucFlags );
+ 338:FreeRTOS/Src/stream_buffer.c **** 
+ 339:FreeRTOS/Src/stream_buffer.c **** 			/* Remember this was statically allocated in case it is ever deleted
+ 340:FreeRTOS/Src/stream_buffer.c **** 			again. */
+ 341:FreeRTOS/Src/stream_buffer.c **** 			pxStreamBuffer->ucFlags |= sbFLAGS_IS_STATICALLY_ALLOCATED;
+ 342:FreeRTOS/Src/stream_buffer.c **** 
+ 343:FreeRTOS/Src/stream_buffer.c **** 			traceSTREAM_BUFFER_CREATE( pxStreamBuffer, xIsMessageBuffer );
+ 344:FreeRTOS/Src/stream_buffer.c **** 
+ 345:FreeRTOS/Src/stream_buffer.c **** 			xReturn = ( StreamBufferHandle_t ) pxStaticStreamBuffer; /*lint !e9087 Data hiding requires cast
+ 346:FreeRTOS/Src/stream_buffer.c **** 		}
+ 347:FreeRTOS/Src/stream_buffer.c **** 		else
+ 348:FreeRTOS/Src/stream_buffer.c **** 		{
+ 349:FreeRTOS/Src/stream_buffer.c **** 			xReturn = NULL;
+ 350:FreeRTOS/Src/stream_buffer.c **** 			traceSTREAM_BUFFER_CREATE_STATIC_FAILED( xReturn, xIsMessageBuffer );
+ 351:FreeRTOS/Src/stream_buffer.c **** 		}
+ 352:FreeRTOS/Src/stream_buffer.c **** 
+ 353:FreeRTOS/Src/stream_buffer.c **** 		return xReturn;
+ 354:FreeRTOS/Src/stream_buffer.c **** 	}
+ 355:FreeRTOS/Src/stream_buffer.c **** 
+ 356:FreeRTOS/Src/stream_buffer.c **** #endif /* ( configSUPPORT_STATIC_ALLOCATION == 1 ) */
+ 357:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 358:FreeRTOS/Src/stream_buffer.c **** 
+ 359:FreeRTOS/Src/stream_buffer.c **** void vStreamBufferDelete( StreamBufferHandle_t xStreamBuffer )
+ 360:FreeRTOS/Src/stream_buffer.c **** {
+ 361:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * pxStreamBuffer = xStreamBuffer;
+ 362:FreeRTOS/Src/stream_buffer.c **** 
+ 363:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 364:FreeRTOS/Src/stream_buffer.c **** 
+ 365:FreeRTOS/Src/stream_buffer.c **** 	traceSTREAM_BUFFER_DELETE( xStreamBuffer );
+ 366:FreeRTOS/Src/stream_buffer.c **** 
+ 367:FreeRTOS/Src/stream_buffer.c **** 	if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_STATICALLY_ALLOCATED ) == ( uint8_t ) pdFALSE )
+ 368:FreeRTOS/Src/stream_buffer.c **** 	{
+ 369:FreeRTOS/Src/stream_buffer.c **** 		#if( configSUPPORT_DYNAMIC_ALLOCATION == 1 )
+ 370:FreeRTOS/Src/stream_buffer.c **** 		{
+ 371:FreeRTOS/Src/stream_buffer.c **** 			/* Both the structure and the buffer were allocated using a single call
+ 372:FreeRTOS/Src/stream_buffer.c **** 			to pvPortMalloc(), hence only one call to vPortFree() is required. */
+ 373:FreeRTOS/Src/stream_buffer.c **** 			vPortFree( ( void * ) pxStreamBuffer ); /*lint !e9087 Standard free() semantics require void *, 
+ 374:FreeRTOS/Src/stream_buffer.c **** 		}
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 8
+
+
+ 375:FreeRTOS/Src/stream_buffer.c **** 		#else
+ 376:FreeRTOS/Src/stream_buffer.c **** 		{
+ 377:FreeRTOS/Src/stream_buffer.c **** 			/* Should not be possible to get here, ucFlags must be corrupt.
+ 378:FreeRTOS/Src/stream_buffer.c **** 			Force an assert. */
+ 379:FreeRTOS/Src/stream_buffer.c **** 			configASSERT( xStreamBuffer == ( StreamBufferHandle_t ) ~0 );
+ 380:FreeRTOS/Src/stream_buffer.c **** 		}
+ 381:FreeRTOS/Src/stream_buffer.c **** 		#endif
+ 382:FreeRTOS/Src/stream_buffer.c **** 	}
+ 383:FreeRTOS/Src/stream_buffer.c **** 	else
+ 384:FreeRTOS/Src/stream_buffer.c **** 	{
+ 385:FreeRTOS/Src/stream_buffer.c **** 		/* The structure and buffer were not allocated dynamically and cannot be
+ 386:FreeRTOS/Src/stream_buffer.c **** 		freed - just scrub the structure so future use will assert. */
+ 387:FreeRTOS/Src/stream_buffer.c **** 		( void ) memset( pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) );
+ 388:FreeRTOS/Src/stream_buffer.c **** 	}
+ 389:FreeRTOS/Src/stream_buffer.c **** }
+ 390:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 391:FreeRTOS/Src/stream_buffer.c **** 
+ 392:FreeRTOS/Src/stream_buffer.c **** BaseType_t xStreamBufferReset( StreamBufferHandle_t xStreamBuffer )
+ 393:FreeRTOS/Src/stream_buffer.c **** {
+ 394:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 395:FreeRTOS/Src/stream_buffer.c **** BaseType_t xReturn = pdFAIL;
+ 396:FreeRTOS/Src/stream_buffer.c **** 
+ 397:FreeRTOS/Src/stream_buffer.c **** #if( configUSE_TRACE_FACILITY == 1 )
+ 398:FreeRTOS/Src/stream_buffer.c **** 	UBaseType_t uxStreamBufferNumber;
+ 399:FreeRTOS/Src/stream_buffer.c **** #endif
+ 400:FreeRTOS/Src/stream_buffer.c **** 
+ 401:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 402:FreeRTOS/Src/stream_buffer.c **** 
+ 403:FreeRTOS/Src/stream_buffer.c **** 	#if( configUSE_TRACE_FACILITY == 1 )
+ 404:FreeRTOS/Src/stream_buffer.c **** 	{
+ 405:FreeRTOS/Src/stream_buffer.c **** 		/* Store the stream buffer number so it can be restored after the
+ 406:FreeRTOS/Src/stream_buffer.c **** 		reset. */
+ 407:FreeRTOS/Src/stream_buffer.c **** 		uxStreamBufferNumber = pxStreamBuffer->uxStreamBufferNumber;
+ 408:FreeRTOS/Src/stream_buffer.c **** 	}
+ 409:FreeRTOS/Src/stream_buffer.c **** 	#endif
+ 410:FreeRTOS/Src/stream_buffer.c **** 
+ 411:FreeRTOS/Src/stream_buffer.c **** 	/* Can only reset a message buffer if there are no tasks blocked on it. */
+ 412:FreeRTOS/Src/stream_buffer.c **** 	taskENTER_CRITICAL();
+ 413:FreeRTOS/Src/stream_buffer.c **** 	{
+ 414:FreeRTOS/Src/stream_buffer.c **** 		if( pxStreamBuffer->xTaskWaitingToReceive == NULL )
+ 415:FreeRTOS/Src/stream_buffer.c **** 		{
+ 416:FreeRTOS/Src/stream_buffer.c **** 			if( pxStreamBuffer->xTaskWaitingToSend == NULL )
+ 417:FreeRTOS/Src/stream_buffer.c **** 			{
+ 418:FreeRTOS/Src/stream_buffer.c **** 				prvInitialiseNewStreamBuffer( pxStreamBuffer,
+ 419:FreeRTOS/Src/stream_buffer.c **** 											  pxStreamBuffer->pucBuffer,
+ 420:FreeRTOS/Src/stream_buffer.c **** 											  pxStreamBuffer->xLength,
+ 421:FreeRTOS/Src/stream_buffer.c **** 											  pxStreamBuffer->xTriggerLevelBytes,
+ 422:FreeRTOS/Src/stream_buffer.c **** 											  pxStreamBuffer->ucFlags );
+ 423:FreeRTOS/Src/stream_buffer.c **** 				xReturn = pdPASS;
+ 424:FreeRTOS/Src/stream_buffer.c **** 
+ 425:FreeRTOS/Src/stream_buffer.c **** 				#if( configUSE_TRACE_FACILITY == 1 )
+ 426:FreeRTOS/Src/stream_buffer.c **** 				{
+ 427:FreeRTOS/Src/stream_buffer.c **** 					pxStreamBuffer->uxStreamBufferNumber = uxStreamBufferNumber;
+ 428:FreeRTOS/Src/stream_buffer.c **** 				}
+ 429:FreeRTOS/Src/stream_buffer.c **** 				#endif
+ 430:FreeRTOS/Src/stream_buffer.c **** 
+ 431:FreeRTOS/Src/stream_buffer.c **** 				traceSTREAM_BUFFER_RESET( xStreamBuffer );
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 9
+
+
+ 432:FreeRTOS/Src/stream_buffer.c **** 			}
+ 433:FreeRTOS/Src/stream_buffer.c **** 		}
+ 434:FreeRTOS/Src/stream_buffer.c **** 	}
+ 435:FreeRTOS/Src/stream_buffer.c **** 	taskEXIT_CRITICAL();
+ 436:FreeRTOS/Src/stream_buffer.c **** 
+ 437:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+ 438:FreeRTOS/Src/stream_buffer.c **** }
+ 439:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 440:FreeRTOS/Src/stream_buffer.c **** 
+ 441:FreeRTOS/Src/stream_buffer.c **** BaseType_t xStreamBufferSetTriggerLevel( StreamBufferHandle_t xStreamBuffer, size_t xTriggerLevel )
+ 442:FreeRTOS/Src/stream_buffer.c **** {
+ 443:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 444:FreeRTOS/Src/stream_buffer.c **** BaseType_t xReturn;
+ 445:FreeRTOS/Src/stream_buffer.c **** 
+ 446:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 447:FreeRTOS/Src/stream_buffer.c **** 
+ 448:FreeRTOS/Src/stream_buffer.c **** 	/* It is not valid for the trigger level to be 0. */
+ 449:FreeRTOS/Src/stream_buffer.c **** 	if( xTriggerLevel == ( size_t ) 0 )
+ 450:FreeRTOS/Src/stream_buffer.c **** 	{
+ 451:FreeRTOS/Src/stream_buffer.c **** 		xTriggerLevel = ( size_t ) 1;
+ 452:FreeRTOS/Src/stream_buffer.c **** 	}
+ 453:FreeRTOS/Src/stream_buffer.c **** 
+ 454:FreeRTOS/Src/stream_buffer.c **** 	/* The trigger level is the number of bytes that must be in the stream
+ 455:FreeRTOS/Src/stream_buffer.c **** 	buffer before a task that is waiting for data is unblocked. */
+ 456:FreeRTOS/Src/stream_buffer.c **** 	if( xTriggerLevel <= pxStreamBuffer->xLength )
+ 457:FreeRTOS/Src/stream_buffer.c **** 	{
+ 458:FreeRTOS/Src/stream_buffer.c **** 		pxStreamBuffer->xTriggerLevelBytes = xTriggerLevel;
+ 459:FreeRTOS/Src/stream_buffer.c **** 		xReturn = pdPASS;
+ 460:FreeRTOS/Src/stream_buffer.c **** 	}
+ 461:FreeRTOS/Src/stream_buffer.c **** 	else
+ 462:FreeRTOS/Src/stream_buffer.c **** 	{
+ 463:FreeRTOS/Src/stream_buffer.c **** 		xReturn = pdFALSE;
+ 464:FreeRTOS/Src/stream_buffer.c **** 	}
+ 465:FreeRTOS/Src/stream_buffer.c **** 
+ 466:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+ 467:FreeRTOS/Src/stream_buffer.c **** }
+ 468:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 469:FreeRTOS/Src/stream_buffer.c **** 
+ 470:FreeRTOS/Src/stream_buffer.c **** size_t xStreamBufferSpacesAvailable( StreamBufferHandle_t xStreamBuffer )
+ 471:FreeRTOS/Src/stream_buffer.c **** {
+ 472:FreeRTOS/Src/stream_buffer.c **** const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 473:FreeRTOS/Src/stream_buffer.c **** size_t xSpace;
+ 474:FreeRTOS/Src/stream_buffer.c **** 
+ 475:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 476:FreeRTOS/Src/stream_buffer.c **** 
+ 477:FreeRTOS/Src/stream_buffer.c **** 	xSpace = pxStreamBuffer->xLength + pxStreamBuffer->xTail;
+ 478:FreeRTOS/Src/stream_buffer.c **** 	xSpace -= pxStreamBuffer->xHead;
+ 479:FreeRTOS/Src/stream_buffer.c **** 	xSpace -= ( size_t ) 1;
+ 480:FreeRTOS/Src/stream_buffer.c **** 
+ 481:FreeRTOS/Src/stream_buffer.c **** 	if( xSpace >= pxStreamBuffer->xLength )
+ 482:FreeRTOS/Src/stream_buffer.c **** 	{
+ 483:FreeRTOS/Src/stream_buffer.c **** 		xSpace -= pxStreamBuffer->xLength;
+ 484:FreeRTOS/Src/stream_buffer.c **** 	}
+ 485:FreeRTOS/Src/stream_buffer.c **** 	else
+ 486:FreeRTOS/Src/stream_buffer.c **** 	{
+ 487:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ 488:FreeRTOS/Src/stream_buffer.c **** 	}
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 10
+
+
+ 489:FreeRTOS/Src/stream_buffer.c **** 
+ 490:FreeRTOS/Src/stream_buffer.c **** 	return xSpace;
+ 491:FreeRTOS/Src/stream_buffer.c **** }
+ 492:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 493:FreeRTOS/Src/stream_buffer.c **** 
+ 494:FreeRTOS/Src/stream_buffer.c **** size_t xStreamBufferBytesAvailable( StreamBufferHandle_t xStreamBuffer )
+ 495:FreeRTOS/Src/stream_buffer.c **** {
+ 496:FreeRTOS/Src/stream_buffer.c **** const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 497:FreeRTOS/Src/stream_buffer.c **** size_t xReturn;
+ 498:FreeRTOS/Src/stream_buffer.c **** 
+ 499:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 500:FreeRTOS/Src/stream_buffer.c **** 
+ 501:FreeRTOS/Src/stream_buffer.c **** 	xReturn = prvBytesInBuffer( pxStreamBuffer );
+ 502:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+ 503:FreeRTOS/Src/stream_buffer.c **** }
+ 504:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 505:FreeRTOS/Src/stream_buffer.c **** 
+ 506:FreeRTOS/Src/stream_buffer.c **** size_t xStreamBufferSend( StreamBufferHandle_t xStreamBuffer,
+ 507:FreeRTOS/Src/stream_buffer.c **** 						  const void *pvTxData,
+ 508:FreeRTOS/Src/stream_buffer.c **** 						  size_t xDataLengthBytes,
+ 509:FreeRTOS/Src/stream_buffer.c **** 						  TickType_t xTicksToWait )
+ 510:FreeRTOS/Src/stream_buffer.c **** {
+ 511:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 512:FreeRTOS/Src/stream_buffer.c **** size_t xReturn, xSpace = 0;
+ 513:FreeRTOS/Src/stream_buffer.c **** size_t xRequiredSpace = xDataLengthBytes;
+ 514:FreeRTOS/Src/stream_buffer.c **** TimeOut_t xTimeOut;
+ 515:FreeRTOS/Src/stream_buffer.c **** 
+ 516:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pvTxData );
+ 517:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 518:FreeRTOS/Src/stream_buffer.c **** 
+ 519:FreeRTOS/Src/stream_buffer.c **** 	/* This send function is used to write to both message buffers and stream
+ 520:FreeRTOS/Src/stream_buffer.c **** 	buffers.  If this is a message buffer then the space needed must be
+ 521:FreeRTOS/Src/stream_buffer.c **** 	increased by the amount of bytes needed to store the length of the
+ 522:FreeRTOS/Src/stream_buffer.c **** 	message. */
+ 523:FreeRTOS/Src/stream_buffer.c **** 	if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
+ 524:FreeRTOS/Src/stream_buffer.c **** 	{
+ 525:FreeRTOS/Src/stream_buffer.c **** 		xRequiredSpace += sbBYTES_TO_STORE_MESSAGE_LENGTH;
+ 526:FreeRTOS/Src/stream_buffer.c **** 
+ 527:FreeRTOS/Src/stream_buffer.c **** 		/* Overflow? */
+ 528:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( xRequiredSpace > xDataLengthBytes );
+ 529:FreeRTOS/Src/stream_buffer.c **** 	}
+ 530:FreeRTOS/Src/stream_buffer.c **** 	else
+ 531:FreeRTOS/Src/stream_buffer.c **** 	{
+ 532:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ 533:FreeRTOS/Src/stream_buffer.c **** 	}
+ 534:FreeRTOS/Src/stream_buffer.c **** 
+ 535:FreeRTOS/Src/stream_buffer.c **** 	if( xTicksToWait != ( TickType_t ) 0 )
+ 536:FreeRTOS/Src/stream_buffer.c **** 	{
+ 537:FreeRTOS/Src/stream_buffer.c **** 		vTaskSetTimeOutState( &xTimeOut );
+ 538:FreeRTOS/Src/stream_buffer.c **** 
+ 539:FreeRTOS/Src/stream_buffer.c **** 		do
+ 540:FreeRTOS/Src/stream_buffer.c **** 		{
+ 541:FreeRTOS/Src/stream_buffer.c **** 			/* Wait until the required number of bytes are free in the message
+ 542:FreeRTOS/Src/stream_buffer.c **** 			buffer. */
+ 543:FreeRTOS/Src/stream_buffer.c **** 			taskENTER_CRITICAL();
+ 544:FreeRTOS/Src/stream_buffer.c **** 			{
+ 545:FreeRTOS/Src/stream_buffer.c **** 				xSpace = xStreamBufferSpacesAvailable( pxStreamBuffer );
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 11
+
+
+ 546:FreeRTOS/Src/stream_buffer.c **** 
+ 547:FreeRTOS/Src/stream_buffer.c **** 				if( xSpace < xRequiredSpace )
+ 548:FreeRTOS/Src/stream_buffer.c **** 				{
+ 549:FreeRTOS/Src/stream_buffer.c **** 					/* Clear notification state as going to wait for space. */
+ 550:FreeRTOS/Src/stream_buffer.c **** 					( void ) xTaskNotifyStateClear( NULL );
+ 551:FreeRTOS/Src/stream_buffer.c **** 
+ 552:FreeRTOS/Src/stream_buffer.c **** 					/* Should only be one writer. */
+ 553:FreeRTOS/Src/stream_buffer.c **** 					configASSERT( pxStreamBuffer->xTaskWaitingToSend == NULL );
+ 554:FreeRTOS/Src/stream_buffer.c **** 					pxStreamBuffer->xTaskWaitingToSend = xTaskGetCurrentTaskHandle();
+ 555:FreeRTOS/Src/stream_buffer.c **** 				}
+ 556:FreeRTOS/Src/stream_buffer.c **** 				else
+ 557:FreeRTOS/Src/stream_buffer.c **** 				{
+ 558:FreeRTOS/Src/stream_buffer.c **** 					taskEXIT_CRITICAL();
+ 559:FreeRTOS/Src/stream_buffer.c **** 					break;
+ 560:FreeRTOS/Src/stream_buffer.c **** 				}
+ 561:FreeRTOS/Src/stream_buffer.c **** 			}
+ 562:FreeRTOS/Src/stream_buffer.c **** 			taskEXIT_CRITICAL();
+ 563:FreeRTOS/Src/stream_buffer.c **** 
+ 564:FreeRTOS/Src/stream_buffer.c **** 			traceBLOCKING_ON_STREAM_BUFFER_SEND( xStreamBuffer );
+ 565:FreeRTOS/Src/stream_buffer.c **** 			( void ) xTaskNotifyWait( ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
+ 566:FreeRTOS/Src/stream_buffer.c **** 			pxStreamBuffer->xTaskWaitingToSend = NULL;
+ 567:FreeRTOS/Src/stream_buffer.c **** 
+ 568:FreeRTOS/Src/stream_buffer.c **** 		} while( xTaskCheckForTimeOut( &xTimeOut, &xTicksToWait ) == pdFALSE );
+ 569:FreeRTOS/Src/stream_buffer.c **** 	}
+ 570:FreeRTOS/Src/stream_buffer.c **** 	else
+ 571:FreeRTOS/Src/stream_buffer.c **** 	{
+ 572:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ 573:FreeRTOS/Src/stream_buffer.c **** 	}
+ 574:FreeRTOS/Src/stream_buffer.c **** 
+ 575:FreeRTOS/Src/stream_buffer.c **** 	if( xSpace == ( size_t ) 0 )
+ 576:FreeRTOS/Src/stream_buffer.c **** 	{
+ 577:FreeRTOS/Src/stream_buffer.c **** 		xSpace = xStreamBufferSpacesAvailable( pxStreamBuffer );
+ 578:FreeRTOS/Src/stream_buffer.c **** 	}
+ 579:FreeRTOS/Src/stream_buffer.c **** 	else
+ 580:FreeRTOS/Src/stream_buffer.c **** 	{
+ 581:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ 582:FreeRTOS/Src/stream_buffer.c **** 	}
+ 583:FreeRTOS/Src/stream_buffer.c **** 
+ 584:FreeRTOS/Src/stream_buffer.c **** 	xReturn = prvWriteMessageToBuffer( pxStreamBuffer, pvTxData, xDataLengthBytes, xSpace, xRequiredSp
+ 585:FreeRTOS/Src/stream_buffer.c **** 
+ 586:FreeRTOS/Src/stream_buffer.c **** 	if( xReturn > ( size_t ) 0 )
+ 587:FreeRTOS/Src/stream_buffer.c **** 	{
+ 588:FreeRTOS/Src/stream_buffer.c **** 		traceSTREAM_BUFFER_SEND( xStreamBuffer, xReturn );
+ 589:FreeRTOS/Src/stream_buffer.c **** 
+ 590:FreeRTOS/Src/stream_buffer.c **** 		/* Was a task waiting for the data? */
+ 591:FreeRTOS/Src/stream_buffer.c **** 		if( prvBytesInBuffer( pxStreamBuffer ) >= pxStreamBuffer->xTriggerLevelBytes )
+ 592:FreeRTOS/Src/stream_buffer.c **** 		{
+ 593:FreeRTOS/Src/stream_buffer.c **** 			sbSEND_COMPLETED( pxStreamBuffer );
+ 594:FreeRTOS/Src/stream_buffer.c **** 		}
+ 595:FreeRTOS/Src/stream_buffer.c **** 		else
+ 596:FreeRTOS/Src/stream_buffer.c **** 		{
+ 597:FreeRTOS/Src/stream_buffer.c **** 			mtCOVERAGE_TEST_MARKER();
+ 598:FreeRTOS/Src/stream_buffer.c **** 		}
+ 599:FreeRTOS/Src/stream_buffer.c **** 	}
+ 600:FreeRTOS/Src/stream_buffer.c **** 	else
+ 601:FreeRTOS/Src/stream_buffer.c **** 	{
+ 602:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 12
+
+
+ 603:FreeRTOS/Src/stream_buffer.c **** 		traceSTREAM_BUFFER_SEND_FAILED( xStreamBuffer );
+ 604:FreeRTOS/Src/stream_buffer.c **** 	}
+ 605:FreeRTOS/Src/stream_buffer.c **** 
+ 606:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+ 607:FreeRTOS/Src/stream_buffer.c **** }
+ 608:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 609:FreeRTOS/Src/stream_buffer.c **** 
+ 610:FreeRTOS/Src/stream_buffer.c **** size_t xStreamBufferSendFromISR( StreamBufferHandle_t xStreamBuffer,
+ 611:FreeRTOS/Src/stream_buffer.c **** 								 const void *pvTxData,
+ 612:FreeRTOS/Src/stream_buffer.c **** 								 size_t xDataLengthBytes,
+ 613:FreeRTOS/Src/stream_buffer.c **** 								 BaseType_t * const pxHigherPriorityTaskWoken )
+ 614:FreeRTOS/Src/stream_buffer.c **** {
+ 615:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 616:FreeRTOS/Src/stream_buffer.c **** size_t xReturn, xSpace;
+ 617:FreeRTOS/Src/stream_buffer.c **** size_t xRequiredSpace = xDataLengthBytes;
+ 618:FreeRTOS/Src/stream_buffer.c **** 
+ 619:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pvTxData );
+ 620:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 621:FreeRTOS/Src/stream_buffer.c **** 
+ 622:FreeRTOS/Src/stream_buffer.c **** 	/* This send function is used to write to both message buffers and stream
+ 623:FreeRTOS/Src/stream_buffer.c **** 	buffers.  If this is a message buffer then the space needed must be
+ 624:FreeRTOS/Src/stream_buffer.c **** 	increased by the amount of bytes needed to store the length of the
+ 625:FreeRTOS/Src/stream_buffer.c **** 	message. */
+ 626:FreeRTOS/Src/stream_buffer.c **** 	if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
+ 627:FreeRTOS/Src/stream_buffer.c **** 	{
+ 628:FreeRTOS/Src/stream_buffer.c **** 		xRequiredSpace += sbBYTES_TO_STORE_MESSAGE_LENGTH;
+ 629:FreeRTOS/Src/stream_buffer.c **** 	}
+ 630:FreeRTOS/Src/stream_buffer.c **** 	else
+ 631:FreeRTOS/Src/stream_buffer.c **** 	{
+ 632:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ 633:FreeRTOS/Src/stream_buffer.c **** 	}
+ 634:FreeRTOS/Src/stream_buffer.c **** 
+ 635:FreeRTOS/Src/stream_buffer.c **** 	xSpace = xStreamBufferSpacesAvailable( pxStreamBuffer );
+ 636:FreeRTOS/Src/stream_buffer.c **** 	xReturn = prvWriteMessageToBuffer( pxStreamBuffer, pvTxData, xDataLengthBytes, xSpace, xRequiredSp
+ 637:FreeRTOS/Src/stream_buffer.c **** 
+ 638:FreeRTOS/Src/stream_buffer.c **** 	if( xReturn > ( size_t ) 0 )
+ 639:FreeRTOS/Src/stream_buffer.c **** 	{
+ 640:FreeRTOS/Src/stream_buffer.c **** 		/* Was a task waiting for the data? */
+ 641:FreeRTOS/Src/stream_buffer.c **** 		if( prvBytesInBuffer( pxStreamBuffer ) >= pxStreamBuffer->xTriggerLevelBytes )
+ 642:FreeRTOS/Src/stream_buffer.c **** 		{
+ 643:FreeRTOS/Src/stream_buffer.c **** 			sbSEND_COMPLETE_FROM_ISR( pxStreamBuffer, pxHigherPriorityTaskWoken );
+ 644:FreeRTOS/Src/stream_buffer.c **** 		}
+ 645:FreeRTOS/Src/stream_buffer.c **** 		else
+ 646:FreeRTOS/Src/stream_buffer.c **** 		{
+ 647:FreeRTOS/Src/stream_buffer.c **** 			mtCOVERAGE_TEST_MARKER();
+ 648:FreeRTOS/Src/stream_buffer.c **** 		}
+ 649:FreeRTOS/Src/stream_buffer.c **** 	}
+ 650:FreeRTOS/Src/stream_buffer.c **** 	else
+ 651:FreeRTOS/Src/stream_buffer.c **** 	{
+ 652:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ 653:FreeRTOS/Src/stream_buffer.c **** 	}
+ 654:FreeRTOS/Src/stream_buffer.c **** 
+ 655:FreeRTOS/Src/stream_buffer.c **** 	traceSTREAM_BUFFER_SEND_FROM_ISR( xStreamBuffer, xReturn );
+ 656:FreeRTOS/Src/stream_buffer.c **** 
+ 657:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+ 658:FreeRTOS/Src/stream_buffer.c **** }
+ 659:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 13
+
+
+ 660:FreeRTOS/Src/stream_buffer.c **** 
+ 661:FreeRTOS/Src/stream_buffer.c **** static size_t prvWriteMessageToBuffer( StreamBuffer_t * const pxStreamBuffer,
+ 662:FreeRTOS/Src/stream_buffer.c **** 									   const void * pvTxData,
+ 663:FreeRTOS/Src/stream_buffer.c **** 									   size_t xDataLengthBytes,
+ 664:FreeRTOS/Src/stream_buffer.c **** 									   size_t xSpace,
+ 665:FreeRTOS/Src/stream_buffer.c **** 									   size_t xRequiredSpace )
+ 666:FreeRTOS/Src/stream_buffer.c **** {
+ 667:FreeRTOS/Src/stream_buffer.c **** 	BaseType_t xShouldWrite;
+ 668:FreeRTOS/Src/stream_buffer.c **** 	size_t xReturn;
+ 669:FreeRTOS/Src/stream_buffer.c **** 
+ 670:FreeRTOS/Src/stream_buffer.c **** 	if( xSpace == ( size_t ) 0 )
+ 671:FreeRTOS/Src/stream_buffer.c **** 	{
+ 672:FreeRTOS/Src/stream_buffer.c **** 		/* Doesn't matter if this is a stream buffer or a message buffer, there
+ 673:FreeRTOS/Src/stream_buffer.c **** 		is no space to write. */
+ 674:FreeRTOS/Src/stream_buffer.c **** 		xShouldWrite = pdFALSE;
+ 675:FreeRTOS/Src/stream_buffer.c **** 	}
+ 676:FreeRTOS/Src/stream_buffer.c **** 	else if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) == ( uint8_t ) 0 )
+ 677:FreeRTOS/Src/stream_buffer.c **** 	{
+ 678:FreeRTOS/Src/stream_buffer.c **** 		/* This is a stream buffer, as opposed to a message buffer, so writing a
+ 679:FreeRTOS/Src/stream_buffer.c **** 		stream of bytes rather than discrete messages.  Write as many bytes as
+ 680:FreeRTOS/Src/stream_buffer.c **** 		possible. */
+ 681:FreeRTOS/Src/stream_buffer.c **** 		xShouldWrite = pdTRUE;
+ 682:FreeRTOS/Src/stream_buffer.c **** 		xDataLengthBytes = configMIN( xDataLengthBytes, xSpace );
+ 683:FreeRTOS/Src/stream_buffer.c **** 	}
+ 684:FreeRTOS/Src/stream_buffer.c **** 	else if( xSpace >= xRequiredSpace )
+ 685:FreeRTOS/Src/stream_buffer.c **** 	{
+ 686:FreeRTOS/Src/stream_buffer.c **** 		/* This is a message buffer, as opposed to a stream buffer, and there
+ 687:FreeRTOS/Src/stream_buffer.c **** 		is enough space to write both the message length and the message itself
+ 688:FreeRTOS/Src/stream_buffer.c **** 		into the buffer.  Start by writing the length of the data, the data
+ 689:FreeRTOS/Src/stream_buffer.c **** 		itself will be written later in this function. */
+ 690:FreeRTOS/Src/stream_buffer.c **** 		xShouldWrite = pdTRUE;
+ 691:FreeRTOS/Src/stream_buffer.c **** 		( void ) prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) &( xDataLengthBytes ), sbBYTE
+ 692:FreeRTOS/Src/stream_buffer.c **** 	}
+ 693:FreeRTOS/Src/stream_buffer.c **** 	else
+ 694:FreeRTOS/Src/stream_buffer.c **** 	{
+ 695:FreeRTOS/Src/stream_buffer.c **** 		/* There is space available, but not enough space. */
+ 696:FreeRTOS/Src/stream_buffer.c **** 		xShouldWrite = pdFALSE;
+ 697:FreeRTOS/Src/stream_buffer.c **** 	}
+ 698:FreeRTOS/Src/stream_buffer.c **** 
+ 699:FreeRTOS/Src/stream_buffer.c **** 	if( xShouldWrite != pdFALSE )
+ 700:FreeRTOS/Src/stream_buffer.c **** 	{
+ 701:FreeRTOS/Src/stream_buffer.c **** 		/* Writes the data itself. */
+ 702:FreeRTOS/Src/stream_buffer.c **** 		xReturn = prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) pvTxData, xDataLengthBytes )
+ 703:FreeRTOS/Src/stream_buffer.c **** 	}
+ 704:FreeRTOS/Src/stream_buffer.c **** 	else
+ 705:FreeRTOS/Src/stream_buffer.c **** 	{
+ 706:FreeRTOS/Src/stream_buffer.c **** 		xReturn = 0;
+ 707:FreeRTOS/Src/stream_buffer.c **** 	}
+ 708:FreeRTOS/Src/stream_buffer.c **** 
+ 709:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+ 710:FreeRTOS/Src/stream_buffer.c **** }
+ 711:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 712:FreeRTOS/Src/stream_buffer.c **** 
+ 713:FreeRTOS/Src/stream_buffer.c **** size_t xStreamBufferReceive( StreamBufferHandle_t xStreamBuffer,
+ 714:FreeRTOS/Src/stream_buffer.c **** 							 void *pvRxData,
+ 715:FreeRTOS/Src/stream_buffer.c **** 							 size_t xBufferLengthBytes,
+ 716:FreeRTOS/Src/stream_buffer.c **** 							 TickType_t xTicksToWait )
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 14
+
+
+ 717:FreeRTOS/Src/stream_buffer.c **** {
+ 718:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 719:FreeRTOS/Src/stream_buffer.c **** size_t xReceivedLength = 0, xBytesAvailable, xBytesToStoreMessageLength;
+ 720:FreeRTOS/Src/stream_buffer.c **** 
+ 721:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pvRxData );
+ 722:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 723:FreeRTOS/Src/stream_buffer.c **** 
+ 724:FreeRTOS/Src/stream_buffer.c **** 	/* This receive function is used by both message buffers, which store
+ 725:FreeRTOS/Src/stream_buffer.c **** 	discrete messages, and stream buffers, which store a continuous stream of
+ 726:FreeRTOS/Src/stream_buffer.c **** 	bytes.  Discrete messages include an additional
+ 727:FreeRTOS/Src/stream_buffer.c **** 	sbBYTES_TO_STORE_MESSAGE_LENGTH bytes that hold the length of the
+ 728:FreeRTOS/Src/stream_buffer.c **** 	message. */
+ 729:FreeRTOS/Src/stream_buffer.c **** 	if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
+ 730:FreeRTOS/Src/stream_buffer.c **** 	{
+ 731:FreeRTOS/Src/stream_buffer.c **** 		xBytesToStoreMessageLength = sbBYTES_TO_STORE_MESSAGE_LENGTH;
+ 732:FreeRTOS/Src/stream_buffer.c **** 	}
+ 733:FreeRTOS/Src/stream_buffer.c **** 	else
+ 734:FreeRTOS/Src/stream_buffer.c **** 	{
+ 735:FreeRTOS/Src/stream_buffer.c **** 		xBytesToStoreMessageLength = 0;
+ 736:FreeRTOS/Src/stream_buffer.c **** 	}
+ 737:FreeRTOS/Src/stream_buffer.c **** 
+ 738:FreeRTOS/Src/stream_buffer.c **** 	if( xTicksToWait != ( TickType_t ) 0 )
+ 739:FreeRTOS/Src/stream_buffer.c **** 	{
+ 740:FreeRTOS/Src/stream_buffer.c **** 		/* Checking if there is data and clearing the notification state must be
+ 741:FreeRTOS/Src/stream_buffer.c **** 		performed atomically. */
+ 742:FreeRTOS/Src/stream_buffer.c **** 		taskENTER_CRITICAL();
+ 743:FreeRTOS/Src/stream_buffer.c **** 		{
+ 744:FreeRTOS/Src/stream_buffer.c **** 			xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
+ 745:FreeRTOS/Src/stream_buffer.c **** 
+ 746:FreeRTOS/Src/stream_buffer.c **** 			/* If this function was invoked by a message buffer read then
+ 747:FreeRTOS/Src/stream_buffer.c **** 			xBytesToStoreMessageLength holds the number of bytes used to hold
+ 748:FreeRTOS/Src/stream_buffer.c **** 			the length of the next discrete message.  If this function was
+ 749:FreeRTOS/Src/stream_buffer.c **** 			invoked by a stream buffer read then xBytesToStoreMessageLength will
+ 750:FreeRTOS/Src/stream_buffer.c **** 			be 0. */
+ 751:FreeRTOS/Src/stream_buffer.c **** 			if( xBytesAvailable <= xBytesToStoreMessageLength )
+ 752:FreeRTOS/Src/stream_buffer.c **** 			{
+ 753:FreeRTOS/Src/stream_buffer.c **** 				/* Clear notification state as going to wait for data. */
+ 754:FreeRTOS/Src/stream_buffer.c **** 				( void ) xTaskNotifyStateClear( NULL );
+ 755:FreeRTOS/Src/stream_buffer.c **** 
+ 756:FreeRTOS/Src/stream_buffer.c **** 				/* Should only be one reader. */
+ 757:FreeRTOS/Src/stream_buffer.c **** 				configASSERT( pxStreamBuffer->xTaskWaitingToReceive == NULL );
+ 758:FreeRTOS/Src/stream_buffer.c **** 				pxStreamBuffer->xTaskWaitingToReceive = xTaskGetCurrentTaskHandle();
+ 759:FreeRTOS/Src/stream_buffer.c **** 			}
+ 760:FreeRTOS/Src/stream_buffer.c **** 			else
+ 761:FreeRTOS/Src/stream_buffer.c **** 			{
+ 762:FreeRTOS/Src/stream_buffer.c **** 				mtCOVERAGE_TEST_MARKER();
+ 763:FreeRTOS/Src/stream_buffer.c **** 			}
+ 764:FreeRTOS/Src/stream_buffer.c **** 		}
+ 765:FreeRTOS/Src/stream_buffer.c **** 		taskEXIT_CRITICAL();
+ 766:FreeRTOS/Src/stream_buffer.c **** 
+ 767:FreeRTOS/Src/stream_buffer.c **** 		if( xBytesAvailable <= xBytesToStoreMessageLength )
+ 768:FreeRTOS/Src/stream_buffer.c **** 		{
+ 769:FreeRTOS/Src/stream_buffer.c **** 			/* Wait for data to be available. */
+ 770:FreeRTOS/Src/stream_buffer.c **** 			traceBLOCKING_ON_STREAM_BUFFER_RECEIVE( xStreamBuffer );
+ 771:FreeRTOS/Src/stream_buffer.c **** 			( void ) xTaskNotifyWait( ( uint32_t ) 0, ( uint32_t ) 0, NULL, xTicksToWait );
+ 772:FreeRTOS/Src/stream_buffer.c **** 			pxStreamBuffer->xTaskWaitingToReceive = NULL;
+ 773:FreeRTOS/Src/stream_buffer.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 15
+
+
+ 774:FreeRTOS/Src/stream_buffer.c **** 			/* Recheck the data available after blocking. */
+ 775:FreeRTOS/Src/stream_buffer.c **** 			xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
+ 776:FreeRTOS/Src/stream_buffer.c **** 		}
+ 777:FreeRTOS/Src/stream_buffer.c **** 		else
+ 778:FreeRTOS/Src/stream_buffer.c **** 		{
+ 779:FreeRTOS/Src/stream_buffer.c **** 			mtCOVERAGE_TEST_MARKER();
+ 780:FreeRTOS/Src/stream_buffer.c **** 		}
+ 781:FreeRTOS/Src/stream_buffer.c **** 	}
+ 782:FreeRTOS/Src/stream_buffer.c **** 	else
+ 783:FreeRTOS/Src/stream_buffer.c **** 	{
+ 784:FreeRTOS/Src/stream_buffer.c **** 		xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
+ 785:FreeRTOS/Src/stream_buffer.c **** 	}
+ 786:FreeRTOS/Src/stream_buffer.c **** 
+ 787:FreeRTOS/Src/stream_buffer.c **** 	/* Whether receiving a discrete message (where xBytesToStoreMessageLength
+ 788:FreeRTOS/Src/stream_buffer.c **** 	holds the number of bytes used to store the message length) or a stream of
+ 789:FreeRTOS/Src/stream_buffer.c **** 	bytes (where xBytesToStoreMessageLength is zero), the number of bytes
+ 790:FreeRTOS/Src/stream_buffer.c **** 	available must be greater than xBytesToStoreMessageLength to be able to
+ 791:FreeRTOS/Src/stream_buffer.c **** 	read bytes from the buffer. */
+ 792:FreeRTOS/Src/stream_buffer.c **** 	if( xBytesAvailable > xBytesToStoreMessageLength )
+ 793:FreeRTOS/Src/stream_buffer.c **** 	{
+ 794:FreeRTOS/Src/stream_buffer.c **** 		xReceivedLength = prvReadMessageFromBuffer( pxStreamBuffer, pvRxData, xBufferLengthBytes, xBytesA
+ 795:FreeRTOS/Src/stream_buffer.c **** 
+ 796:FreeRTOS/Src/stream_buffer.c **** 		/* Was a task waiting for space in the buffer? */
+ 797:FreeRTOS/Src/stream_buffer.c **** 		if( xReceivedLength != ( size_t ) 0 )
+ 798:FreeRTOS/Src/stream_buffer.c **** 		{
+ 799:FreeRTOS/Src/stream_buffer.c **** 			traceSTREAM_BUFFER_RECEIVE( xStreamBuffer, xReceivedLength );
+ 800:FreeRTOS/Src/stream_buffer.c **** 			sbRECEIVE_COMPLETED( pxStreamBuffer );
+ 801:FreeRTOS/Src/stream_buffer.c **** 		}
+ 802:FreeRTOS/Src/stream_buffer.c **** 		else
+ 803:FreeRTOS/Src/stream_buffer.c **** 		{
+ 804:FreeRTOS/Src/stream_buffer.c **** 			mtCOVERAGE_TEST_MARKER();
+ 805:FreeRTOS/Src/stream_buffer.c **** 		}
+ 806:FreeRTOS/Src/stream_buffer.c **** 	}
+ 807:FreeRTOS/Src/stream_buffer.c **** 	else
+ 808:FreeRTOS/Src/stream_buffer.c **** 	{
+ 809:FreeRTOS/Src/stream_buffer.c **** 		traceSTREAM_BUFFER_RECEIVE_FAILED( xStreamBuffer );
+ 810:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ 811:FreeRTOS/Src/stream_buffer.c **** 	}
+ 812:FreeRTOS/Src/stream_buffer.c **** 
+ 813:FreeRTOS/Src/stream_buffer.c **** 	return xReceivedLength;
+ 814:FreeRTOS/Src/stream_buffer.c **** }
+ 815:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 816:FreeRTOS/Src/stream_buffer.c **** 
+ 817:FreeRTOS/Src/stream_buffer.c **** size_t xStreamBufferNextMessageLengthBytes( StreamBufferHandle_t xStreamBuffer )
+ 818:FreeRTOS/Src/stream_buffer.c **** {
+ 819:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 820:FreeRTOS/Src/stream_buffer.c **** size_t xReturn, xBytesAvailable, xOriginalTail;
+ 821:FreeRTOS/Src/stream_buffer.c **** configMESSAGE_BUFFER_LENGTH_TYPE xTempReturn;
+ 822:FreeRTOS/Src/stream_buffer.c **** 
+ 823:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 824:FreeRTOS/Src/stream_buffer.c **** 
+ 825:FreeRTOS/Src/stream_buffer.c **** 	/* Ensure the stream buffer is being used as a message buffer. */
+ 826:FreeRTOS/Src/stream_buffer.c **** 	if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
+ 827:FreeRTOS/Src/stream_buffer.c **** 	{
+ 828:FreeRTOS/Src/stream_buffer.c **** 		xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
+ 829:FreeRTOS/Src/stream_buffer.c **** 		if( xBytesAvailable > sbBYTES_TO_STORE_MESSAGE_LENGTH )
+ 830:FreeRTOS/Src/stream_buffer.c **** 		{
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 16
+
+
+ 831:FreeRTOS/Src/stream_buffer.c **** 			/* The number of bytes available is greater than the number of bytes
+ 832:FreeRTOS/Src/stream_buffer.c **** 			required to hold the length of the next message, so another message
+ 833:FreeRTOS/Src/stream_buffer.c **** 			is available.  Return its length without removing the length bytes
+ 834:FreeRTOS/Src/stream_buffer.c **** 			from the buffer.  A copy of the tail is stored so the buffer can be
+ 835:FreeRTOS/Src/stream_buffer.c **** 			returned to its prior state as the message is not actually being
+ 836:FreeRTOS/Src/stream_buffer.c **** 			removed from the buffer. */
+ 837:FreeRTOS/Src/stream_buffer.c **** 			xOriginalTail = pxStreamBuffer->xTail;
+ 838:FreeRTOS/Src/stream_buffer.c **** 			( void ) prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) &xTempReturn, sbBYTES_TO_STORE_ME
+ 839:FreeRTOS/Src/stream_buffer.c **** 			xReturn = ( size_t ) xTempReturn;
+ 840:FreeRTOS/Src/stream_buffer.c **** 			pxStreamBuffer->xTail = xOriginalTail;
+ 841:FreeRTOS/Src/stream_buffer.c **** 		}
+ 842:FreeRTOS/Src/stream_buffer.c **** 		else
+ 843:FreeRTOS/Src/stream_buffer.c **** 		{
+ 844:FreeRTOS/Src/stream_buffer.c **** 			/* The minimum amount of bytes in a message buffer is
+ 845:FreeRTOS/Src/stream_buffer.c **** 			( sbBYTES_TO_STORE_MESSAGE_LENGTH + 1 ), so if xBytesAvailable is
+ 846:FreeRTOS/Src/stream_buffer.c **** 			less than sbBYTES_TO_STORE_MESSAGE_LENGTH the only other valid
+ 847:FreeRTOS/Src/stream_buffer.c **** 			value is 0. */
+ 848:FreeRTOS/Src/stream_buffer.c **** 			configASSERT( xBytesAvailable == 0 );
+ 849:FreeRTOS/Src/stream_buffer.c **** 			xReturn = 0;
+ 850:FreeRTOS/Src/stream_buffer.c **** 		}
+ 851:FreeRTOS/Src/stream_buffer.c **** 	}
+ 852:FreeRTOS/Src/stream_buffer.c **** 	else
+ 853:FreeRTOS/Src/stream_buffer.c **** 	{
+ 854:FreeRTOS/Src/stream_buffer.c **** 		xReturn = 0;
+ 855:FreeRTOS/Src/stream_buffer.c **** 	}
+ 856:FreeRTOS/Src/stream_buffer.c **** 
+ 857:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+ 858:FreeRTOS/Src/stream_buffer.c **** }
+ 859:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 860:FreeRTOS/Src/stream_buffer.c **** 
+ 861:FreeRTOS/Src/stream_buffer.c **** size_t xStreamBufferReceiveFromISR( StreamBufferHandle_t xStreamBuffer,
+ 862:FreeRTOS/Src/stream_buffer.c **** 									void *pvRxData,
+ 863:FreeRTOS/Src/stream_buffer.c **** 									size_t xBufferLengthBytes,
+ 864:FreeRTOS/Src/stream_buffer.c **** 									BaseType_t * const pxHigherPriorityTaskWoken )
+ 865:FreeRTOS/Src/stream_buffer.c **** {
+ 866:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 867:FreeRTOS/Src/stream_buffer.c **** size_t xReceivedLength = 0, xBytesAvailable, xBytesToStoreMessageLength;
+ 868:FreeRTOS/Src/stream_buffer.c **** 
+ 869:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pvRxData );
+ 870:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 871:FreeRTOS/Src/stream_buffer.c **** 
+ 872:FreeRTOS/Src/stream_buffer.c **** 	/* This receive function is used by both message buffers, which store
+ 873:FreeRTOS/Src/stream_buffer.c **** 	discrete messages, and stream buffers, which store a continuous stream of
+ 874:FreeRTOS/Src/stream_buffer.c **** 	bytes.  Discrete messages include an additional
+ 875:FreeRTOS/Src/stream_buffer.c **** 	sbBYTES_TO_STORE_MESSAGE_LENGTH bytes that hold the length of the
+ 876:FreeRTOS/Src/stream_buffer.c **** 	message. */
+ 877:FreeRTOS/Src/stream_buffer.c **** 	if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
+ 878:FreeRTOS/Src/stream_buffer.c **** 	{
+ 879:FreeRTOS/Src/stream_buffer.c **** 		xBytesToStoreMessageLength = sbBYTES_TO_STORE_MESSAGE_LENGTH;
+ 880:FreeRTOS/Src/stream_buffer.c **** 	}
+ 881:FreeRTOS/Src/stream_buffer.c **** 	else
+ 882:FreeRTOS/Src/stream_buffer.c **** 	{
+ 883:FreeRTOS/Src/stream_buffer.c **** 		xBytesToStoreMessageLength = 0;
+ 884:FreeRTOS/Src/stream_buffer.c **** 	}
+ 885:FreeRTOS/Src/stream_buffer.c **** 
+ 886:FreeRTOS/Src/stream_buffer.c **** 	xBytesAvailable = prvBytesInBuffer( pxStreamBuffer );
+ 887:FreeRTOS/Src/stream_buffer.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 17
+
+
+ 888:FreeRTOS/Src/stream_buffer.c **** 	/* Whether receiving a discrete message (where xBytesToStoreMessageLength
+ 889:FreeRTOS/Src/stream_buffer.c **** 	holds the number of bytes used to store the message length) or a stream of
+ 890:FreeRTOS/Src/stream_buffer.c **** 	bytes (where xBytesToStoreMessageLength is zero), the number of bytes
+ 891:FreeRTOS/Src/stream_buffer.c **** 	available must be greater than xBytesToStoreMessageLength to be able to
+ 892:FreeRTOS/Src/stream_buffer.c **** 	read bytes from the buffer. */
+ 893:FreeRTOS/Src/stream_buffer.c **** 	if( xBytesAvailable > xBytesToStoreMessageLength )
+ 894:FreeRTOS/Src/stream_buffer.c **** 	{
+ 895:FreeRTOS/Src/stream_buffer.c **** 		xReceivedLength = prvReadMessageFromBuffer( pxStreamBuffer, pvRxData, xBufferLengthBytes, xBytesA
+ 896:FreeRTOS/Src/stream_buffer.c **** 
+ 897:FreeRTOS/Src/stream_buffer.c **** 		/* Was a task waiting for space in the buffer? */
+ 898:FreeRTOS/Src/stream_buffer.c **** 		if( xReceivedLength != ( size_t ) 0 )
+ 899:FreeRTOS/Src/stream_buffer.c **** 		{
+ 900:FreeRTOS/Src/stream_buffer.c **** 			sbRECEIVE_COMPLETED_FROM_ISR( pxStreamBuffer, pxHigherPriorityTaskWoken );
+ 901:FreeRTOS/Src/stream_buffer.c **** 		}
+ 902:FreeRTOS/Src/stream_buffer.c **** 		else
+ 903:FreeRTOS/Src/stream_buffer.c **** 		{
+ 904:FreeRTOS/Src/stream_buffer.c **** 			mtCOVERAGE_TEST_MARKER();
+ 905:FreeRTOS/Src/stream_buffer.c **** 		}
+ 906:FreeRTOS/Src/stream_buffer.c **** 	}
+ 907:FreeRTOS/Src/stream_buffer.c **** 	else
+ 908:FreeRTOS/Src/stream_buffer.c **** 	{
+ 909:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ 910:FreeRTOS/Src/stream_buffer.c **** 	}
+ 911:FreeRTOS/Src/stream_buffer.c **** 
+ 912:FreeRTOS/Src/stream_buffer.c **** 	traceSTREAM_BUFFER_RECEIVE_FROM_ISR( xStreamBuffer, xReceivedLength );
+ 913:FreeRTOS/Src/stream_buffer.c **** 
+ 914:FreeRTOS/Src/stream_buffer.c **** 	return xReceivedLength;
+ 915:FreeRTOS/Src/stream_buffer.c **** }
+ 916:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 917:FreeRTOS/Src/stream_buffer.c **** 
+ 918:FreeRTOS/Src/stream_buffer.c **** static size_t prvReadMessageFromBuffer( StreamBuffer_t *pxStreamBuffer,
+ 919:FreeRTOS/Src/stream_buffer.c **** 										void *pvRxData,
+ 920:FreeRTOS/Src/stream_buffer.c **** 										size_t xBufferLengthBytes,
+ 921:FreeRTOS/Src/stream_buffer.c **** 										size_t xBytesAvailable,
+ 922:FreeRTOS/Src/stream_buffer.c **** 										size_t xBytesToStoreMessageLength )
+ 923:FreeRTOS/Src/stream_buffer.c **** {
+ 924:FreeRTOS/Src/stream_buffer.c **** size_t xOriginalTail, xReceivedLength, xNextMessageLength;
+ 925:FreeRTOS/Src/stream_buffer.c **** configMESSAGE_BUFFER_LENGTH_TYPE xTempNextMessageLength;
+ 926:FreeRTOS/Src/stream_buffer.c **** 
+ 927:FreeRTOS/Src/stream_buffer.c **** 	if( xBytesToStoreMessageLength != ( size_t ) 0 )
+ 928:FreeRTOS/Src/stream_buffer.c **** 	{
+ 929:FreeRTOS/Src/stream_buffer.c **** 		/* A discrete message is being received.  First receive the length
+ 930:FreeRTOS/Src/stream_buffer.c **** 		of the message.  A copy of the tail is stored so the buffer can be
+ 931:FreeRTOS/Src/stream_buffer.c **** 		returned to its prior state if the length of the message is too
+ 932:FreeRTOS/Src/stream_buffer.c **** 		large for the provided buffer. */
+ 933:FreeRTOS/Src/stream_buffer.c **** 		xOriginalTail = pxStreamBuffer->xTail;
+ 934:FreeRTOS/Src/stream_buffer.c **** 		( void ) prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) &xTempNextMessageLength, xBytesToS
+ 935:FreeRTOS/Src/stream_buffer.c **** 		xNextMessageLength = ( size_t ) xTempNextMessageLength;
+ 936:FreeRTOS/Src/stream_buffer.c **** 
+ 937:FreeRTOS/Src/stream_buffer.c **** 		/* Reduce the number of bytes available by the number of bytes just
+ 938:FreeRTOS/Src/stream_buffer.c **** 		read out. */
+ 939:FreeRTOS/Src/stream_buffer.c **** 		xBytesAvailable -= xBytesToStoreMessageLength;
+ 940:FreeRTOS/Src/stream_buffer.c **** 
+ 941:FreeRTOS/Src/stream_buffer.c **** 		/* Check there is enough space in the buffer provided by the
+ 942:FreeRTOS/Src/stream_buffer.c **** 		user. */
+ 943:FreeRTOS/Src/stream_buffer.c **** 		if( xNextMessageLength > xBufferLengthBytes )
+ 944:FreeRTOS/Src/stream_buffer.c **** 		{
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 18
+
+
+ 945:FreeRTOS/Src/stream_buffer.c **** 			/* The user has provided insufficient space to read the message
+ 946:FreeRTOS/Src/stream_buffer.c **** 			so return the buffer to its previous state (so the length of
+ 947:FreeRTOS/Src/stream_buffer.c **** 			the message is in the buffer again). */
+ 948:FreeRTOS/Src/stream_buffer.c **** 			pxStreamBuffer->xTail = xOriginalTail;
+ 949:FreeRTOS/Src/stream_buffer.c **** 			xNextMessageLength = 0;
+ 950:FreeRTOS/Src/stream_buffer.c **** 		}
+ 951:FreeRTOS/Src/stream_buffer.c **** 		else
+ 952:FreeRTOS/Src/stream_buffer.c **** 		{
+ 953:FreeRTOS/Src/stream_buffer.c **** 			mtCOVERAGE_TEST_MARKER();
+ 954:FreeRTOS/Src/stream_buffer.c **** 		}
+ 955:FreeRTOS/Src/stream_buffer.c **** 	}
+ 956:FreeRTOS/Src/stream_buffer.c **** 	else
+ 957:FreeRTOS/Src/stream_buffer.c **** 	{
+ 958:FreeRTOS/Src/stream_buffer.c **** 		/* A stream of bytes is being received (as opposed to a discrete
+ 959:FreeRTOS/Src/stream_buffer.c **** 		message), so read as many bytes as possible. */
+ 960:FreeRTOS/Src/stream_buffer.c **** 		xNextMessageLength = xBufferLengthBytes;
+ 961:FreeRTOS/Src/stream_buffer.c **** 	}
+ 962:FreeRTOS/Src/stream_buffer.c **** 
+ 963:FreeRTOS/Src/stream_buffer.c **** 	/* Read the actual data. */
+ 964:FreeRTOS/Src/stream_buffer.c **** 	xReceivedLength = prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) pvRxData, xNextMessageLeng
+ 965:FreeRTOS/Src/stream_buffer.c **** 
+ 966:FreeRTOS/Src/stream_buffer.c **** 	return xReceivedLength;
+ 967:FreeRTOS/Src/stream_buffer.c **** }
+ 968:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 969:FreeRTOS/Src/stream_buffer.c **** 
+ 970:FreeRTOS/Src/stream_buffer.c **** BaseType_t xStreamBufferIsEmpty( StreamBufferHandle_t xStreamBuffer )
+ 971:FreeRTOS/Src/stream_buffer.c **** {
+ 972:FreeRTOS/Src/stream_buffer.c **** const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 973:FreeRTOS/Src/stream_buffer.c **** BaseType_t xReturn;
+ 974:FreeRTOS/Src/stream_buffer.c **** size_t xTail;
+ 975:FreeRTOS/Src/stream_buffer.c **** 
+ 976:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+ 977:FreeRTOS/Src/stream_buffer.c **** 
+ 978:FreeRTOS/Src/stream_buffer.c **** 	/* True if no bytes are available. */
+ 979:FreeRTOS/Src/stream_buffer.c **** 	xTail = pxStreamBuffer->xTail;
+ 980:FreeRTOS/Src/stream_buffer.c **** 	if( pxStreamBuffer->xHead == xTail )
+ 981:FreeRTOS/Src/stream_buffer.c **** 	{
+ 982:FreeRTOS/Src/stream_buffer.c **** 		xReturn = pdTRUE;
+ 983:FreeRTOS/Src/stream_buffer.c **** 	}
+ 984:FreeRTOS/Src/stream_buffer.c **** 	else
+ 985:FreeRTOS/Src/stream_buffer.c **** 	{
+ 986:FreeRTOS/Src/stream_buffer.c **** 		xReturn = pdFALSE;
+ 987:FreeRTOS/Src/stream_buffer.c **** 	}
+ 988:FreeRTOS/Src/stream_buffer.c **** 
+ 989:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+ 990:FreeRTOS/Src/stream_buffer.c **** }
+ 991:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 992:FreeRTOS/Src/stream_buffer.c **** 
+ 993:FreeRTOS/Src/stream_buffer.c **** BaseType_t xStreamBufferIsFull( StreamBufferHandle_t xStreamBuffer )
+ 994:FreeRTOS/Src/stream_buffer.c **** {
+ 995:FreeRTOS/Src/stream_buffer.c **** BaseType_t xReturn;
+ 996:FreeRTOS/Src/stream_buffer.c **** size_t xBytesToStoreMessageLength;
+ 997:FreeRTOS/Src/stream_buffer.c **** const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 998:FreeRTOS/Src/stream_buffer.c **** 
+ 999:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+1000:FreeRTOS/Src/stream_buffer.c **** 
+1001:FreeRTOS/Src/stream_buffer.c **** 	/* This generic version of the receive function is used by both message
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 19
+
+
+1002:FreeRTOS/Src/stream_buffer.c **** 	buffers, which store discrete messages, and stream buffers, which store a
+1003:FreeRTOS/Src/stream_buffer.c **** 	continuous stream of bytes.  Discrete messages include an additional
+1004:FreeRTOS/Src/stream_buffer.c **** 	sbBYTES_TO_STORE_MESSAGE_LENGTH bytes that hold the length of the message. */
+1005:FreeRTOS/Src/stream_buffer.c **** 	if( ( pxStreamBuffer->ucFlags & sbFLAGS_IS_MESSAGE_BUFFER ) != ( uint8_t ) 0 )
+1006:FreeRTOS/Src/stream_buffer.c **** 	{
+1007:FreeRTOS/Src/stream_buffer.c **** 		xBytesToStoreMessageLength = sbBYTES_TO_STORE_MESSAGE_LENGTH;
+1008:FreeRTOS/Src/stream_buffer.c **** 	}
+1009:FreeRTOS/Src/stream_buffer.c **** 	else
+1010:FreeRTOS/Src/stream_buffer.c **** 	{
+1011:FreeRTOS/Src/stream_buffer.c **** 		xBytesToStoreMessageLength = 0;
+1012:FreeRTOS/Src/stream_buffer.c **** 	}
+1013:FreeRTOS/Src/stream_buffer.c **** 
+1014:FreeRTOS/Src/stream_buffer.c **** 	/* True if the available space equals zero. */
+1015:FreeRTOS/Src/stream_buffer.c **** 	if( xStreamBufferSpacesAvailable( xStreamBuffer ) <= xBytesToStoreMessageLength )
+1016:FreeRTOS/Src/stream_buffer.c **** 	{
+1017:FreeRTOS/Src/stream_buffer.c **** 		xReturn = pdTRUE;
+1018:FreeRTOS/Src/stream_buffer.c **** 	}
+1019:FreeRTOS/Src/stream_buffer.c **** 	else
+1020:FreeRTOS/Src/stream_buffer.c **** 	{
+1021:FreeRTOS/Src/stream_buffer.c **** 		xReturn = pdFALSE;
+1022:FreeRTOS/Src/stream_buffer.c **** 	}
+1023:FreeRTOS/Src/stream_buffer.c **** 
+1024:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+1025:FreeRTOS/Src/stream_buffer.c **** }
+1026:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+1027:FreeRTOS/Src/stream_buffer.c **** 
+1028:FreeRTOS/Src/stream_buffer.c **** BaseType_t xStreamBufferSendCompletedFromISR( StreamBufferHandle_t xStreamBuffer, BaseType_t *pxHig
+1029:FreeRTOS/Src/stream_buffer.c **** {
+1030:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+1031:FreeRTOS/Src/stream_buffer.c **** BaseType_t xReturn;
+1032:FreeRTOS/Src/stream_buffer.c **** UBaseType_t uxSavedInterruptStatus;
+1033:FreeRTOS/Src/stream_buffer.c **** 
+1034:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+1035:FreeRTOS/Src/stream_buffer.c **** 
+1036:FreeRTOS/Src/stream_buffer.c **** 	uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();
+1037:FreeRTOS/Src/stream_buffer.c **** 	{
+1038:FreeRTOS/Src/stream_buffer.c **** 		if( ( pxStreamBuffer )->xTaskWaitingToReceive != NULL )
+1039:FreeRTOS/Src/stream_buffer.c **** 		{
+1040:FreeRTOS/Src/stream_buffer.c **** 			( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToReceive,
+1041:FreeRTOS/Src/stream_buffer.c **** 										 ( uint32_t ) 0,
+1042:FreeRTOS/Src/stream_buffer.c **** 										 eNoAction,
+1043:FreeRTOS/Src/stream_buffer.c **** 										 pxHigherPriorityTaskWoken );
+1044:FreeRTOS/Src/stream_buffer.c **** 			( pxStreamBuffer )->xTaskWaitingToReceive = NULL;
+1045:FreeRTOS/Src/stream_buffer.c **** 			xReturn = pdTRUE;
+1046:FreeRTOS/Src/stream_buffer.c **** 		}
+1047:FreeRTOS/Src/stream_buffer.c **** 		else
+1048:FreeRTOS/Src/stream_buffer.c **** 		{
+1049:FreeRTOS/Src/stream_buffer.c **** 			xReturn = pdFALSE;
+1050:FreeRTOS/Src/stream_buffer.c **** 		}
+1051:FreeRTOS/Src/stream_buffer.c **** 	}
+1052:FreeRTOS/Src/stream_buffer.c **** 	portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+1053:FreeRTOS/Src/stream_buffer.c **** 
+1054:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+1055:FreeRTOS/Src/stream_buffer.c **** }
+1056:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+1057:FreeRTOS/Src/stream_buffer.c **** 
+1058:FreeRTOS/Src/stream_buffer.c **** BaseType_t xStreamBufferReceiveCompletedFromISR( StreamBufferHandle_t xStreamBuffer, BaseType_t *px
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 20
+
+
+1059:FreeRTOS/Src/stream_buffer.c **** {
+1060:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+1061:FreeRTOS/Src/stream_buffer.c **** BaseType_t xReturn;
+1062:FreeRTOS/Src/stream_buffer.c **** UBaseType_t uxSavedInterruptStatus;
+1063:FreeRTOS/Src/stream_buffer.c **** 
+1064:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( pxStreamBuffer );
+1065:FreeRTOS/Src/stream_buffer.c **** 
+1066:FreeRTOS/Src/stream_buffer.c **** 	uxSavedInterruptStatus = ( UBaseType_t ) portSET_INTERRUPT_MASK_FROM_ISR();
+1067:FreeRTOS/Src/stream_buffer.c **** 	{
+1068:FreeRTOS/Src/stream_buffer.c **** 		if( ( pxStreamBuffer )->xTaskWaitingToSend != NULL )
+1069:FreeRTOS/Src/stream_buffer.c **** 		{
+1070:FreeRTOS/Src/stream_buffer.c **** 			( void ) xTaskNotifyFromISR( ( pxStreamBuffer )->xTaskWaitingToSend,
+1071:FreeRTOS/Src/stream_buffer.c **** 										 ( uint32_t ) 0,
+1072:FreeRTOS/Src/stream_buffer.c **** 										 eNoAction,
+1073:FreeRTOS/Src/stream_buffer.c **** 										 pxHigherPriorityTaskWoken );
+1074:FreeRTOS/Src/stream_buffer.c **** 			( pxStreamBuffer )->xTaskWaitingToSend = NULL;
+1075:FreeRTOS/Src/stream_buffer.c **** 			xReturn = pdTRUE;
+1076:FreeRTOS/Src/stream_buffer.c **** 		}
+1077:FreeRTOS/Src/stream_buffer.c **** 		else
+1078:FreeRTOS/Src/stream_buffer.c **** 		{
+1079:FreeRTOS/Src/stream_buffer.c **** 			xReturn = pdFALSE;
+1080:FreeRTOS/Src/stream_buffer.c **** 		}
+1081:FreeRTOS/Src/stream_buffer.c **** 	}
+1082:FreeRTOS/Src/stream_buffer.c **** 	portCLEAR_INTERRUPT_MASK_FROM_ISR( uxSavedInterruptStatus );
+1083:FreeRTOS/Src/stream_buffer.c **** 
+1084:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+1085:FreeRTOS/Src/stream_buffer.c **** }
+1086:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+1087:FreeRTOS/Src/stream_buffer.c **** 
+1088:FreeRTOS/Src/stream_buffer.c **** static size_t prvWriteBytesToBuffer( StreamBuffer_t * const pxStreamBuffer, const uint8_t *pucData,
+1089:FreeRTOS/Src/stream_buffer.c **** {
+1090:FreeRTOS/Src/stream_buffer.c **** size_t xNextHead, xFirstLength;
+1091:FreeRTOS/Src/stream_buffer.c **** 
+1092:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( xCount > ( size_t ) 0 );
+1093:FreeRTOS/Src/stream_buffer.c **** 
+1094:FreeRTOS/Src/stream_buffer.c **** 	xNextHead = pxStreamBuffer->xHead;
+1095:FreeRTOS/Src/stream_buffer.c **** 
+1096:FreeRTOS/Src/stream_buffer.c **** 	/* Calculate the number of bytes that can be added in the first write -
+1097:FreeRTOS/Src/stream_buffer.c **** 	which may be less than the total number of bytes that need to be added if
+1098:FreeRTOS/Src/stream_buffer.c **** 	the buffer will wrap back to the beginning. */
+1099:FreeRTOS/Src/stream_buffer.c **** 	xFirstLength = configMIN( pxStreamBuffer->xLength - xNextHead, xCount );
+1100:FreeRTOS/Src/stream_buffer.c **** 
+1101:FreeRTOS/Src/stream_buffer.c **** 	/* Write as many bytes as can be written in the first write. */
+1102:FreeRTOS/Src/stream_buffer.c **** 	configASSERT( ( xNextHead + xFirstLength ) <= pxStreamBuffer->xLength );
+1103:FreeRTOS/Src/stream_buffer.c **** 	( void ) memcpy( ( void* ) ( &( pxStreamBuffer->pucBuffer[ xNextHead ] ) ), ( const void * ) pucDa
+1104:FreeRTOS/Src/stream_buffer.c **** 
+1105:FreeRTOS/Src/stream_buffer.c **** 	/* If the number of bytes written was less than the number that could be
+1106:FreeRTOS/Src/stream_buffer.c **** 	written in the first write... */
+1107:FreeRTOS/Src/stream_buffer.c **** 	if( xCount > xFirstLength )
+1108:FreeRTOS/Src/stream_buffer.c **** 	{
+1109:FreeRTOS/Src/stream_buffer.c **** 		/* ...then write the remaining bytes to the start of the buffer. */
+1110:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( ( xCount - xFirstLength ) <= pxStreamBuffer->xLength );
+1111:FreeRTOS/Src/stream_buffer.c **** 		( void ) memcpy( ( void * ) pxStreamBuffer->pucBuffer, ( const void * ) &( pucData[ xFirstLength 
+1112:FreeRTOS/Src/stream_buffer.c **** 	}
+1113:FreeRTOS/Src/stream_buffer.c **** 	else
+1114:FreeRTOS/Src/stream_buffer.c **** 	{
+1115:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 21
+
+
+1116:FreeRTOS/Src/stream_buffer.c **** 	}
+1117:FreeRTOS/Src/stream_buffer.c **** 
+1118:FreeRTOS/Src/stream_buffer.c **** 	xNextHead += xCount;
+1119:FreeRTOS/Src/stream_buffer.c **** 	if( xNextHead >= pxStreamBuffer->xLength )
+1120:FreeRTOS/Src/stream_buffer.c **** 	{
+1121:FreeRTOS/Src/stream_buffer.c **** 		xNextHead -= pxStreamBuffer->xLength;
+1122:FreeRTOS/Src/stream_buffer.c **** 	}
+1123:FreeRTOS/Src/stream_buffer.c **** 	else
+1124:FreeRTOS/Src/stream_buffer.c **** 	{
+1125:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+1126:FreeRTOS/Src/stream_buffer.c **** 	}
+1127:FreeRTOS/Src/stream_buffer.c **** 
+1128:FreeRTOS/Src/stream_buffer.c **** 	pxStreamBuffer->xHead = xNextHead;
+1129:FreeRTOS/Src/stream_buffer.c **** 
+1130:FreeRTOS/Src/stream_buffer.c **** 	return xCount;
+1131:FreeRTOS/Src/stream_buffer.c **** }
+1132:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+1133:FreeRTOS/Src/stream_buffer.c **** 
+1134:FreeRTOS/Src/stream_buffer.c **** static size_t prvReadBytesFromBuffer( StreamBuffer_t *pxStreamBuffer, uint8_t *pucData, size_t xMax
+1135:FreeRTOS/Src/stream_buffer.c **** {
+1136:FreeRTOS/Src/stream_buffer.c **** size_t xCount, xFirstLength, xNextTail;
+1137:FreeRTOS/Src/stream_buffer.c **** 
+1138:FreeRTOS/Src/stream_buffer.c **** 	/* Use the minimum of the wanted bytes and the available bytes. */
+1139:FreeRTOS/Src/stream_buffer.c **** 	xCount = configMIN( xBytesAvailable, xMaxCount );
+1140:FreeRTOS/Src/stream_buffer.c **** 
+1141:FreeRTOS/Src/stream_buffer.c **** 	if( xCount > ( size_t ) 0 )
+1142:FreeRTOS/Src/stream_buffer.c **** 	{
+1143:FreeRTOS/Src/stream_buffer.c **** 		xNextTail = pxStreamBuffer->xTail;
+1144:FreeRTOS/Src/stream_buffer.c **** 
+1145:FreeRTOS/Src/stream_buffer.c **** 		/* Calculate the number of bytes that can be read - which may be
+1146:FreeRTOS/Src/stream_buffer.c **** 		less than the number wanted if the data wraps around to the start of
+1147:FreeRTOS/Src/stream_buffer.c **** 		the buffer. */
+1148:FreeRTOS/Src/stream_buffer.c **** 		xFirstLength = configMIN( pxStreamBuffer->xLength - xNextTail, xCount );
+1149:FreeRTOS/Src/stream_buffer.c **** 
+1150:FreeRTOS/Src/stream_buffer.c **** 		/* Obtain the number of bytes it is possible to obtain in the first
+1151:FreeRTOS/Src/stream_buffer.c **** 		read.  Asserts check bounds of read and write. */
+1152:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( xFirstLength <= xMaxCount );
+1153:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( ( xNextTail + xFirstLength ) <= pxStreamBuffer->xLength );
+1154:FreeRTOS/Src/stream_buffer.c **** 		( void ) memcpy( ( void * ) pucData, ( const void * ) &( pxStreamBuffer->pucBuffer[ xNextTail ] )
+1155:FreeRTOS/Src/stream_buffer.c **** 
+1156:FreeRTOS/Src/stream_buffer.c **** 		/* If the total number of wanted bytes is greater than the number
+1157:FreeRTOS/Src/stream_buffer.c **** 		that could be read in the first read... */
+1158:FreeRTOS/Src/stream_buffer.c **** 		if( xCount > xFirstLength )
+1159:FreeRTOS/Src/stream_buffer.c **** 		{
+1160:FreeRTOS/Src/stream_buffer.c **** 			/*...then read the remaining bytes from the start of the buffer. */
+1161:FreeRTOS/Src/stream_buffer.c **** 			configASSERT( xCount <= xMaxCount );
+1162:FreeRTOS/Src/stream_buffer.c **** 			( void ) memcpy( ( void * ) &( pucData[ xFirstLength ] ), ( void * ) ( pxStreamBuffer->pucBuffer
+1163:FreeRTOS/Src/stream_buffer.c **** 		}
+1164:FreeRTOS/Src/stream_buffer.c **** 		else
+1165:FreeRTOS/Src/stream_buffer.c **** 		{
+1166:FreeRTOS/Src/stream_buffer.c **** 			mtCOVERAGE_TEST_MARKER();
+1167:FreeRTOS/Src/stream_buffer.c **** 		}
+1168:FreeRTOS/Src/stream_buffer.c **** 
+1169:FreeRTOS/Src/stream_buffer.c **** 		/* Move the tail pointer to effectively remove the data read from
+1170:FreeRTOS/Src/stream_buffer.c **** 		the buffer. */
+1171:FreeRTOS/Src/stream_buffer.c **** 		xNextTail += xCount;
+1172:FreeRTOS/Src/stream_buffer.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 22
+
+
+1173:FreeRTOS/Src/stream_buffer.c **** 		if( xNextTail >= pxStreamBuffer->xLength )
+1174:FreeRTOS/Src/stream_buffer.c **** 		{
+1175:FreeRTOS/Src/stream_buffer.c **** 			xNextTail -= pxStreamBuffer->xLength;
+1176:FreeRTOS/Src/stream_buffer.c **** 		}
+1177:FreeRTOS/Src/stream_buffer.c **** 
+1178:FreeRTOS/Src/stream_buffer.c **** 		pxStreamBuffer->xTail = xNextTail;
+1179:FreeRTOS/Src/stream_buffer.c **** 	}
+1180:FreeRTOS/Src/stream_buffer.c **** 	else
+1181:FreeRTOS/Src/stream_buffer.c **** 	{
+1182:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+1183:FreeRTOS/Src/stream_buffer.c **** 	}
+1184:FreeRTOS/Src/stream_buffer.c **** 
+1185:FreeRTOS/Src/stream_buffer.c **** 	return xCount;
+1186:FreeRTOS/Src/stream_buffer.c **** }
+1187:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+1188:FreeRTOS/Src/stream_buffer.c **** 
+1189:FreeRTOS/Src/stream_buffer.c **** static size_t prvBytesInBuffer( const StreamBuffer_t * const pxStreamBuffer )
+1190:FreeRTOS/Src/stream_buffer.c **** {
+  27              		.loc 1 1190 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 0
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              		@ link register save eliminated.
+  32              	.LVL0:
+1191:FreeRTOS/Src/stream_buffer.c **** /* Returns the distance between xTail and xHead. */
+1192:FreeRTOS/Src/stream_buffer.c **** size_t xCount;
+1193:FreeRTOS/Src/stream_buffer.c **** 
+1194:FreeRTOS/Src/stream_buffer.c **** 	xCount = pxStreamBuffer->xLength + pxStreamBuffer->xHead;
+  33              		.loc 1 1194 0
+  34 0000 8268     		ldr	r2, [r0, #8]
+  35 0002 4368     		ldr	r3, [r0, #4]
+  36 0004 1344     		add	r3, r3, r2
+  37              	.LVL1:
+1195:FreeRTOS/Src/stream_buffer.c **** 	xCount -= pxStreamBuffer->xTail;
+  38              		.loc 1 1195 0
+  39 0006 0068     		ldr	r0, [r0]
+  40              	.LVL2:
+  41 0008 181A     		subs	r0, r3, r0
+  42              	.LVL3:
+1196:FreeRTOS/Src/stream_buffer.c **** 	if ( xCount >= pxStreamBuffer->xLength )
+  43              		.loc 1 1196 0
+  44 000a 8242     		cmp	r2, r0
+  45 000c 00D8     		bhi	.L2
+1197:FreeRTOS/Src/stream_buffer.c **** 	{
+1198:FreeRTOS/Src/stream_buffer.c **** 		xCount -= pxStreamBuffer->xLength;
+  46              		.loc 1 1198 0
+  47 000e 801A     		subs	r0, r0, r2
+  48              	.LVL4:
+  49              	.L2:
+1199:FreeRTOS/Src/stream_buffer.c **** 	}
+1200:FreeRTOS/Src/stream_buffer.c **** 	else
+1201:FreeRTOS/Src/stream_buffer.c **** 	{
+1202:FreeRTOS/Src/stream_buffer.c **** 		mtCOVERAGE_TEST_MARKER();
+1203:FreeRTOS/Src/stream_buffer.c **** 	}
+1204:FreeRTOS/Src/stream_buffer.c **** 
+1205:FreeRTOS/Src/stream_buffer.c **** 	return xCount;
+1206:FreeRTOS/Src/stream_buffer.c **** }
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 23
+
+
+  50              		.loc 1 1206 0
+  51 0010 7047     		bx	lr
+  52              		.cfi_endproc
+  53              	.LFE51:
+  55 0012 00BF     		.section	.text.prvInitialiseNewStreamBuffer,"ax",%progbits
+  56              		.align	2
+  57              		.thumb
+  58              		.thumb_func
+  60              	prvInitialiseNewStreamBuffer:
+  61              	.LFB52:
+1207:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+1208:FreeRTOS/Src/stream_buffer.c **** 
+1209:FreeRTOS/Src/stream_buffer.c **** static void prvInitialiseNewStreamBuffer( StreamBuffer_t * const pxStreamBuffer,
+1210:FreeRTOS/Src/stream_buffer.c **** 										  uint8_t * const pucBuffer,
+1211:FreeRTOS/Src/stream_buffer.c **** 										  size_t xBufferSizeBytes,
+1212:FreeRTOS/Src/stream_buffer.c **** 										  size_t xTriggerLevelBytes,
+1213:FreeRTOS/Src/stream_buffer.c **** 										  uint8_t ucFlags )
+1214:FreeRTOS/Src/stream_buffer.c **** {
+  62              		.loc 1 1214 0
+  63              		.cfi_startproc
+  64              		@ args = 4, pretend = 0, frame = 0
+  65              		@ frame_needed = 0, uses_anonymous_args = 0
+  66              	.LVL5:
+  67 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+  68              	.LCFI0:
+  69              		.cfi_def_cfa_offset 24
+  70              		.cfi_offset 3, -24
+  71              		.cfi_offset 4, -20
+  72              		.cfi_offset 5, -16
+  73              		.cfi_offset 6, -12
+  74              		.cfi_offset 7, -8
+  75              		.cfi_offset 14, -4
+  76 0002 0446     		mov	r4, r0
+  77 0004 0F46     		mov	r7, r1
+  78 0006 1646     		mov	r6, r2
+  79 0008 1D46     		mov	r5, r3
+1215:FreeRTOS/Src/stream_buffer.c **** 	/* Assert here is deliberately writing to the entire buffer to ensure it can
+1216:FreeRTOS/Src/stream_buffer.c **** 	be written to without generating exceptions, and is setting the buffer to a
+1217:FreeRTOS/Src/stream_buffer.c **** 	known value to assist in development/debugging. */
+1218:FreeRTOS/Src/stream_buffer.c **** 	#if( configASSERT_DEFINED == 1 )
+1219:FreeRTOS/Src/stream_buffer.c **** 	{
+1220:FreeRTOS/Src/stream_buffer.c **** 		/* The value written just has to be identifiable when looking at the
+1221:FreeRTOS/Src/stream_buffer.c **** 		memory.  Don't use 0xA5 as that is the stack fill value and could
+1222:FreeRTOS/Src/stream_buffer.c **** 		result in confusion as to what is actually being observed. */
+1223:FreeRTOS/Src/stream_buffer.c **** 		const BaseType_t xWriteValue = 0x55;
+1224:FreeRTOS/Src/stream_buffer.c **** 		configASSERT( memset( pucBuffer, ( int ) xWriteValue, xBufferSizeBytes ) == pucBuffer );
+1225:FreeRTOS/Src/stream_buffer.c **** 	} /*lint !e529 !e438 xWriteValue is only used if configASSERT() is defined. */
+1226:FreeRTOS/Src/stream_buffer.c **** 	#endif
+1227:FreeRTOS/Src/stream_buffer.c **** 
+1228:FreeRTOS/Src/stream_buffer.c **** 	( void ) memset( ( void * ) pxStreamBuffer, 0x00, sizeof( StreamBuffer_t ) ); /*lint !e9087 memset
+  80              		.loc 1 1228 0
+  81 000a 2022     		movs	r2, #32
+  82              	.LVL6:
+  83 000c 0021     		movs	r1, #0
+  84              	.LVL7:
+  85 000e FFF7FEFF 		bl	memset
+  86              	.LVL8:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 24
+
+
+1229:FreeRTOS/Src/stream_buffer.c **** 	pxStreamBuffer->pucBuffer = pucBuffer;
+  87              		.loc 1 1229 0
+  88 0012 A761     		str	r7, [r4, #24]
+1230:FreeRTOS/Src/stream_buffer.c **** 	pxStreamBuffer->xLength = xBufferSizeBytes;
+  89              		.loc 1 1230 0
+  90 0014 A660     		str	r6, [r4, #8]
+1231:FreeRTOS/Src/stream_buffer.c **** 	pxStreamBuffer->xTriggerLevelBytes = xTriggerLevelBytes;
+  91              		.loc 1 1231 0
+  92 0016 E560     		str	r5, [r4, #12]
+1232:FreeRTOS/Src/stream_buffer.c **** 	pxStreamBuffer->ucFlags = ucFlags;
+  93              		.loc 1 1232 0
+  94 0018 9DF81830 		ldrb	r3, [sp, #24]	@ zero_extendqisi2
+  95 001c 2377     		strb	r3, [r4, #28]
+  96 001e F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+  97              		.cfi_endproc
+  98              	.LFE52:
+ 100              		.section	.text.prvWriteBytesToBuffer,"ax",%progbits
+ 101              		.align	2
+ 102              		.thumb
+ 103              		.thumb_func
+ 105              	prvWriteBytesToBuffer:
+ 106              	.LFB49:
+1089:FreeRTOS/Src/stream_buffer.c **** size_t xNextHead, xFirstLength;
+ 107              		.loc 1 1089 0
+ 108              		.cfi_startproc
+ 109              		@ args = 0, pretend = 0, frame = 0
+ 110              		@ frame_needed = 0, uses_anonymous_args = 0
+ 111              	.LVL9:
+ 112 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 113              	.LCFI1:
+ 114              		.cfi_def_cfa_offset 24
+ 115              		.cfi_offset 4, -24
+ 116              		.cfi_offset 5, -20
+ 117              		.cfi_offset 6, -16
+ 118              		.cfi_offset 7, -12
+ 119              		.cfi_offset 8, -8
+ 120              		.cfi_offset 14, -4
+ 121 0004 0646     		mov	r6, r0
+ 122 0006 8846     		mov	r8, r1
+ 123 0008 1746     		mov	r7, r2
+1094:FreeRTOS/Src/stream_buffer.c **** 
+ 124              		.loc 1 1094 0
+ 125 000a 4468     		ldr	r4, [r0, #4]
+ 126              	.LVL10:
+1099:FreeRTOS/Src/stream_buffer.c **** 
+ 127              		.loc 1 1099 0
+ 128 000c 8568     		ldr	r5, [r0, #8]
+ 129 000e 2D1B     		subs	r5, r5, r4
+ 130 0010 9542     		cmp	r5, r2
+ 131 0012 28BF     		it	cs
+ 132 0014 1546     		movcs	r5, r2
+ 133              	.LVL11:
+1103:FreeRTOS/Src/stream_buffer.c **** 
+ 134              		.loc 1 1103 0
+ 135 0016 8069     		ldr	r0, [r0, #24]
+ 136              	.LVL12:
+ 137 0018 2A46     		mov	r2, r5
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 25
+
+
+ 138              	.LVL13:
+ 139 001a 2044     		add	r0, r0, r4
+ 140 001c FFF7FEFF 		bl	memcpy
+ 141              	.LVL14:
+1107:FreeRTOS/Src/stream_buffer.c **** 	{
+ 142              		.loc 1 1107 0
+ 143 0020 AF42     		cmp	r7, r5
+ 144 0022 05D9     		bls	.L6
+1111:FreeRTOS/Src/stream_buffer.c **** 	}
+ 145              		.loc 1 1111 0
+ 146 0024 7A1B     		subs	r2, r7, r5
+ 147 0026 08EB0501 		add	r1, r8, r5
+ 148 002a B069     		ldr	r0, [r6, #24]
+ 149 002c FFF7FEFF 		bl	memcpy
+ 150              	.LVL15:
+ 151              	.L6:
+1118:FreeRTOS/Src/stream_buffer.c **** 	if( xNextHead >= pxStreamBuffer->xLength )
+ 152              		.loc 1 1118 0
+ 153 0030 E319     		adds	r3, r4, r7
+ 154              	.LVL16:
+1119:FreeRTOS/Src/stream_buffer.c **** 	{
+ 155              		.loc 1 1119 0
+ 156 0032 B268     		ldr	r2, [r6, #8]
+ 157 0034 9342     		cmp	r3, r2
+ 158 0036 00D3     		bcc	.L7
+1121:FreeRTOS/Src/stream_buffer.c **** 	}
+ 159              		.loc 1 1121 0
+ 160 0038 9B1A     		subs	r3, r3, r2
+ 161              	.LVL17:
+ 162              	.L7:
+1128:FreeRTOS/Src/stream_buffer.c **** 
+ 163              		.loc 1 1128 0
+ 164 003a 7360     		str	r3, [r6, #4]
+1131:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 165              		.loc 1 1131 0
+ 166 003c 3846     		mov	r0, r7
+ 167 003e BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 168              		.cfi_endproc
+ 169              	.LFE49:
+ 171 0042 00BF     		.section	.text.prvWriteMessageToBuffer,"ax",%progbits
+ 172              		.align	2
+ 173              		.thumb
+ 174              		.thumb_func
+ 176              	prvWriteMessageToBuffer:
+ 177              	.LFB40:
+ 666:FreeRTOS/Src/stream_buffer.c **** 	BaseType_t xShouldWrite;
+ 178              		.loc 1 666 0
+ 179              		.cfi_startproc
+ 180              		@ args = 4, pretend = 0, frame = 8
+ 181              		@ frame_needed = 0, uses_anonymous_args = 0
+ 182              	.LVL18:
+ 183 0000 30B5     		push	{r4, r5, lr}
+ 184              	.LCFI2:
+ 185              		.cfi_def_cfa_offset 12
+ 186              		.cfi_offset 4, -12
+ 187              		.cfi_offset 5, -8
+ 188              		.cfi_offset 14, -4
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 26
+
+
+ 189 0002 83B0     		sub	sp, sp, #12
+ 190              	.LCFI3:
+ 191              		.cfi_def_cfa_offset 24
+ 192 0004 0446     		mov	r4, r0
+ 193 0006 0D46     		mov	r5, r1
+ 194 0008 0192     		str	r2, [sp, #4]
+ 670:FreeRTOS/Src/stream_buffer.c **** 	{
+ 195              		.loc 1 670 0
+ 196 000a ABB1     		cbz	r3, .L13
+ 197 000c 1A46     		mov	r2, r3
+ 198              	.LVL19:
+ 676:FreeRTOS/Src/stream_buffer.c **** 	{
+ 199              		.loc 1 676 0
+ 200 000e 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
+ 201              	.LVL20:
+ 202 0010 13F0010F 		tst	r3, #1
+ 203 0014 06D1     		bne	.L11
+ 204              	.LVL21:
+ 682:FreeRTOS/Src/stream_buffer.c **** 	}
+ 205              		.loc 1 682 0
+ 206 0016 019B     		ldr	r3, [sp, #4]
+ 207 0018 9A42     		cmp	r2, r3
+ 208 001a 28BF     		it	cs
+ 209 001c 1A46     		movcs	r2, r3
+ 210              	.LVL22:
+ 211 001e 0192     		str	r2, [sp, #4]
+ 212              	.LVL23:
+ 681:FreeRTOS/Src/stream_buffer.c **** 		xDataLengthBytes = configMIN( xDataLengthBytes, xSpace );
+ 213              		.loc 1 681 0
+ 214 0020 0123     		movs	r3, #1
+ 215              	.LVL24:
+ 216 0022 0CE0     		b	.L10
+ 217              	.LVL25:
+ 218              	.L11:
+ 684:FreeRTOS/Src/stream_buffer.c **** 	{
+ 219              		.loc 1 684 0
+ 220 0024 069B     		ldr	r3, [sp, #24]
+ 221 0026 9A42     		cmp	r2, r3
+ 222 0028 08D3     		bcc	.L14
+ 223              	.LVL26:
+ 691:FreeRTOS/Src/stream_buffer.c **** 	}
+ 224              		.loc 1 691 0
+ 225 002a 0422     		movs	r2, #4
+ 226              	.LVL27:
+ 227 002c 0DEB0201 		add	r1, sp, r2
+ 228              	.LVL28:
+ 229 0030 FFF7FEFF 		bl	prvWriteBytesToBuffer
+ 230              	.LVL29:
+ 690:FreeRTOS/Src/stream_buffer.c **** 		( void ) prvWriteBytesToBuffer( pxStreamBuffer, ( const uint8_t * ) &( xDataLengthBytes ), sbBYTE
+ 231              		.loc 1 690 0
+ 232 0034 0123     		movs	r3, #1
+ 233 0036 02E0     		b	.L10
+ 234              	.LVL30:
+ 235              	.L13:
+ 674:FreeRTOS/Src/stream_buffer.c **** 	}
+ 236              		.loc 1 674 0
+ 237 0038 0023     		movs	r3, #0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 27
+
+
+ 238              	.LVL31:
+ 239 003a 00E0     		b	.L10
+ 240              	.LVL32:
+ 241              	.L14:
+ 696:FreeRTOS/Src/stream_buffer.c **** 	}
+ 242              		.loc 1 696 0
+ 243 003c 0023     		movs	r3, #0
+ 244              	.LVL33:
+ 245              	.L10:
+ 699:FreeRTOS/Src/stream_buffer.c **** 	{
+ 246              		.loc 1 699 0
+ 247 003e 2BB1     		cbz	r3, .L15
+ 702:FreeRTOS/Src/stream_buffer.c **** 	}
+ 248              		.loc 1 702 0
+ 249 0040 019A     		ldr	r2, [sp, #4]
+ 250 0042 2946     		mov	r1, r5
+ 251 0044 2046     		mov	r0, r4
+ 252 0046 FFF7FEFF 		bl	prvWriteBytesToBuffer
+ 253              	.LVL34:
+ 254 004a 00E0     		b	.L12
+ 255              	.LVL35:
+ 256              	.L15:
+ 706:FreeRTOS/Src/stream_buffer.c **** 	}
+ 257              		.loc 1 706 0
+ 258 004c 0020     		movs	r0, #0
+ 259              	.LVL36:
+ 260              	.L12:
+ 710:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 261              		.loc 1 710 0
+ 262 004e 03B0     		add	sp, sp, #12
+ 263              	.LCFI4:
+ 264              		.cfi_def_cfa_offset 12
+ 265              		@ sp needed
+ 266 0050 30BD     		pop	{r4, r5, pc}
+ 267              		.cfi_endproc
+ 268              	.LFE40:
+ 270              		.section	.text.prvReadBytesFromBuffer,"ax",%progbits
+ 271              		.align	2
+ 272              		.thumb
+ 273              		.thumb_func
+ 275              	prvReadBytesFromBuffer:
+ 276              	.LFB50:
+1135:FreeRTOS/Src/stream_buffer.c **** size_t xCount, xFirstLength, xNextTail;
+ 277              		.loc 1 1135 0
+ 278              		.cfi_startproc
+ 279              		@ args = 0, pretend = 0, frame = 0
+ 280              		@ frame_needed = 0, uses_anonymous_args = 0
+ 281              	.LVL37:
+ 282 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 283              	.LCFI5:
+ 284              		.cfi_def_cfa_offset 24
+ 285              		.cfi_offset 4, -24
+ 286              		.cfi_offset 5, -20
+ 287              		.cfi_offset 6, -16
+ 288              		.cfi_offset 7, -12
+ 289              		.cfi_offset 8, -8
+ 290              		.cfi_offset 14, -4
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 28
+
+
+1139:FreeRTOS/Src/stream_buffer.c **** 
+ 291              		.loc 1 1139 0
+ 292 0004 9A42     		cmp	r2, r3
+ 293 0006 28BF     		it	cs
+ 294 0008 1A46     		movcs	r2, r3
+ 295              	.LVL38:
+ 296 000a 1446     		mov	r4, r2
+ 297              	.LVL39:
+1141:FreeRTOS/Src/stream_buffer.c **** 	{
+ 298              		.loc 1 1141 0
+ 299 000c DAB1     		cbz	r2, .L18
+ 300 000e 8846     		mov	r8, r1
+ 301 0010 0546     		mov	r5, r0
+1143:FreeRTOS/Src/stream_buffer.c **** 
+ 302              		.loc 1 1143 0
+ 303 0012 0668     		ldr	r6, [r0]
+ 304              	.LVL40:
+1148:FreeRTOS/Src/stream_buffer.c **** 
+ 305              		.loc 1 1148 0
+ 306 0014 8768     		ldr	r7, [r0, #8]
+ 307 0016 BF1B     		subs	r7, r7, r6
+ 308 0018 9742     		cmp	r7, r2
+ 309 001a 28BF     		it	cs
+ 310 001c 1746     		movcs	r7, r2
+ 311              	.LVL41:
+1154:FreeRTOS/Src/stream_buffer.c **** 
+ 312              		.loc 1 1154 0
+ 313 001e 8169     		ldr	r1, [r0, #24]
+ 314              	.LVL42:
+ 315 0020 3A46     		mov	r2, r7
+ 316              	.LVL43:
+ 317 0022 3144     		add	r1, r1, r6
+ 318 0024 4046     		mov	r0, r8
+ 319              	.LVL44:
+ 320 0026 FFF7FEFF 		bl	memcpy
+ 321              	.LVL45:
+1158:FreeRTOS/Src/stream_buffer.c **** 		{
+ 322              		.loc 1 1158 0
+ 323 002a BC42     		cmp	r4, r7
+ 324 002c 05D9     		bls	.L19
+1162:FreeRTOS/Src/stream_buffer.c **** 		}
+ 325              		.loc 1 1162 0
+ 326 002e E21B     		subs	r2, r4, r7
+ 327 0030 A969     		ldr	r1, [r5, #24]
+ 328 0032 08EB0700 		add	r0, r8, r7
+ 329 0036 FFF7FEFF 		bl	memcpy
+ 330              	.LVL46:
+ 331              	.L19:
+1171:FreeRTOS/Src/stream_buffer.c **** 
+ 332              		.loc 1 1171 0
+ 333 003a 2644     		add	r6, r6, r4
+ 334              	.LVL47:
+1173:FreeRTOS/Src/stream_buffer.c **** 		{
+ 335              		.loc 1 1173 0
+ 336 003c AB68     		ldr	r3, [r5, #8]
+ 337 003e 9E42     		cmp	r6, r3
+ 338 0040 00D3     		bcc	.L20
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 29
+
+
+1175:FreeRTOS/Src/stream_buffer.c **** 		}
+ 339              		.loc 1 1175 0
+ 340 0042 F61A     		subs	r6, r6, r3
+ 341              	.LVL48:
+ 342              	.L20:
+1178:FreeRTOS/Src/stream_buffer.c **** 	}
+ 343              		.loc 1 1178 0
+ 344 0044 2E60     		str	r6, [r5]
+ 345              	.LVL49:
+ 346              	.L18:
+1186:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 347              		.loc 1 1186 0
+ 348 0046 2046     		mov	r0, r4
+ 349 0048 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 350              		.cfi_endproc
+ 351              	.LFE50:
+ 353              		.section	.text.prvReadMessageFromBuffer,"ax",%progbits
+ 354              		.align	2
+ 355              		.thumb
+ 356              		.thumb_func
+ 358              	prvReadMessageFromBuffer:
+ 359              	.LFB44:
+ 923:FreeRTOS/Src/stream_buffer.c **** size_t xOriginalTail, xReceivedLength, xNextMessageLength;
+ 360              		.loc 1 923 0
+ 361              		.cfi_startproc
+ 362              		@ args = 4, pretend = 0, frame = 8
+ 363              		@ frame_needed = 0, uses_anonymous_args = 0
+ 364              	.LVL50:
+ 365 0000 2DE9F043 		push	{r4, r5, r6, r7, r8, r9, lr}
+ 366              	.LCFI6:
+ 367              		.cfi_def_cfa_offset 28
+ 368              		.cfi_offset 4, -28
+ 369              		.cfi_offset 5, -24
+ 370              		.cfi_offset 6, -20
+ 371              		.cfi_offset 7, -16
+ 372              		.cfi_offset 8, -12
+ 373              		.cfi_offset 9, -8
+ 374              		.cfi_offset 14, -4
+ 375 0004 83B0     		sub	sp, sp, #12
+ 376              	.LCFI7:
+ 377              		.cfi_def_cfa_offset 40
+ 378 0006 0546     		mov	r5, r0
+ 379 0008 8846     		mov	r8, r1
+ 380 000a 1646     		mov	r6, r2
+ 381 000c 1C46     		mov	r4, r3
+ 382 000e 0A9F     		ldr	r7, [sp, #40]
+ 927:FreeRTOS/Src/stream_buffer.c **** 	{
+ 383              		.loc 1 927 0
+ 384 0010 77B1     		cbz	r7, .L23
+ 933:FreeRTOS/Src/stream_buffer.c **** 		( void ) prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) &xTempNextMessageLength, xBytesToS
+ 385              		.loc 1 933 0
+ 386 0012 D0F80090 		ldr	r9, [r0]
+ 387              	.LVL51:
+ 934:FreeRTOS/Src/stream_buffer.c **** 		xNextMessageLength = ( size_t ) xTempNextMessageLength;
+ 388              		.loc 1 934 0
+ 389 0016 3A46     		mov	r2, r7
+ 390              	.LVL52:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 30
+
+
+ 391 0018 01A9     		add	r1, sp, #4
+ 392              	.LVL53:
+ 393 001a FFF7FEFF 		bl	prvReadBytesFromBuffer
+ 394              	.LVL54:
+ 935:FreeRTOS/Src/stream_buffer.c **** 
+ 395              		.loc 1 935 0
+ 396 001e 019B     		ldr	r3, [sp, #4]
+ 397              	.LVL55:
+ 939:FreeRTOS/Src/stream_buffer.c **** 
+ 398              		.loc 1 939 0
+ 399 0020 E41B     		subs	r4, r4, r7
+ 400              	.LVL56:
+ 943:FreeRTOS/Src/stream_buffer.c **** 		{
+ 401              		.loc 1 943 0
+ 402 0022 B342     		cmp	r3, r6
+ 403 0024 03D9     		bls	.L24
+ 948:FreeRTOS/Src/stream_buffer.c **** 			xNextMessageLength = 0;
+ 404              		.loc 1 948 0
+ 405 0026 C5F80090 		str	r9, [r5]
+ 406              	.LVL57:
+ 949:FreeRTOS/Src/stream_buffer.c **** 		}
+ 407              		.loc 1 949 0
+ 408 002a 0026     		movs	r6, #0
+ 409              	.LVL58:
+ 410 002c 00E0     		b	.L23
+ 411              	.LVL59:
+ 412              	.L24:
+ 935:FreeRTOS/Src/stream_buffer.c **** 
+ 413              		.loc 1 935 0
+ 414 002e 1E46     		mov	r6, r3
+ 415              	.LVL60:
+ 416              	.L23:
+ 964:FreeRTOS/Src/stream_buffer.c **** 
+ 417              		.loc 1 964 0
+ 418 0030 2346     		mov	r3, r4
+ 419 0032 3246     		mov	r2, r6
+ 420 0034 4146     		mov	r1, r8
+ 421 0036 2846     		mov	r0, r5
+ 422 0038 FFF7FEFF 		bl	prvReadBytesFromBuffer
+ 423              	.LVL61:
+ 967:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 424              		.loc 1 967 0
+ 425 003c 03B0     		add	sp, sp, #12
+ 426              	.LCFI8:
+ 427              		.cfi_def_cfa_offset 28
+ 428              		@ sp needed
+ 429 003e BDE8F083 		pop	{r4, r5, r6, r7, r8, r9, pc}
+ 430              		.cfi_endproc
+ 431              	.LFE44:
+ 433 0042 00BF     		.section	.text.xStreamBufferGenericCreate,"ax",%progbits
+ 434              		.align	2
+ 435              		.global	xStreamBufferGenericCreate
+ 436              		.thumb
+ 437              		.thumb_func
+ 439              	xStreamBufferGenericCreate:
+ 440              	.LFB32:
+ 220:FreeRTOS/Src/stream_buffer.c **** 	uint8_t *pucAllocatedMemory;
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 31
+
+
+ 441              		.loc 1 220 0
+ 442              		.cfi_startproc
+ 443              		@ args = 0, pretend = 0, frame = 0
+ 444              		@ frame_needed = 0, uses_anonymous_args = 0
+ 445              	.LVL62:
+ 446 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 447              	.LCFI9:
+ 448              		.cfi_def_cfa_offset 20
+ 449              		.cfi_offset 4, -20
+ 450              		.cfi_offset 5, -16
+ 451              		.cfi_offset 6, -12
+ 452              		.cfi_offset 7, -8
+ 453              		.cfi_offset 14, -4
+ 454 0002 83B0     		sub	sp, sp, #12
+ 455              	.LCFI10:
+ 456              		.cfi_def_cfa_offset 32
+ 457 0004 0D46     		mov	r5, r1
+ 228:FreeRTOS/Src/stream_buffer.c **** 		{
+ 458              		.loc 1 228 0
+ 459 0006 012A     		cmp	r2, #1
+ 460 0008 01D1     		bne	.L30
+ 231:FreeRTOS/Src/stream_buffer.c **** 			configASSERT( xBufferSizeBytes > sbBYTES_TO_STORE_MESSAGE_LENGTH );
+ 461              		.loc 1 231 0
+ 462 000a 0127     		movs	r7, #1
+ 463 000c 00E0     		b	.L27
+ 464              	.L30:
+ 237:FreeRTOS/Src/stream_buffer.c **** 			configASSERT( xBufferSizeBytes > 0 );
+ 465              		.loc 1 237 0
+ 466 000e 0027     		movs	r7, #0
+ 467              	.L27:
+ 468              	.LVL63:
+ 244:FreeRTOS/Src/stream_buffer.c **** 		{
+ 469              		.loc 1 244 0
+ 470 0010 05B9     		cbnz	r5, .L28
+ 246:FreeRTOS/Src/stream_buffer.c **** 		}
+ 471              		.loc 1 246 0
+ 472 0012 0125     		movs	r5, #1
+ 473              	.L28:
+ 474              	.LVL64:
+ 257:FreeRTOS/Src/stream_buffer.c **** 		pucAllocatedMemory = ( uint8_t * ) pvPortMalloc( xBufferSizeBytes + sizeof( StreamBuffer_t ) ); /
+ 475              		.loc 1 257 0
+ 476 0014 461C     		adds	r6, r0, #1
+ 477              	.LVL65:
+ 258:FreeRTOS/Src/stream_buffer.c **** 
+ 478              		.loc 1 258 0
+ 479 0016 2130     		adds	r0, r0, #33
+ 480 0018 FFF7FEFF 		bl	pvPortMalloc
+ 481              	.LVL66:
+ 260:FreeRTOS/Src/stream_buffer.c **** 		{
+ 482              		.loc 1 260 0
+ 483 001c 0446     		mov	r4, r0
+ 484 001e 30B1     		cbz	r0, .L29
+ 262:FreeRTOS/Src/stream_buffer.c **** 										   pucAllocatedMemory + sizeof( StreamBuffer_t ),  /* Storage area follows. */ /*lint !e9
+ 485              		.loc 1 262 0
+ 486 0020 0097     		str	r7, [sp]
+ 487 0022 2B46     		mov	r3, r5
+ 488 0024 3246     		mov	r2, r6
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 32
+
+
+ 489 0026 00F12001 		add	r1, r0, #32
+ 490 002a FFF7FEFF 		bl	prvInitialiseNewStreamBuffer
+ 491              	.LVL67:
+ 492              	.L29:
+ 276:FreeRTOS/Src/stream_buffer.c **** 
+ 493              		.loc 1 276 0
+ 494 002e 2046     		mov	r0, r4
+ 495 0030 03B0     		add	sp, sp, #12
+ 496              	.LCFI11:
+ 497              		.cfi_def_cfa_offset 20
+ 498              		@ sp needed
+ 499 0032 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 500              		.cfi_endproc
+ 501              	.LFE32:
+ 503              		.section	.text.vStreamBufferDelete,"ax",%progbits
+ 504              		.align	2
+ 505              		.global	vStreamBufferDelete
+ 506              		.thumb
+ 507              		.thumb_func
+ 509              	vStreamBufferDelete:
+ 510              	.LFB33:
+ 360:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * pxStreamBuffer = xStreamBuffer;
+ 511              		.loc 1 360 0
+ 512              		.cfi_startproc
+ 513              		@ args = 0, pretend = 0, frame = 0
+ 514              		@ frame_needed = 0, uses_anonymous_args = 0
+ 515              	.LVL68:
+ 516 0000 08B5     		push	{r3, lr}
+ 517              	.LCFI12:
+ 518              		.cfi_def_cfa_offset 8
+ 519              		.cfi_offset 3, -8
+ 520              		.cfi_offset 14, -4
+ 521              	.LVL69:
+ 367:FreeRTOS/Src/stream_buffer.c **** 	{
+ 522              		.loc 1 367 0
+ 523 0002 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
+ 524 0004 13F0020F 		tst	r3, #2
+ 525 0008 02D1     		bne	.L34
+ 373:FreeRTOS/Src/stream_buffer.c **** 		}
+ 526              		.loc 1 373 0
+ 527 000a FFF7FEFF 		bl	vPortFree
+ 528              	.LVL70:
+ 529 000e 08BD     		pop	{r3, pc}
+ 530              	.LVL71:
+ 531              	.L34:
+ 387:FreeRTOS/Src/stream_buffer.c **** 	}
+ 532              		.loc 1 387 0
+ 533 0010 2022     		movs	r2, #32
+ 534 0012 0021     		movs	r1, #0
+ 535 0014 FFF7FEFF 		bl	memset
+ 536              	.LVL72:
+ 537 0018 08BD     		pop	{r3, pc}
+ 538              		.cfi_endproc
+ 539              	.LFE33:
+ 541 001a 00BF     		.section	.text.xStreamBufferReset,"ax",%progbits
+ 542              		.align	2
+ 543              		.global	xStreamBufferReset
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 33
+
+
+ 544              		.thumb
+ 545              		.thumb_func
+ 547              	xStreamBufferReset:
+ 548              	.LFB34:
+ 393:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 549              		.loc 1 393 0
+ 550              		.cfi_startproc
+ 551              		@ args = 0, pretend = 0, frame = 0
+ 552              		@ frame_needed = 0, uses_anonymous_args = 0
+ 553              	.LVL73:
+ 554 0000 10B5     		push	{r4, lr}
+ 555              	.LCFI13:
+ 556              		.cfi_def_cfa_offset 8
+ 557              		.cfi_offset 4, -8
+ 558              		.cfi_offset 14, -4
+ 559 0002 82B0     		sub	sp, sp, #8
+ 560              	.LCFI14:
+ 561              		.cfi_def_cfa_offset 16
+ 562 0004 0446     		mov	r4, r0
+ 563              	.LVL74:
+ 412:FreeRTOS/Src/stream_buffer.c **** 	{
+ 564              		.loc 1 412 0
+ 565 0006 FFF7FEFF 		bl	vPortEnterCritical
+ 566              	.LVL75:
+ 414:FreeRTOS/Src/stream_buffer.c **** 		{
+ 567              		.loc 1 414 0
+ 568 000a 2369     		ldr	r3, [r4, #16]
+ 569 000c 5BB9     		cbnz	r3, .L39
+ 416:FreeRTOS/Src/stream_buffer.c **** 			{
+ 570              		.loc 1 416 0
+ 571 000e 6369     		ldr	r3, [r4, #20]
+ 572 0010 5BB9     		cbnz	r3, .L40
+ 418:FreeRTOS/Src/stream_buffer.c **** 											  pxStreamBuffer->pucBuffer,
+ 573              		.loc 1 418 0
+ 574 0012 237F     		ldrb	r3, [r4, #28]	@ zero_extendqisi2
+ 575 0014 0093     		str	r3, [sp]
+ 576 0016 E368     		ldr	r3, [r4, #12]
+ 577 0018 A268     		ldr	r2, [r4, #8]
+ 578 001a A169     		ldr	r1, [r4, #24]
+ 579 001c 2046     		mov	r0, r4
+ 580 001e FFF7FEFF 		bl	prvInitialiseNewStreamBuffer
+ 581              	.LVL76:
+ 423:FreeRTOS/Src/stream_buffer.c **** 
+ 582              		.loc 1 423 0
+ 583 0022 0124     		movs	r4, #1
+ 584              	.LVL77:
+ 585 0024 02E0     		b	.L38
+ 586              	.LVL78:
+ 587              	.L39:
+ 395:FreeRTOS/Src/stream_buffer.c **** 
+ 588              		.loc 1 395 0
+ 589 0026 0024     		movs	r4, #0
+ 590              	.LVL79:
+ 591 0028 00E0     		b	.L38
+ 592              	.LVL80:
+ 593              	.L40:
+ 594 002a 0024     		movs	r4, #0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 34
+
+
+ 595              	.LVL81:
+ 596              	.L38:
+ 435:FreeRTOS/Src/stream_buffer.c **** 
+ 597              		.loc 1 435 0
+ 598 002c FFF7FEFF 		bl	vPortExitCritical
+ 599              	.LVL82:
+ 438:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 600              		.loc 1 438 0
+ 601 0030 2046     		mov	r0, r4
+ 602 0032 02B0     		add	sp, sp, #8
+ 603              	.LCFI15:
+ 604              		.cfi_def_cfa_offset 8
+ 605              		@ sp needed
+ 606 0034 10BD     		pop	{r4, pc}
+ 607              		.cfi_endproc
+ 608              	.LFE34:
+ 610 0036 00BF     		.section	.text.xStreamBufferSetTriggerLevel,"ax",%progbits
+ 611              		.align	2
+ 612              		.global	xStreamBufferSetTriggerLevel
+ 613              		.thumb
+ 614              		.thumb_func
+ 616              	xStreamBufferSetTriggerLevel:
+ 617              	.LFB35:
+ 442:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 618              		.loc 1 442 0
+ 619              		.cfi_startproc
+ 620              		@ args = 0, pretend = 0, frame = 0
+ 621              		@ frame_needed = 0, uses_anonymous_args = 0
+ 622              		@ link register save eliminated.
+ 623              	.LVL83:
+ 449:FreeRTOS/Src/stream_buffer.c **** 	{
+ 624              		.loc 1 449 0
+ 625 0000 0B46     		mov	r3, r1
+ 626 0002 01B9     		cbnz	r1, .L43
+ 451:FreeRTOS/Src/stream_buffer.c **** 	}
+ 627              		.loc 1 451 0
+ 628 0004 0123     		movs	r3, #1
+ 629              	.L43:
+ 630              	.LVL84:
+ 456:FreeRTOS/Src/stream_buffer.c **** 	{
+ 631              		.loc 1 456 0
+ 632 0006 8268     		ldr	r2, [r0, #8]
+ 633 0008 9342     		cmp	r3, r2
+ 634 000a 02D8     		bhi	.L46
+ 458:FreeRTOS/Src/stream_buffer.c **** 		xReturn = pdPASS;
+ 635              		.loc 1 458 0
+ 636 000c C360     		str	r3, [r0, #12]
+ 637              	.LVL85:
+ 459:FreeRTOS/Src/stream_buffer.c **** 	}
+ 638              		.loc 1 459 0
+ 639 000e 0120     		movs	r0, #1
+ 640              	.LVL86:
+ 641 0010 7047     		bx	lr
+ 642              	.LVL87:
+ 643              	.L46:
+ 463:FreeRTOS/Src/stream_buffer.c **** 	}
+ 644              		.loc 1 463 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 35
+
+
+ 645 0012 0020     		movs	r0, #0
+ 646              	.LVL88:
+ 467:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 647              		.loc 1 467 0
+ 648 0014 7047     		bx	lr
+ 649              		.cfi_endproc
+ 650              	.LFE35:
+ 652 0016 00BF     		.section	.text.xStreamBufferSpacesAvailable,"ax",%progbits
+ 653              		.align	2
+ 654              		.global	xStreamBufferSpacesAvailable
+ 655              		.thumb
+ 656              		.thumb_func
+ 658              	xStreamBufferSpacesAvailable:
+ 659              	.LFB36:
+ 471:FreeRTOS/Src/stream_buffer.c **** const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 660              		.loc 1 471 0
+ 661              		.cfi_startproc
+ 662              		@ args = 0, pretend = 0, frame = 0
+ 663              		@ frame_needed = 0, uses_anonymous_args = 0
+ 664              		@ link register save eliminated.
+ 665              	.LVL89:
+ 477:FreeRTOS/Src/stream_buffer.c **** 	xSpace -= pxStreamBuffer->xHead;
+ 666              		.loc 1 477 0
+ 667 0000 8268     		ldr	r2, [r0, #8]
+ 668 0002 0368     		ldr	r3, [r0]
+ 669 0004 1344     		add	r3, r3, r2
+ 670              	.LVL90:
+ 478:FreeRTOS/Src/stream_buffer.c **** 	xSpace -= ( size_t ) 1;
+ 671              		.loc 1 478 0
+ 672 0006 4068     		ldr	r0, [r0, #4]
+ 673              	.LVL91:
+ 674 0008 181A     		subs	r0, r3, r0
+ 675              	.LVL92:
+ 479:FreeRTOS/Src/stream_buffer.c **** 
+ 676              		.loc 1 479 0
+ 677 000a 0138     		subs	r0, r0, #1
+ 678              	.LVL93:
+ 481:FreeRTOS/Src/stream_buffer.c **** 	{
+ 679              		.loc 1 481 0
+ 680 000c 8242     		cmp	r2, r0
+ 681 000e 00D8     		bhi	.L48
+ 483:FreeRTOS/Src/stream_buffer.c **** 	}
+ 682              		.loc 1 483 0
+ 683 0010 801A     		subs	r0, r0, r2
+ 684              	.LVL94:
+ 685              	.L48:
+ 491:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 686              		.loc 1 491 0
+ 687 0012 7047     		bx	lr
+ 688              		.cfi_endproc
+ 689              	.LFE36:
+ 691              		.section	.text.xStreamBufferBytesAvailable,"ax",%progbits
+ 692              		.align	2
+ 693              		.global	xStreamBufferBytesAvailable
+ 694              		.thumb
+ 695              		.thumb_func
+ 697              	xStreamBufferBytesAvailable:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 36
+
+
+ 698              	.LFB37:
+ 495:FreeRTOS/Src/stream_buffer.c **** const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 699              		.loc 1 495 0
+ 700              		.cfi_startproc
+ 701              		@ args = 0, pretend = 0, frame = 0
+ 702              		@ frame_needed = 0, uses_anonymous_args = 0
+ 703              	.LVL95:
+ 704 0000 08B5     		push	{r3, lr}
+ 705              	.LCFI16:
+ 706              		.cfi_def_cfa_offset 8
+ 707              		.cfi_offset 3, -8
+ 708              		.cfi_offset 14, -4
+ 709              	.LVL96:
+ 501:FreeRTOS/Src/stream_buffer.c **** 	return xReturn;
+ 710              		.loc 1 501 0
+ 711 0002 FFF7FEFF 		bl	prvBytesInBuffer
+ 712              	.LVL97:
+ 503:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 713              		.loc 1 503 0
+ 714 0006 08BD     		pop	{r3, pc}
+ 715              		.cfi_endproc
+ 716              	.LFE37:
+ 718              		.section	.text.xStreamBufferSend,"ax",%progbits
+ 719              		.align	2
+ 720              		.global	xStreamBufferSend
+ 721              		.thumb
+ 722              		.thumb_func
+ 724              	xStreamBufferSend:
+ 725              	.LFB38:
+ 510:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 726              		.loc 1 510 0
+ 727              		.cfi_startproc
+ 728              		@ args = 0, pretend = 0, frame = 16
+ 729              		@ frame_needed = 0, uses_anonymous_args = 0
+ 730              	.LVL98:
+ 731 0000 2DE9F043 		push	{r4, r5, r6, r7, r8, r9, lr}
+ 732              	.LCFI17:
+ 733              		.cfi_def_cfa_offset 28
+ 734              		.cfi_offset 4, -28
+ 735              		.cfi_offset 5, -24
+ 736              		.cfi_offset 6, -20
+ 737              		.cfi_offset 7, -16
+ 738              		.cfi_offset 8, -12
+ 739              		.cfi_offset 9, -8
+ 740              		.cfi_offset 14, -4
+ 741 0004 87B0     		sub	sp, sp, #28
+ 742              	.LCFI18:
+ 743              		.cfi_def_cfa_offset 56
+ 744 0006 0446     		mov	r4, r0
+ 745 0008 8946     		mov	r9, r1
+ 746 000a 9046     		mov	r8, r2
+ 747 000c 0393     		str	r3, [sp, #12]
+ 748              	.LVL99:
+ 523:FreeRTOS/Src/stream_buffer.c **** 	{
+ 749              		.loc 1 523 0
+ 750 000e 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
+ 751              	.LVL100:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 37
+
+
+ 752 0010 13F0010F 		tst	r3, #1
+ 753 0014 01D0     		beq	.L59
+ 525:FreeRTOS/Src/stream_buffer.c **** 
+ 754              		.loc 1 525 0
+ 755 0016 171D     		adds	r7, r2, #4
+ 756              	.LVL101:
+ 757 0018 00E0     		b	.L52
+ 758              	.LVL102:
+ 759              	.L59:
+ 513:FreeRTOS/Src/stream_buffer.c **** TimeOut_t xTimeOut;
+ 760              		.loc 1 513 0
+ 761 001a 1746     		mov	r7, r2
+ 762              	.LVL103:
+ 763              	.L52:
+ 535:FreeRTOS/Src/stream_buffer.c **** 	{
+ 764              		.loc 1 535 0
+ 765 001c 039B     		ldr	r3, [sp, #12]
+ 766 001e 33B3     		cbz	r3, .L60
+ 537:FreeRTOS/Src/stream_buffer.c **** 
+ 767              		.loc 1 537 0
+ 768 0020 04A8     		add	r0, sp, #16
+ 769              	.LVL104:
+ 770 0022 FFF7FEFF 		bl	vTaskSetTimeOutState
+ 771              	.LVL105:
+ 772              	.L55:
+ 543:FreeRTOS/Src/stream_buffer.c **** 			{
+ 773              		.loc 1 543 0
+ 774 0026 FFF7FEFF 		bl	vPortEnterCritical
+ 775              	.LVL106:
+ 545:FreeRTOS/Src/stream_buffer.c **** 
+ 776              		.loc 1 545 0
+ 777 002a 2046     		mov	r0, r4
+ 778 002c FFF7FEFF 		bl	xStreamBufferSpacesAvailable
+ 779              	.LVL107:
+ 780 0030 0646     		mov	r6, r0
+ 781              	.LVL108:
+ 547:FreeRTOS/Src/stream_buffer.c **** 				{
+ 782              		.loc 1 547 0
+ 783 0032 8742     		cmp	r7, r0
+ 784 0034 18D9     		bls	.L54
+ 550:FreeRTOS/Src/stream_buffer.c **** 
+ 785              		.loc 1 550 0
+ 786 0036 0020     		movs	r0, #0
+ 787              	.LVL109:
+ 788 0038 FFF7FEFF 		bl	xTaskNotifyStateClear
+ 789              	.LVL110:
+ 554:FreeRTOS/Src/stream_buffer.c **** 				}
+ 790              		.loc 1 554 0
+ 791 003c FFF7FEFF 		bl	xTaskGetCurrentTaskHandle
+ 792              	.LVL111:
+ 793 0040 6061     		str	r0, [r4, #20]
+ 562:FreeRTOS/Src/stream_buffer.c **** 
+ 794              		.loc 1 562 0
+ 795 0042 FFF7FEFF 		bl	vPortExitCritical
+ 796              	.LVL112:
+ 565:FreeRTOS/Src/stream_buffer.c **** 			pxStreamBuffer->xTaskWaitingToSend = NULL;
+ 797              		.loc 1 565 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 38
+
+
+ 798 0046 06AD     		add	r5, sp, #24
+ 799 0048 55F80C3D 		ldr	r3, [r5, #-12]!
+ 800 004c 0022     		movs	r2, #0
+ 801 004e 1146     		mov	r1, r2
+ 802 0050 1046     		mov	r0, r2
+ 803 0052 FFF7FEFF 		bl	xTaskNotifyWait
+ 804              	.LVL113:
+ 566:FreeRTOS/Src/stream_buffer.c **** 
+ 805              		.loc 1 566 0
+ 806 0056 0023     		movs	r3, #0
+ 807 0058 6361     		str	r3, [r4, #20]
+ 568:FreeRTOS/Src/stream_buffer.c **** 	}
+ 808              		.loc 1 568 0
+ 809 005a 2946     		mov	r1, r5
+ 810 005c 04A8     		add	r0, sp, #16
+ 811 005e FFF7FEFF 		bl	xTaskCheckForTimeOut
+ 812              	.LVL114:
+ 813 0062 0028     		cmp	r0, #0
+ 814 0064 DFD0     		beq	.L55
+ 815 0066 03E0     		b	.L53
+ 816              	.LVL115:
+ 817              	.L54:
+ 558:FreeRTOS/Src/stream_buffer.c **** 					break;
+ 818              		.loc 1 558 0
+ 819 0068 FFF7FEFF 		bl	vPortExitCritical
+ 820              	.LVL116:
+ 559:FreeRTOS/Src/stream_buffer.c **** 				}
+ 821              		.loc 1 559 0
+ 822 006c 00E0     		b	.L53
+ 823              	.LVL117:
+ 824              	.L60:
+ 512:FreeRTOS/Src/stream_buffer.c **** size_t xRequiredSpace = xDataLengthBytes;
+ 825              		.loc 1 512 0
+ 826 006e 0026     		movs	r6, #0
+ 827              	.LVL118:
+ 828              	.L53:
+ 575:FreeRTOS/Src/stream_buffer.c **** 	{
+ 829              		.loc 1 575 0
+ 830 0070 1EB9     		cbnz	r6, .L56
+ 577:FreeRTOS/Src/stream_buffer.c **** 	}
+ 831              		.loc 1 577 0
+ 832 0072 2046     		mov	r0, r4
+ 833 0074 FFF7FEFF 		bl	xStreamBufferSpacesAvailable
+ 834              	.LVL119:
+ 835 0078 0646     		mov	r6, r0
+ 836              	.LVL120:
+ 837              	.L56:
+ 584:FreeRTOS/Src/stream_buffer.c **** 
+ 838              		.loc 1 584 0
+ 839 007a 0097     		str	r7, [sp]
+ 840 007c 3346     		mov	r3, r6
+ 841 007e 4246     		mov	r2, r8
+ 842 0080 4946     		mov	r1, r9
+ 843 0082 2046     		mov	r0, r4
+ 844 0084 FFF7FEFF 		bl	prvWriteMessageToBuffer
+ 845              	.LVL121:
+ 586:FreeRTOS/Src/stream_buffer.c **** 	{
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 39
+
+
+ 846              		.loc 1 586 0
+ 847 0088 0546     		mov	r5, r0
+ 848 008a 98B1     		cbz	r0, .L57
+ 591:FreeRTOS/Src/stream_buffer.c **** 		{
+ 849              		.loc 1 591 0
+ 850 008c 2046     		mov	r0, r4
+ 851              	.LVL122:
+ 852 008e FFF7FEFF 		bl	prvBytesInBuffer
+ 853              	.LVL123:
+ 854 0092 E368     		ldr	r3, [r4, #12]
+ 855 0094 9842     		cmp	r0, r3
+ 856 0096 0DD3     		bcc	.L57
+ 593:FreeRTOS/Src/stream_buffer.c **** 		}
+ 857              		.loc 1 593 0
+ 858 0098 FFF7FEFF 		bl	vTaskSuspendAll
+ 859              	.LVL124:
+ 860 009c 2369     		ldr	r3, [r4, #16]
+ 861 009e 3BB1     		cbz	r3, .L58
+ 593:FreeRTOS/Src/stream_buffer.c **** 		}
+ 862              		.loc 1 593 0 is_stmt 0 discriminator 1
+ 863 00a0 2069     		ldr	r0, [r4, #16]
+ 864 00a2 0023     		movs	r3, #0
+ 865 00a4 1A46     		mov	r2, r3
+ 866 00a6 1946     		mov	r1, r3
+ 867 00a8 FFF7FEFF 		bl	xTaskGenericNotify
+ 868              	.LVL125:
+ 869 00ac 0023     		movs	r3, #0
+ 870 00ae 2361     		str	r3, [r4, #16]
+ 871              	.L58:
+ 593:FreeRTOS/Src/stream_buffer.c **** 		}
+ 872              		.loc 1 593 0 discriminator 3
+ 873 00b0 FFF7FEFF 		bl	xTaskResumeAll
+ 874              	.LVL126:
+ 875              	.L57:
+ 607:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 876              		.loc 1 607 0 is_stmt 1
+ 877 00b4 2846     		mov	r0, r5
+ 878 00b6 07B0     		add	sp, sp, #28
+ 879              	.LCFI19:
+ 880              		.cfi_def_cfa_offset 28
+ 881              		@ sp needed
+ 882 00b8 BDE8F083 		pop	{r4, r5, r6, r7, r8, r9, pc}
+ 883              		.cfi_endproc
+ 884              	.LFE38:
+ 886              		.section	.text.xStreamBufferSendFromISR,"ax",%progbits
+ 887              		.align	2
+ 888              		.global	xStreamBufferSendFromISR
+ 889              		.thumb
+ 890              		.thumb_func
+ 892              	xStreamBufferSendFromISR:
+ 893              	.LFB39:
+ 614:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 894              		.loc 1 614 0
+ 895              		.cfi_startproc
+ 896              		@ args = 0, pretend = 0, frame = 0
+ 897              		@ frame_needed = 0, uses_anonymous_args = 0
+ 898              	.LVL127:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 40
+
+
+ 899 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 900              	.LCFI20:
+ 901              		.cfi_def_cfa_offset 24
+ 902              		.cfi_offset 4, -24
+ 903              		.cfi_offset 5, -20
+ 904              		.cfi_offset 6, -16
+ 905              		.cfi_offset 7, -12
+ 906              		.cfi_offset 8, -8
+ 907              		.cfi_offset 14, -4
+ 908 0004 82B0     		sub	sp, sp, #8
+ 909              	.LCFI21:
+ 910              		.cfi_def_cfa_offset 32
+ 911 0006 0446     		mov	r4, r0
+ 912 0008 0E46     		mov	r6, r1
+ 913 000a 1546     		mov	r5, r2
+ 914 000c 9846     		mov	r8, r3
+ 915              	.LVL128:
+ 626:FreeRTOS/Src/stream_buffer.c **** 	{
+ 916              		.loc 1 626 0
+ 917 000e 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
+ 918              	.LVL129:
+ 919 0010 13F0010F 		tst	r3, #1
+ 920 0014 01D0     		beq	.L66
+ 628:FreeRTOS/Src/stream_buffer.c **** 	}
+ 921              		.loc 1 628 0
+ 922 0016 171D     		adds	r7, r2, #4
+ 923              	.LVL130:
+ 924 0018 00E0     		b	.L63
+ 925              	.LVL131:
+ 926              	.L66:
+ 617:FreeRTOS/Src/stream_buffer.c **** 
+ 927              		.loc 1 617 0
+ 928 001a 1746     		mov	r7, r2
+ 929              	.LVL132:
+ 930              	.L63:
+ 635:FreeRTOS/Src/stream_buffer.c **** 	xReturn = prvWriteMessageToBuffer( pxStreamBuffer, pvTxData, xDataLengthBytes, xSpace, xRequiredSp
+ 931              		.loc 1 635 0
+ 932 001c 2046     		mov	r0, r4
+ 933              	.LVL133:
+ 934 001e FFF7FEFF 		bl	xStreamBufferSpacesAvailable
+ 935              	.LVL134:
+ 636:FreeRTOS/Src/stream_buffer.c **** 
+ 936              		.loc 1 636 0
+ 937 0022 0097     		str	r7, [sp]
+ 938 0024 0346     		mov	r3, r0
+ 939 0026 2A46     		mov	r2, r5
+ 940 0028 3146     		mov	r1, r6
+ 941 002a 2046     		mov	r0, r4
+ 942              	.LVL135:
+ 943 002c FFF7FEFF 		bl	prvWriteMessageToBuffer
+ 944              	.LVL136:
+ 638:FreeRTOS/Src/stream_buffer.c **** 	{
+ 945              		.loc 1 638 0
+ 946 0030 0546     		mov	r5, r0
+ 947              	.LVL137:
+ 948 0032 E8B1     		cbz	r0, .L64
+ 641:FreeRTOS/Src/stream_buffer.c **** 		{
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 41
+
+
+ 949              		.loc 1 641 0
+ 950 0034 2046     		mov	r0, r4
+ 951              	.LVL138:
+ 952 0036 FFF7FEFF 		bl	prvBytesInBuffer
+ 953              	.LVL139:
+ 954 003a E368     		ldr	r3, [r4, #12]
+ 955 003c 9842     		cmp	r0, r3
+ 956 003e 17D3     		bcc	.L64
+ 957              	.LBB20:
+ 958              	.LBB21:
+ 959              	.LBB22:
+ 960              		.file 2 "FreeRTOS/ARM_CM3/portmacro.h"
+   1:FreeRTOS/ARM_CM3/portmacro.h **** /*
+   2:FreeRTOS/ARM_CM3/portmacro.h ****  * FreeRTOS Kernel V10.1.1
+   3:FreeRTOS/ARM_CM3/portmacro.h ****  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+   4:FreeRTOS/ARM_CM3/portmacro.h ****  *
+   5:FreeRTOS/ARM_CM3/portmacro.h ****  * Permission is hereby granted, free of charge, to any person obtaining a copy of
+   6:FreeRTOS/ARM_CM3/portmacro.h ****  * this software and associated documentation files (the "Software"), to deal in
+   7:FreeRTOS/ARM_CM3/portmacro.h ****  * the Software without restriction, including without limitation the rights to
+   8:FreeRTOS/ARM_CM3/portmacro.h ****  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   9:FreeRTOS/ARM_CM3/portmacro.h ****  * the Software, and to permit persons to whom the Software is furnished to do so,
+  10:FreeRTOS/ARM_CM3/portmacro.h ****  * subject to the following conditions:
+  11:FreeRTOS/ARM_CM3/portmacro.h ****  *
+  12:FreeRTOS/ARM_CM3/portmacro.h ****  * The above copyright notice and this permission notice shall be included in all
+  13:FreeRTOS/ARM_CM3/portmacro.h ****  * copies or substantial portions of the Software.
+  14:FreeRTOS/ARM_CM3/portmacro.h ****  *
+  15:FreeRTOS/ARM_CM3/portmacro.h ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  16:FreeRTOS/ARM_CM3/portmacro.h ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  17:FreeRTOS/ARM_CM3/portmacro.h ****  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  18:FreeRTOS/ARM_CM3/portmacro.h ****  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  19:FreeRTOS/ARM_CM3/portmacro.h ****  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  20:FreeRTOS/ARM_CM3/portmacro.h ****  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  21:FreeRTOS/ARM_CM3/portmacro.h ****  *
+  22:FreeRTOS/ARM_CM3/portmacro.h ****  * http://www.FreeRTOS.org
+  23:FreeRTOS/ARM_CM3/portmacro.h ****  * http://aws.amazon.com/freertos
+  24:FreeRTOS/ARM_CM3/portmacro.h ****  *
+  25:FreeRTOS/ARM_CM3/portmacro.h ****  * 1 tab == 4 spaces!
+  26:FreeRTOS/ARM_CM3/portmacro.h ****  */
+  27:FreeRTOS/ARM_CM3/portmacro.h **** 
+  28:FreeRTOS/ARM_CM3/portmacro.h **** 
+  29:FreeRTOS/ARM_CM3/portmacro.h **** #ifndef PORTMACRO_H
+  30:FreeRTOS/ARM_CM3/portmacro.h **** #define PORTMACRO_H
+  31:FreeRTOS/ARM_CM3/portmacro.h **** 
+  32:FreeRTOS/ARM_CM3/portmacro.h **** #ifdef __cplusplus
+  33:FreeRTOS/ARM_CM3/portmacro.h **** extern "C" {
+  34:FreeRTOS/ARM_CM3/portmacro.h **** #endif
+  35:FreeRTOS/ARM_CM3/portmacro.h **** 
+  36:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------
+  37:FreeRTOS/ARM_CM3/portmacro.h ****  * Port specific definitions.
+  38:FreeRTOS/ARM_CM3/portmacro.h ****  *
+  39:FreeRTOS/ARM_CM3/portmacro.h ****  * The settings in this file configure FreeRTOS correctly for the
+  40:FreeRTOS/ARM_CM3/portmacro.h ****  * given hardware and compiler.
+  41:FreeRTOS/ARM_CM3/portmacro.h ****  *
+  42:FreeRTOS/ARM_CM3/portmacro.h ****  * These settings should not be altered.
+  43:FreeRTOS/ARM_CM3/portmacro.h ****  *-----------------------------------------------------------
+  44:FreeRTOS/ARM_CM3/portmacro.h ****  */
+  45:FreeRTOS/ARM_CM3/portmacro.h **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 42
+
+
+  46:FreeRTOS/ARM_CM3/portmacro.h **** /* Type definitions. */
+  47:FreeRTOS/ARM_CM3/portmacro.h **** #define portCHAR		char
+  48:FreeRTOS/ARM_CM3/portmacro.h **** #define portFLOAT		float
+  49:FreeRTOS/ARM_CM3/portmacro.h **** #define portDOUBLE		double
+  50:FreeRTOS/ARM_CM3/portmacro.h **** #define portLONG		long
+  51:FreeRTOS/ARM_CM3/portmacro.h **** #define portSHORT		short
+  52:FreeRTOS/ARM_CM3/portmacro.h **** #define portSTACK_TYPE	uint32_t
+  53:FreeRTOS/ARM_CM3/portmacro.h **** #define portBASE_TYPE	long
+  54:FreeRTOS/ARM_CM3/portmacro.h **** 
+  55:FreeRTOS/ARM_CM3/portmacro.h **** typedef portSTACK_TYPE StackType_t;
+  56:FreeRTOS/ARM_CM3/portmacro.h **** typedef long BaseType_t;
+  57:FreeRTOS/ARM_CM3/portmacro.h **** typedef unsigned long UBaseType_t;
+  58:FreeRTOS/ARM_CM3/portmacro.h **** 
+  59:FreeRTOS/ARM_CM3/portmacro.h **** #if( configUSE_16_BIT_TICKS == 1 )
+  60:FreeRTOS/ARM_CM3/portmacro.h **** 	typedef uint16_t TickType_t;
+  61:FreeRTOS/ARM_CM3/portmacro.h **** 	#define portMAX_DELAY ( TickType_t ) 0xffff
+  62:FreeRTOS/ARM_CM3/portmacro.h **** #else
+  63:FreeRTOS/ARM_CM3/portmacro.h **** 	typedef uint32_t TickType_t;
+  64:FreeRTOS/ARM_CM3/portmacro.h **** 	#define portMAX_DELAY ( TickType_t ) 0xffffffffUL
+  65:FreeRTOS/ARM_CM3/portmacro.h **** 
+  66:FreeRTOS/ARM_CM3/portmacro.h **** 	/* 32-bit tick type on a 32-bit architecture, so reads of the tick count do
+  67:FreeRTOS/ARM_CM3/portmacro.h **** 	not need to be guarded with a critical section. */
+  68:FreeRTOS/ARM_CM3/portmacro.h **** 	#define portTICK_TYPE_IS_ATOMIC 1
+  69:FreeRTOS/ARM_CM3/portmacro.h **** #endif
+  70:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+  71:FreeRTOS/ARM_CM3/portmacro.h **** 
+  72:FreeRTOS/ARM_CM3/portmacro.h **** /* Architecture specifics. */
+  73:FreeRTOS/ARM_CM3/portmacro.h **** #define portSTACK_GROWTH			( -1 )
+  74:FreeRTOS/ARM_CM3/portmacro.h **** #define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+  75:FreeRTOS/ARM_CM3/portmacro.h **** #define portBYTE_ALIGNMENT			8
+  76:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+  77:FreeRTOS/ARM_CM3/portmacro.h **** 
+  78:FreeRTOS/ARM_CM3/portmacro.h **** /* Scheduler utilities. */
+  79:FreeRTOS/ARM_CM3/portmacro.h **** #define portYIELD() 															\
+  80:FreeRTOS/ARM_CM3/portmacro.h **** {																				\
+  81:FreeRTOS/ARM_CM3/portmacro.h **** 	/* Set a PendSV to request a context switch. */								\
+  82:FreeRTOS/ARM_CM3/portmacro.h **** 	portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;								\
+  83:FreeRTOS/ARM_CM3/portmacro.h **** 																				\
+  84:FreeRTOS/ARM_CM3/portmacro.h **** 	/* Barriers are normally not required but do ensure the code is completely	\
+  85:FreeRTOS/ARM_CM3/portmacro.h **** 	within the specified behaviour for the architecture. */						\
+  86:FreeRTOS/ARM_CM3/portmacro.h **** 	__asm volatile( "dsb" ::: "memory" );										\
+  87:FreeRTOS/ARM_CM3/portmacro.h **** 	__asm volatile( "isb" );													\
+  88:FreeRTOS/ARM_CM3/portmacro.h **** }
+  89:FreeRTOS/ARM_CM3/portmacro.h **** 
+  90:FreeRTOS/ARM_CM3/portmacro.h **** #define portNVIC_INT_CTRL_REG		( * ( ( volatile uint32_t * ) 0xe000ed04 ) )
+  91:FreeRTOS/ARM_CM3/portmacro.h **** #define portNVIC_PENDSVSET_BIT		( 1UL << 28UL )
+  92:FreeRTOS/ARM_CM3/portmacro.h **** #define portEND_SWITCHING_ISR( xSwitchRequired ) if( xSwitchRequired != pdFALSE ) portYIELD()
+  93:FreeRTOS/ARM_CM3/portmacro.h **** #define portYIELD_FROM_ISR( x ) portEND_SWITCHING_ISR( x )
+  94:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+  95:FreeRTOS/ARM_CM3/portmacro.h **** 
+  96:FreeRTOS/ARM_CM3/portmacro.h **** /* Critical section management. */
+  97:FreeRTOS/ARM_CM3/portmacro.h **** extern void vPortEnterCritical( void );
+  98:FreeRTOS/ARM_CM3/portmacro.h **** extern void vPortExitCritical( void );
+  99:FreeRTOS/ARM_CM3/portmacro.h **** #define portSET_INTERRUPT_MASK_FROM_ISR()		ulPortRaiseBASEPRI()
+ 100:FreeRTOS/ARM_CM3/portmacro.h **** #define portCLEAR_INTERRUPT_MASK_FROM_ISR(x)	vPortSetBASEPRI(x)
+ 101:FreeRTOS/ARM_CM3/portmacro.h **** #define portDISABLE_INTERRUPTS()				vPortRaiseBASEPRI()
+ 102:FreeRTOS/ARM_CM3/portmacro.h **** #define portENABLE_INTERRUPTS()					vPortSetBASEPRI(0)
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 43
+
+
+ 103:FreeRTOS/ARM_CM3/portmacro.h **** #define portENTER_CRITICAL()					vPortEnterCritical()
+ 104:FreeRTOS/ARM_CM3/portmacro.h **** #define portEXIT_CRITICAL()						vPortExitCritical()
+ 105:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 106:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+ 107:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 108:FreeRTOS/ARM_CM3/portmacro.h **** /* Task function macros as described on the FreeRTOS.org WEB site.  These are
+ 109:FreeRTOS/ARM_CM3/portmacro.h **** not necessary for to use this port.  They are defined so the common demo files
+ 110:FreeRTOS/ARM_CM3/portmacro.h **** (which build with all the ports) will build. */
+ 111:FreeRTOS/ARM_CM3/portmacro.h **** #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
+ 112:FreeRTOS/ARM_CM3/portmacro.h **** #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
+ 113:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+ 114:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 115:FreeRTOS/ARM_CM3/portmacro.h **** /* Tickless idle/low power functionality. */
+ 116:FreeRTOS/ARM_CM3/portmacro.h **** #ifndef portSUPPRESS_TICKS_AND_SLEEP
+ 117:FreeRTOS/ARM_CM3/portmacro.h **** 	extern void vPortSuppressTicksAndSleep( TickType_t xExpectedIdleTime );
+ 118:FreeRTOS/ARM_CM3/portmacro.h **** 	#define portSUPPRESS_TICKS_AND_SLEEP( xExpectedIdleTime ) vPortSuppressTicksAndSleep( xExpectedIdl
+ 119:FreeRTOS/ARM_CM3/portmacro.h **** #endif
+ 120:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+ 121:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 122:FreeRTOS/ARM_CM3/portmacro.h **** /* Architecture specific optimisations. */
+ 123:FreeRTOS/ARM_CM3/portmacro.h **** #ifndef configUSE_PORT_OPTIMISED_TASK_SELECTION
+ 124:FreeRTOS/ARM_CM3/portmacro.h **** 	#define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
+ 125:FreeRTOS/ARM_CM3/portmacro.h **** #endif
+ 126:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 127:FreeRTOS/ARM_CM3/portmacro.h **** #if configUSE_PORT_OPTIMISED_TASK_SELECTION == 1
+ 128:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 129:FreeRTOS/ARM_CM3/portmacro.h **** 	/* Generic helper function. */
+ 130:FreeRTOS/ARM_CM3/portmacro.h **** 	__attribute__( ( always_inline ) ) static inline uint8_t ucPortCountLeadingZeros( uint32_t ulBitma
+ 131:FreeRTOS/ARM_CM3/portmacro.h **** 	{
+ 132:FreeRTOS/ARM_CM3/portmacro.h **** 	uint8_t ucReturn;
+ 133:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 134:FreeRTOS/ARM_CM3/portmacro.h **** 		__asm volatile ( "clz %0, %1" : "=r" ( ucReturn ) : "r" ( ulBitmap ) : "memory" );
+ 135:FreeRTOS/ARM_CM3/portmacro.h **** 		return ucReturn;
+ 136:FreeRTOS/ARM_CM3/portmacro.h **** 	}
+ 137:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 138:FreeRTOS/ARM_CM3/portmacro.h **** 	/* Check the configuration. */
+ 139:FreeRTOS/ARM_CM3/portmacro.h **** 	#if( configMAX_PRIORITIES > 32 )
+ 140:FreeRTOS/ARM_CM3/portmacro.h **** 		#error configUSE_PORT_OPTIMISED_TASK_SELECTION can only be set to 1 when configMAX_PRIORITIES is 
+ 141:FreeRTOS/ARM_CM3/portmacro.h **** 	#endif
+ 142:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 143:FreeRTOS/ARM_CM3/portmacro.h **** 	/* Store/clear the ready priorities in a bit map. */
+ 144:FreeRTOS/ARM_CM3/portmacro.h **** 	#define portRECORD_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) |= ( 1UL 
+ 145:FreeRTOS/ARM_CM3/portmacro.h **** 	#define portRESET_READY_PRIORITY( uxPriority, uxReadyPriorities ) ( uxReadyPriorities ) &= ~( 1UL 
+ 146:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 147:FreeRTOS/ARM_CM3/portmacro.h **** 	/*-----------------------------------------------------------*/
+ 148:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 149:FreeRTOS/ARM_CM3/portmacro.h **** 	#define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities ) uxTopPriority = ( 31UL - ( ui
+ 150:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 151:FreeRTOS/ARM_CM3/portmacro.h **** #endif /* configUSE_PORT_OPTIMISED_TASK_SELECTION */
+ 152:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 153:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+ 154:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 155:FreeRTOS/ARM_CM3/portmacro.h **** #ifdef configASSERT
+ 156:FreeRTOS/ARM_CM3/portmacro.h **** 	void vPortValidateInterruptPriority( void );
+ 157:FreeRTOS/ARM_CM3/portmacro.h **** 	#define portASSERT_IF_INTERRUPT_PRIORITY_INVALID() 	vPortValidateInterruptPriority()
+ 158:FreeRTOS/ARM_CM3/portmacro.h **** #endif
+ 159:FreeRTOS/ARM_CM3/portmacro.h **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 44
+
+
+ 160:FreeRTOS/ARM_CM3/portmacro.h **** /* portNOP() is not required by this port. */
+ 161:FreeRTOS/ARM_CM3/portmacro.h **** #define portNOP()
+ 162:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 163:FreeRTOS/ARM_CM3/portmacro.h **** #define portINLINE	__inline
+ 164:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 165:FreeRTOS/ARM_CM3/portmacro.h **** #ifndef portFORCE_INLINE
+ 166:FreeRTOS/ARM_CM3/portmacro.h **** 	#define portFORCE_INLINE inline __attribute__(( always_inline))
+ 167:FreeRTOS/ARM_CM3/portmacro.h **** #endif
+ 168:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 169:FreeRTOS/ARM_CM3/portmacro.h **** portFORCE_INLINE static BaseType_t xPortIsInsideInterrupt( void )
+ 170:FreeRTOS/ARM_CM3/portmacro.h **** {
+ 171:FreeRTOS/ARM_CM3/portmacro.h **** uint32_t ulCurrentInterrupt;
+ 172:FreeRTOS/ARM_CM3/portmacro.h **** BaseType_t xReturn;
+ 173:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 174:FreeRTOS/ARM_CM3/portmacro.h **** 	/* Obtain the number of the currently executing interrupt. */
+ 175:FreeRTOS/ARM_CM3/portmacro.h **** 	__asm volatile( "mrs %0, ipsr" : "=r"( ulCurrentInterrupt ) :: "memory" );
+ 176:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 177:FreeRTOS/ARM_CM3/portmacro.h **** 	if( ulCurrentInterrupt == 0 )
+ 178:FreeRTOS/ARM_CM3/portmacro.h **** 	{
+ 179:FreeRTOS/ARM_CM3/portmacro.h **** 		xReturn = pdFALSE;
+ 180:FreeRTOS/ARM_CM3/portmacro.h **** 	}
+ 181:FreeRTOS/ARM_CM3/portmacro.h **** 	else
+ 182:FreeRTOS/ARM_CM3/portmacro.h **** 	{
+ 183:FreeRTOS/ARM_CM3/portmacro.h **** 		xReturn = pdTRUE;
+ 184:FreeRTOS/ARM_CM3/portmacro.h **** 	}
+ 185:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 186:FreeRTOS/ARM_CM3/portmacro.h **** 	return xReturn;
+ 187:FreeRTOS/ARM_CM3/portmacro.h **** }
+ 188:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 189:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+ 190:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 191:FreeRTOS/ARM_CM3/portmacro.h **** portFORCE_INLINE static void vPortRaiseBASEPRI( void )
+ 192:FreeRTOS/ARM_CM3/portmacro.h **** {
+ 193:FreeRTOS/ARM_CM3/portmacro.h **** uint32_t ulNewBASEPRI;
+ 194:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 195:FreeRTOS/ARM_CM3/portmacro.h **** 	__asm volatile
+ 196:FreeRTOS/ARM_CM3/portmacro.h **** 	(
+ 197:FreeRTOS/ARM_CM3/portmacro.h **** 		"	mov %0, %1												\n" \
+ 198:FreeRTOS/ARM_CM3/portmacro.h **** 		"	msr basepri, %0											\n" \
+ 199:FreeRTOS/ARM_CM3/portmacro.h **** 		"	isb														\n" \
+ 200:FreeRTOS/ARM_CM3/portmacro.h **** 		"	dsb														\n" \
+ 201:FreeRTOS/ARM_CM3/portmacro.h **** 		:"=r" (ulNewBASEPRI) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "memory"
+ 202:FreeRTOS/ARM_CM3/portmacro.h **** 	);
+ 203:FreeRTOS/ARM_CM3/portmacro.h **** }
+ 204:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 205:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+ 206:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 207:FreeRTOS/ARM_CM3/portmacro.h **** portFORCE_INLINE static uint32_t ulPortRaiseBASEPRI( void )
+ 208:FreeRTOS/ARM_CM3/portmacro.h **** {
+ 209:FreeRTOS/ARM_CM3/portmacro.h **** uint32_t ulOriginalBASEPRI, ulNewBASEPRI;
+ 210:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 211:FreeRTOS/ARM_CM3/portmacro.h **** 	__asm volatile
+ 961              		.loc 2 211 0
+ 962              		.syntax unified
+ 963              	@ 211 "FreeRTOS/ARM_CM3/portmacro.h" 1
+ 964 0040 EFF31186 			mrs r6, basepri											
+ 965 0044 4FF0BF03 		mov r3, #191												
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 45
+
+
+ 966 0048 83F31188 		msr basepri, r3											
+ 967 004c BFF36F8F 		isb														
+ 968 0050 BFF34F8F 		dsb														
+ 969              	
+ 970              	@ 0 "" 2
+ 971              	.LVL140:
+ 972              		.thumb
+ 973              		.syntax unified
+ 974              	.LBE22:
+ 975              	.LBE21:
+ 643:FreeRTOS/Src/stream_buffer.c **** 		}
+ 976              		.loc 1 643 0
+ 977 0054 2369     		ldr	r3, [r4, #16]
+ 978 0056 4BB1     		cbz	r3, .L65
+ 643:FreeRTOS/Src/stream_buffer.c **** 		}
+ 979              		.loc 1 643 0 is_stmt 0 discriminator 1
+ 980 0058 2069     		ldr	r0, [r4, #16]
+ 981 005a CDF80080 		str	r8, [sp]
+ 982 005e 0023     		movs	r3, #0
+ 983 0060 1A46     		mov	r2, r3
+ 984 0062 1946     		mov	r1, r3
+ 985 0064 FFF7FEFF 		bl	xTaskGenericNotifyFromISR
+ 986              	.LVL141:
+ 987 0068 0023     		movs	r3, #0
+ 988 006a 2361     		str	r3, [r4, #16]
+ 989              	.L65:
+ 990              	.LVL142:
+ 991              	.LBB23:
+ 992              	.LBB24:
+ 212:FreeRTOS/ARM_CM3/portmacro.h **** 	(
+ 213:FreeRTOS/ARM_CM3/portmacro.h **** 		"	mrs %0, basepri											\n" \
+ 214:FreeRTOS/ARM_CM3/portmacro.h **** 		"	mov %1, %2												\n" \
+ 215:FreeRTOS/ARM_CM3/portmacro.h **** 		"	msr basepri, %1											\n" \
+ 216:FreeRTOS/ARM_CM3/portmacro.h **** 		"	isb														\n" \
+ 217:FreeRTOS/ARM_CM3/portmacro.h **** 		"	dsb														\n" \
+ 218:FreeRTOS/ARM_CM3/portmacro.h **** 		:"=r" (ulOriginalBASEPRI), "=r" (ulNewBASEPRI) : "i" ( configMAX_SYSCALL_INTERRUPT_PRIORITY ) : "
+ 219:FreeRTOS/ARM_CM3/portmacro.h **** 	);
+ 220:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 221:FreeRTOS/ARM_CM3/portmacro.h **** 	/* This return will not be reached but is necessary to prevent compiler
+ 222:FreeRTOS/ARM_CM3/portmacro.h **** 	warnings. */
+ 223:FreeRTOS/ARM_CM3/portmacro.h **** 	return ulOriginalBASEPRI;
+ 224:FreeRTOS/ARM_CM3/portmacro.h **** }
+ 225:FreeRTOS/ARM_CM3/portmacro.h **** /*-----------------------------------------------------------*/
+ 226:FreeRTOS/ARM_CM3/portmacro.h **** 
+ 227:FreeRTOS/ARM_CM3/portmacro.h **** portFORCE_INLINE static void vPortSetBASEPRI( uint32_t ulNewMaskValue )
+ 228:FreeRTOS/ARM_CM3/portmacro.h **** {
+ 229:FreeRTOS/ARM_CM3/portmacro.h **** 	__asm volatile
+ 993              		.loc 2 229 0 is_stmt 1 discriminator 3
+ 994              		.syntax unified
+ 995              	@ 229 "FreeRTOS/ARM_CM3/portmacro.h" 1
+ 996 006c 86F31188 			msr basepri, r6	
+ 997              	@ 0 "" 2
+ 998              	.LVL143:
+ 999              		.thumb
+ 1000              		.syntax unified
+ 1001              	.L64:
+ 1002              	.LBE24:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 46
+
+
+ 1003              	.LBE23:
+ 1004              	.LBE20:
+ 658:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 1005              		.loc 1 658 0
+ 1006 0070 2846     		mov	r0, r5
+ 1007 0072 02B0     		add	sp, sp, #8
+ 1008              	.LCFI22:
+ 1009              		.cfi_def_cfa_offset 24
+ 1010              		@ sp needed
+ 1011 0074 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 1012              		.cfi_endproc
+ 1013              	.LFE39:
+ 1015              		.section	.text.xStreamBufferReceive,"ax",%progbits
+ 1016              		.align	2
+ 1017              		.global	xStreamBufferReceive
+ 1018              		.thumb
+ 1019              		.thumb_func
+ 1021              	xStreamBufferReceive:
+ 1022              	.LFB41:
+ 717:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 1023              		.loc 1 717 0
+ 1024              		.cfi_startproc
+ 1025              		@ args = 0, pretend = 0, frame = 0
+ 1026              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1027              	.LVL144:
+ 1028 0000 2DE9F043 		push	{r4, r5, r6, r7, r8, r9, lr}
+ 1029              	.LCFI23:
+ 1030              		.cfi_def_cfa_offset 28
+ 1031              		.cfi_offset 4, -28
+ 1032              		.cfi_offset 5, -24
+ 1033              		.cfi_offset 6, -20
+ 1034              		.cfi_offset 7, -16
+ 1035              		.cfi_offset 8, -12
+ 1036              		.cfi_offset 9, -8
+ 1037              		.cfi_offset 14, -4
+ 1038 0004 83B0     		sub	sp, sp, #12
+ 1039              	.LCFI24:
+ 1040              		.cfi_def_cfa_offset 40
+ 1041 0006 0446     		mov	r4, r0
+ 1042 0008 8846     		mov	r8, r1
+ 1043 000a 9146     		mov	r9, r2
+ 1044 000c 1F46     		mov	r7, r3
+ 1045              	.LVL145:
+ 729:FreeRTOS/Src/stream_buffer.c **** 	{
+ 1046              		.loc 1 729 0
+ 1047 000e 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
+ 1048              	.LVL146:
+ 1049 0010 13F0010F 		tst	r3, #1
+ 1050 0014 01D0     		beq	.L75
+ 731:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1051              		.loc 1 731 0
+ 1052 0016 0426     		movs	r6, #4
+ 1053 0018 00E0     		b	.L69
+ 1054              	.L75:
+ 735:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1055              		.loc 1 735 0
+ 1056 001a 0026     		movs	r6, #0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 47
+
+
+ 1057              	.L69:
+ 1058              	.LVL147:
+ 738:FreeRTOS/Src/stream_buffer.c **** 	{
+ 1059              		.loc 1 738 0
+ 1060 001c F7B1     		cbz	r7, .L70
+ 742:FreeRTOS/Src/stream_buffer.c **** 		{
+ 1061              		.loc 1 742 0
+ 1062 001e FFF7FEFF 		bl	vPortEnterCritical
+ 1063              	.LVL148:
+ 744:FreeRTOS/Src/stream_buffer.c **** 
+ 1064              		.loc 1 744 0
+ 1065 0022 2046     		mov	r0, r4
+ 1066 0024 FFF7FEFF 		bl	prvBytesInBuffer
+ 1067              	.LVL149:
+ 1068 0028 0546     		mov	r5, r0
+ 1069              	.LVL150:
+ 751:FreeRTOS/Src/stream_buffer.c **** 			{
+ 1070              		.loc 1 751 0
+ 1071 002a 8642     		cmp	r6, r0
+ 1072 002c 05D3     		bcc	.L71
+ 754:FreeRTOS/Src/stream_buffer.c **** 
+ 1073              		.loc 1 754 0
+ 1074 002e 0020     		movs	r0, #0
+ 1075              	.LVL151:
+ 1076 0030 FFF7FEFF 		bl	xTaskNotifyStateClear
+ 1077              	.LVL152:
+ 758:FreeRTOS/Src/stream_buffer.c **** 			}
+ 1078              		.loc 1 758 0
+ 1079 0034 FFF7FEFF 		bl	xTaskGetCurrentTaskHandle
+ 1080              	.LVL153:
+ 1081 0038 2061     		str	r0, [r4, #16]
+ 1082              	.L71:
+ 765:FreeRTOS/Src/stream_buffer.c **** 
+ 1083              		.loc 1 765 0
+ 1084 003a FFF7FEFF 		bl	vPortExitCritical
+ 1085              	.LVL154:
+ 767:FreeRTOS/Src/stream_buffer.c **** 		{
+ 1086              		.loc 1 767 0
+ 1087 003e AE42     		cmp	r6, r5
+ 1088 0040 10D3     		bcc	.L72
+ 771:FreeRTOS/Src/stream_buffer.c **** 			pxStreamBuffer->xTaskWaitingToReceive = NULL;
+ 1089              		.loc 1 771 0
+ 1090 0042 3B46     		mov	r3, r7
+ 1091 0044 0022     		movs	r2, #0
+ 1092 0046 1146     		mov	r1, r2
+ 1093 0048 1046     		mov	r0, r2
+ 1094 004a FFF7FEFF 		bl	xTaskNotifyWait
+ 1095              	.LVL155:
+ 772:FreeRTOS/Src/stream_buffer.c **** 
+ 1096              		.loc 1 772 0
+ 1097 004e 0023     		movs	r3, #0
+ 1098 0050 2361     		str	r3, [r4, #16]
+ 775:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1099              		.loc 1 775 0
+ 1100 0052 2046     		mov	r0, r4
+ 1101 0054 FFF7FEFF 		bl	prvBytesInBuffer
+ 1102              	.LVL156:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 48
+
+
+ 1103 0058 0546     		mov	r5, r0
+ 1104              	.LVL157:
+ 1105 005a 03E0     		b	.L72
+ 1106              	.LVL158:
+ 1107              	.L70:
+ 784:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1108              		.loc 1 784 0
+ 1109 005c 2046     		mov	r0, r4
+ 1110              	.LVL159:
+ 1111 005e FFF7FEFF 		bl	prvBytesInBuffer
+ 1112              	.LVL160:
+ 1113 0062 0546     		mov	r5, r0
+ 1114              	.LVL161:
+ 1115              	.L72:
+ 792:FreeRTOS/Src/stream_buffer.c **** 	{
+ 1116              		.loc 1 792 0
+ 1117 0064 B542     		cmp	r5, r6
+ 1118 0066 17D9     		bls	.L76
+ 794:FreeRTOS/Src/stream_buffer.c **** 
+ 1119              		.loc 1 794 0
+ 1120 0068 0096     		str	r6, [sp]
+ 1121 006a 2B46     		mov	r3, r5
+ 1122 006c 4A46     		mov	r2, r9
+ 1123 006e 4146     		mov	r1, r8
+ 1124 0070 2046     		mov	r0, r4
+ 1125 0072 FFF7FEFF 		bl	prvReadMessageFromBuffer
+ 1126              	.LVL162:
+ 797:FreeRTOS/Src/stream_buffer.c **** 		{
+ 1127              		.loc 1 797 0
+ 1128 0076 0546     		mov	r5, r0
+ 1129              	.LVL163:
+ 1130 0078 78B1     		cbz	r0, .L73
+ 800:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1131              		.loc 1 800 0
+ 1132 007a FFF7FEFF 		bl	vTaskSuspendAll
+ 1133              	.LVL164:
+ 1134 007e 6369     		ldr	r3, [r4, #20]
+ 1135 0080 3BB1     		cbz	r3, .L74
+ 800:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1136              		.loc 1 800 0 is_stmt 0 discriminator 1
+ 1137 0082 6069     		ldr	r0, [r4, #20]
+ 1138 0084 0023     		movs	r3, #0
+ 1139 0086 1A46     		mov	r2, r3
+ 1140 0088 1946     		mov	r1, r3
+ 1141 008a FFF7FEFF 		bl	xTaskGenericNotify
+ 1142              	.LVL165:
+ 1143 008e 0023     		movs	r3, #0
+ 1144 0090 6361     		str	r3, [r4, #20]
+ 1145              	.L74:
+ 800:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1146              		.loc 1 800 0 discriminator 3
+ 1147 0092 FFF7FEFF 		bl	xTaskResumeAll
+ 1148              	.LVL166:
+ 1149 0096 00E0     		b	.L73
+ 1150              	.LVL167:
+ 1151              	.L76:
+ 719:FreeRTOS/Src/stream_buffer.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 49
+
+
+ 1152              		.loc 1 719 0 is_stmt 1
+ 1153 0098 0025     		movs	r5, #0
+ 1154              	.LVL168:
+ 1155              	.L73:
+ 814:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 1156              		.loc 1 814 0
+ 1157 009a 2846     		mov	r0, r5
+ 1158 009c 03B0     		add	sp, sp, #12
+ 1159              	.LCFI25:
+ 1160              		.cfi_def_cfa_offset 28
+ 1161              		@ sp needed
+ 1162 009e BDE8F083 		pop	{r4, r5, r6, r7, r8, r9, pc}
+ 1163              		.cfi_endproc
+ 1164              	.LFE41:
+ 1166 00a2 00BF     		.section	.text.xStreamBufferNextMessageLengthBytes,"ax",%progbits
+ 1167              		.align	2
+ 1168              		.global	xStreamBufferNextMessageLengthBytes
+ 1169              		.thumb
+ 1170              		.thumb_func
+ 1172              	xStreamBufferNextMessageLengthBytes:
+ 1173              	.LFB42:
+ 818:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 1174              		.loc 1 818 0
+ 1175              		.cfi_startproc
+ 1176              		@ args = 0, pretend = 0, frame = 8
+ 1177              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1178              	.LVL169:
+ 826:FreeRTOS/Src/stream_buffer.c **** 	{
+ 1179              		.loc 1 826 0
+ 1180 0000 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
+ 1181 0002 13F0010F 		tst	r3, #1
+ 1182 0006 11D0     		beq	.L80
+ 818:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 1183              		.loc 1 818 0
+ 1184 0008 30B5     		push	{r4, r5, lr}
+ 1185              	.LCFI26:
+ 1186              		.cfi_def_cfa_offset 12
+ 1187              		.cfi_offset 4, -12
+ 1188              		.cfi_offset 5, -8
+ 1189              		.cfi_offset 14, -4
+ 1190 000a 83B0     		sub	sp, sp, #12
+ 1191              	.LCFI27:
+ 1192              		.cfi_def_cfa_offset 24
+ 1193 000c 0446     		mov	r4, r0
+ 828:FreeRTOS/Src/stream_buffer.c **** 		if( xBytesAvailable > sbBYTES_TO_STORE_MESSAGE_LENGTH )
+ 1194              		.loc 1 828 0
+ 1195 000e FFF7FEFF 		bl	prvBytesInBuffer
+ 1196              	.LVL170:
+ 829:FreeRTOS/Src/stream_buffer.c **** 		{
+ 1197              		.loc 1 829 0
+ 1198 0012 0428     		cmp	r0, #4
+ 1199 0014 0CD9     		bls	.L81
+ 837:FreeRTOS/Src/stream_buffer.c **** 			( void ) prvReadBytesFromBuffer( pxStreamBuffer, ( uint8_t * ) &xTempReturn, sbBYTES_TO_STORE_ME
+ 1200              		.loc 1 837 0
+ 1201 0016 2568     		ldr	r5, [r4]
+ 1202              	.LVL171:
+ 838:FreeRTOS/Src/stream_buffer.c **** 			xReturn = ( size_t ) xTempReturn;
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 50
+
+
+ 1203              		.loc 1 838 0
+ 1204 0018 0346     		mov	r3, r0
+ 1205 001a 0422     		movs	r2, #4
+ 1206 001c 0DEB0201 		add	r1, sp, r2
+ 1207 0020 2046     		mov	r0, r4
+ 1208              	.LVL172:
+ 1209 0022 FFF7FEFF 		bl	prvReadBytesFromBuffer
+ 1210              	.LVL173:
+ 839:FreeRTOS/Src/stream_buffer.c **** 			pxStreamBuffer->xTail = xOriginalTail;
+ 1211              		.loc 1 839 0
+ 1212 0026 0198     		ldr	r0, [sp, #4]
+ 1213              	.LVL174:
+ 840:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1214              		.loc 1 840 0
+ 1215 0028 2560     		str	r5, [r4]
+ 1216 002a 02E0     		b	.L79
+ 1217              	.LVL175:
+ 1218              	.L80:
+ 1219              	.LCFI28:
+ 1220              		.cfi_def_cfa_offset 0
+ 1221              		.cfi_restore 4
+ 1222              		.cfi_restore 5
+ 1223              		.cfi_restore 14
+ 854:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1224              		.loc 1 854 0
+ 1225 002c 0020     		movs	r0, #0
+ 1226              	.LVL176:
+ 858:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 1227              		.loc 1 858 0
+ 1228 002e 7047     		bx	lr
+ 1229              	.LVL177:
+ 1230              	.L81:
+ 1231              	.LCFI29:
+ 1232              		.cfi_def_cfa_offset 24
+ 1233              		.cfi_offset 4, -12
+ 1234              		.cfi_offset 5, -8
+ 1235              		.cfi_offset 14, -4
+ 849:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1236              		.loc 1 849 0
+ 1237 0030 0020     		movs	r0, #0
+ 1238              	.LVL178:
+ 1239              	.L79:
+ 858:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 1240              		.loc 1 858 0
+ 1241 0032 03B0     		add	sp, sp, #12
+ 1242              	.LCFI30:
+ 1243              		.cfi_def_cfa_offset 12
+ 1244              		@ sp needed
+ 1245 0034 30BD     		pop	{r4, r5, pc}
+ 1246              		.cfi_endproc
+ 1247              	.LFE42:
+ 1249 0036 00BF     		.section	.text.xStreamBufferReceiveFromISR,"ax",%progbits
+ 1250              		.align	2
+ 1251              		.global	xStreamBufferReceiveFromISR
+ 1252              		.thumb
+ 1253              		.thumb_func
+ 1255              	xStreamBufferReceiveFromISR:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 51
+
+
+ 1256              	.LFB43:
+ 865:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 1257              		.loc 1 865 0
+ 1258              		.cfi_startproc
+ 1259              		@ args = 0, pretend = 0, frame = 0
+ 1260              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1261              	.LVL179:
+ 1262 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 1263              	.LCFI31:
+ 1264              		.cfi_def_cfa_offset 24
+ 1265              		.cfi_offset 4, -24
+ 1266              		.cfi_offset 5, -20
+ 1267              		.cfi_offset 6, -16
+ 1268              		.cfi_offset 7, -12
+ 1269              		.cfi_offset 8, -8
+ 1270              		.cfi_offset 14, -4
+ 1271 0004 82B0     		sub	sp, sp, #8
+ 1272              	.LCFI32:
+ 1273              		.cfi_def_cfa_offset 32
+ 1274 0006 0446     		mov	r4, r0
+ 1275 0008 0E46     		mov	r6, r1
+ 1276 000a 1746     		mov	r7, r2
+ 1277 000c 9846     		mov	r8, r3
+ 1278              	.LVL180:
+ 877:FreeRTOS/Src/stream_buffer.c **** 	{
+ 1279              		.loc 1 877 0
+ 1280 000e 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
+ 1281              	.LVL181:
+ 1282 0010 13F0010F 		tst	r3, #1
+ 1283 0014 01D0     		beq	.L87
+ 879:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1284              		.loc 1 879 0
+ 1285 0016 0425     		movs	r5, #4
+ 1286 0018 00E0     		b	.L84
+ 1287              	.L87:
+ 883:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1288              		.loc 1 883 0
+ 1289 001a 0025     		movs	r5, #0
+ 1290              	.L84:
+ 1291              	.LVL182:
+ 886:FreeRTOS/Src/stream_buffer.c **** 
+ 1292              		.loc 1 886 0
+ 1293 001c 2046     		mov	r0, r4
+ 1294              	.LVL183:
+ 1295 001e FFF7FEFF 		bl	prvBytesInBuffer
+ 1296              	.LVL184:
+ 893:FreeRTOS/Src/stream_buffer.c **** 	{
+ 1297              		.loc 1 893 0
+ 1298 0022 8542     		cmp	r5, r0
+ 1299 0024 21D2     		bcs	.L88
+ 895:FreeRTOS/Src/stream_buffer.c **** 
+ 1300              		.loc 1 895 0
+ 1301 0026 0095     		str	r5, [sp]
+ 1302 0028 0346     		mov	r3, r0
+ 1303 002a 3A46     		mov	r2, r7
+ 1304 002c 3146     		mov	r1, r6
+ 1305 002e 2046     		mov	r0, r4
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 52
+
+
+ 1306              	.LVL185:
+ 1307 0030 FFF7FEFF 		bl	prvReadMessageFromBuffer
+ 1308              	.LVL186:
+ 898:FreeRTOS/Src/stream_buffer.c **** 		{
+ 1309              		.loc 1 898 0
+ 1310 0034 0546     		mov	r5, r0
+ 1311              	.LVL187:
+ 1312 0036 C8B1     		cbz	r0, .L85
+ 1313              	.LBB25:
+ 1314              	.LBB26:
+ 1315              	.LBB27:
+ 211:FreeRTOS/ARM_CM3/portmacro.h **** 	(
+ 1316              		.loc 2 211 0
+ 1317              		.syntax unified
+ 1318              	@ 211 "FreeRTOS/ARM_CM3/portmacro.h" 1
+ 1319 0038 EFF31186 			mrs r6, basepri											
+ 1320 003c 4FF0BF03 		mov r3, #191												
+ 1321 0040 83F31188 		msr basepri, r3											
+ 1322 0044 BFF36F8F 		isb														
+ 1323 0048 BFF34F8F 		dsb														
+ 1324              	
+ 1325              	@ 0 "" 2
+ 1326              	.LVL188:
+ 1327              		.thumb
+ 1328              		.syntax unified
+ 1329              	.LBE27:
+ 1330              	.LBE26:
+ 900:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1331              		.loc 1 900 0
+ 1332 004c 6369     		ldr	r3, [r4, #20]
+ 1333 004e 4BB1     		cbz	r3, .L86
+ 900:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1334              		.loc 1 900 0 is_stmt 0 discriminator 1
+ 1335 0050 6069     		ldr	r0, [r4, #20]
+ 1336              	.LVL189:
+ 1337 0052 CDF80080 		str	r8, [sp]
+ 1338 0056 0023     		movs	r3, #0
+ 1339 0058 1A46     		mov	r2, r3
+ 1340 005a 1946     		mov	r1, r3
+ 1341 005c FFF7FEFF 		bl	xTaskGenericNotifyFromISR
+ 1342              	.LVL190:
+ 1343 0060 0023     		movs	r3, #0
+ 1344 0062 6361     		str	r3, [r4, #20]
+ 1345              	.L86:
+ 1346              	.LVL191:
+ 1347              	.LBB28:
+ 1348              	.LBB29:
+ 1349              		.loc 2 229 0 is_stmt 1 discriminator 3
+ 1350              		.syntax unified
+ 1351              	@ 229 "FreeRTOS/ARM_CM3/portmacro.h" 1
+ 1352 0064 86F31188 			msr basepri, r6	
+ 1353              	@ 0 "" 2
+ 1354              		.thumb
+ 1355              		.syntax unified
+ 1356 0068 00E0     		b	.L85
+ 1357              	.LVL192:
+ 1358              	.L88:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 53
+
+
+ 1359              	.LBE29:
+ 1360              	.LBE28:
+ 1361              	.LBE25:
+ 867:FreeRTOS/Src/stream_buffer.c **** 
+ 1362              		.loc 1 867 0
+ 1363 006a 0025     		movs	r5, #0
+ 1364              	.LVL193:
+ 1365              	.L85:
+ 915:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 1366              		.loc 1 915 0
+ 1367 006c 2846     		mov	r0, r5
+ 1368 006e 02B0     		add	sp, sp, #8
+ 1369              	.LCFI33:
+ 1370              		.cfi_def_cfa_offset 24
+ 1371              		@ sp needed
+ 1372 0070 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 1373              		.cfi_endproc
+ 1374              	.LFE43:
+ 1376              		.section	.text.xStreamBufferIsEmpty,"ax",%progbits
+ 1377              		.align	2
+ 1378              		.global	xStreamBufferIsEmpty
+ 1379              		.thumb
+ 1380              		.thumb_func
+ 1382              	xStreamBufferIsEmpty:
+ 1383              	.LFB45:
+ 971:FreeRTOS/Src/stream_buffer.c **** const StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 1384              		.loc 1 971 0
+ 1385              		.cfi_startproc
+ 1386              		@ args = 0, pretend = 0, frame = 0
+ 1387              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1388              		@ link register save eliminated.
+ 1389              	.LVL194:
+ 979:FreeRTOS/Src/stream_buffer.c **** 	if( pxStreamBuffer->xHead == xTail )
+ 1390              		.loc 1 979 0
+ 1391 0000 0268     		ldr	r2, [r0]
+ 1392              	.LVL195:
+ 980:FreeRTOS/Src/stream_buffer.c **** 	{
+ 1393              		.loc 1 980 0
+ 1394 0002 4368     		ldr	r3, [r0, #4]
+ 1395 0004 9A42     		cmp	r2, r3
+ 1396 0006 01D1     		bne	.L92
+ 982:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1397              		.loc 1 982 0
+ 1398 0008 0120     		movs	r0, #1
+ 1399              	.LVL196:
+ 1400 000a 7047     		bx	lr
+ 1401              	.LVL197:
+ 1402              	.L92:
+ 986:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1403              		.loc 1 986 0
+ 1404 000c 0020     		movs	r0, #0
+ 1405              	.LVL198:
+ 990:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 1406              		.loc 1 990 0
+ 1407 000e 7047     		bx	lr
+ 1408              		.cfi_endproc
+ 1409              	.LFE45:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 54
+
+
+ 1411              		.section	.text.xStreamBufferIsFull,"ax",%progbits
+ 1412              		.align	2
+ 1413              		.global	xStreamBufferIsFull
+ 1414              		.thumb
+ 1415              		.thumb_func
+ 1417              	xStreamBufferIsFull:
+ 1418              	.LFB46:
+ 994:FreeRTOS/Src/stream_buffer.c **** BaseType_t xReturn;
+ 1419              		.loc 1 994 0
+ 1420              		.cfi_startproc
+ 1421              		@ args = 0, pretend = 0, frame = 0
+ 1422              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1423              	.LVL199:
+ 1424 0000 10B5     		push	{r4, lr}
+ 1425              	.LCFI34:
+ 1426              		.cfi_def_cfa_offset 8
+ 1427              		.cfi_offset 4, -8
+ 1428              		.cfi_offset 14, -4
+ 1429              	.LVL200:
+1005:FreeRTOS/Src/stream_buffer.c **** 	{
+ 1430              		.loc 1 1005 0
+ 1431 0002 037F     		ldrb	r3, [r0, #28]	@ zero_extendqisi2
+ 1432 0004 13F0010F 		tst	r3, #1
+ 1433 0008 01D0     		beq	.L96
+1007:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1434              		.loc 1 1007 0
+ 1435 000a 0424     		movs	r4, #4
+ 1436 000c 00E0     		b	.L94
+ 1437              	.L96:
+1011:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1438              		.loc 1 1011 0
+ 1439 000e 0024     		movs	r4, #0
+ 1440              	.L94:
+ 1441              	.LVL201:
+1015:FreeRTOS/Src/stream_buffer.c **** 	{
+ 1442              		.loc 1 1015 0
+ 1443 0010 FFF7FEFF 		bl	xStreamBufferSpacesAvailable
+ 1444              	.LVL202:
+ 1445 0014 8442     		cmp	r4, r0
+ 1446 0016 01D3     		bcc	.L97
+1017:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1447              		.loc 1 1017 0
+ 1448 0018 0120     		movs	r0, #1
+ 1449 001a 10BD     		pop	{r4, pc}
+ 1450              	.LVL203:
+ 1451              	.L97:
+1021:FreeRTOS/Src/stream_buffer.c **** 	}
+ 1452              		.loc 1 1021 0
+ 1453 001c 0020     		movs	r0, #0
+ 1454              	.LVL204:
+1025:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 1455              		.loc 1 1025 0
+ 1456 001e 10BD     		pop	{r4, pc}
+ 1457              		.cfi_endproc
+ 1458              	.LFE46:
+ 1460              		.section	.text.xStreamBufferSendCompletedFromISR,"ax",%progbits
+ 1461              		.align	2
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 55
+
+
+ 1462              		.global	xStreamBufferSendCompletedFromISR
+ 1463              		.thumb
+ 1464              		.thumb_func
+ 1466              	xStreamBufferSendCompletedFromISR:
+ 1467              	.LFB47:
+1029:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 1468              		.loc 1 1029 0
+ 1469              		.cfi_startproc
+ 1470              		@ args = 0, pretend = 0, frame = 0
+ 1471              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1472              	.LVL205:
+ 1473 0000 30B5     		push	{r4, r5, lr}
+ 1474              	.LCFI35:
+ 1475              		.cfi_def_cfa_offset 12
+ 1476              		.cfi_offset 4, -12
+ 1477              		.cfi_offset 5, -8
+ 1478              		.cfi_offset 14, -4
+ 1479 0002 83B0     		sub	sp, sp, #12
+ 1480              	.LCFI36:
+ 1481              		.cfi_def_cfa_offset 24
+ 1482              	.LVL206:
+ 1483              	.LBB30:
+ 1484              	.LBB31:
+ 211:FreeRTOS/ARM_CM3/portmacro.h **** 	(
+ 1485              		.loc 2 211 0
+ 1486              		.syntax unified
+ 1487              	@ 211 "FreeRTOS/ARM_CM3/portmacro.h" 1
+ 1488 0004 EFF31185 			mrs r5, basepri											
+ 1489 0008 4FF0BF03 		mov r3, #191												
+ 1490 000c 83F31188 		msr basepri, r3											
+ 1491 0010 BFF36F8F 		isb														
+ 1492 0014 BFF34F8F 		dsb														
+ 1493              	
+ 1494              	@ 0 "" 2
+ 1495              		.thumb
+ 1496              		.syntax unified
+ 1497              	.LBE31:
+ 1498              	.LBE30:
+1038:FreeRTOS/Src/stream_buffer.c **** 		{
+ 1499              		.loc 1 1038 0
+ 1500 0018 0369     		ldr	r3, [r0, #16]
+ 1501 001a 5BB1     		cbz	r3, .L101
+ 1502 001c 0446     		mov	r4, r0
+1040:FreeRTOS/Src/stream_buffer.c **** 										 ( uint32_t ) 0,
+ 1503              		.loc 1 1040 0
+ 1504 001e 0069     		ldr	r0, [r0, #16]
+ 1505              	.LVL207:
+ 1506 0020 0091     		str	r1, [sp]
+ 1507 0022 0023     		movs	r3, #0
+ 1508 0024 1A46     		mov	r2, r3
+ 1509 0026 1946     		mov	r1, r3
+ 1510              	.LVL208:
+ 1511 0028 FFF7FEFF 		bl	xTaskGenericNotifyFromISR
+ 1512              	.LVL209:
+1044:FreeRTOS/Src/stream_buffer.c **** 			xReturn = pdTRUE;
+ 1513              		.loc 1 1044 0
+ 1514 002c 0023     		movs	r3, #0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 56
+
+
+ 1515 002e 2361     		str	r3, [r4, #16]
+ 1516              	.LVL210:
+1045:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1517              		.loc 1 1045 0
+ 1518 0030 0120     		movs	r0, #1
+ 1519 0032 00E0     		b	.L100
+ 1520              	.LVL211:
+ 1521              	.L101:
+1049:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1522              		.loc 1 1049 0
+ 1523 0034 0020     		movs	r0, #0
+ 1524              	.LVL212:
+ 1525              	.L100:
+ 1526              	.LBB32:
+ 1527              	.LBB33:
+ 1528              		.loc 2 229 0
+ 1529              		.syntax unified
+ 1530              	@ 229 "FreeRTOS/ARM_CM3/portmacro.h" 1
+ 1531 0036 85F31188 			msr basepri, r5	
+ 1532              	@ 0 "" 2
+ 1533              	.LVL213:
+ 1534              		.thumb
+ 1535              		.syntax unified
+ 1536              	.LBE33:
+ 1537              	.LBE32:
+1055:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 1538              		.loc 1 1055 0
+ 1539 003a 03B0     		add	sp, sp, #12
+ 1540              	.LCFI37:
+ 1541              		.cfi_def_cfa_offset 12
+ 1542              		@ sp needed
+ 1543 003c 30BD     		pop	{r4, r5, pc}
+ 1544              		.cfi_endproc
+ 1545              	.LFE47:
+ 1547 003e 00BF     		.section	.text.xStreamBufferReceiveCompletedFromISR,"ax",%progbits
+ 1548              		.align	2
+ 1549              		.global	xStreamBufferReceiveCompletedFromISR
+ 1550              		.thumb
+ 1551              		.thumb_func
+ 1553              	xStreamBufferReceiveCompletedFromISR:
+ 1554              	.LFB48:
+1059:FreeRTOS/Src/stream_buffer.c **** StreamBuffer_t * const pxStreamBuffer = xStreamBuffer;
+ 1555              		.loc 1 1059 0
+ 1556              		.cfi_startproc
+ 1557              		@ args = 0, pretend = 0, frame = 0
+ 1558              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1559              	.LVL214:
+ 1560 0000 30B5     		push	{r4, r5, lr}
+ 1561              	.LCFI38:
+ 1562              		.cfi_def_cfa_offset 12
+ 1563              		.cfi_offset 4, -12
+ 1564              		.cfi_offset 5, -8
+ 1565              		.cfi_offset 14, -4
+ 1566 0002 83B0     		sub	sp, sp, #12
+ 1567              	.LCFI39:
+ 1568              		.cfi_def_cfa_offset 24
+ 1569              	.LVL215:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 57
+
+
+ 1570              	.LBB34:
+ 1571              	.LBB35:
+ 211:FreeRTOS/ARM_CM3/portmacro.h **** 	(
+ 1572              		.loc 2 211 0
+ 1573              		.syntax unified
+ 1574              	@ 211 "FreeRTOS/ARM_CM3/portmacro.h" 1
+ 1575 0004 EFF31185 			mrs r5, basepri											
+ 1576 0008 4FF0BF03 		mov r3, #191												
+ 1577 000c 83F31188 		msr basepri, r3											
+ 1578 0010 BFF36F8F 		isb														
+ 1579 0014 BFF34F8F 		dsb														
+ 1580              	
+ 1581              	@ 0 "" 2
+ 1582              		.thumb
+ 1583              		.syntax unified
+ 1584              	.LBE35:
+ 1585              	.LBE34:
+1068:FreeRTOS/Src/stream_buffer.c **** 		{
+ 1586              		.loc 1 1068 0
+ 1587 0018 4369     		ldr	r3, [r0, #20]
+ 1588 001a 5BB1     		cbz	r3, .L105
+ 1589 001c 0446     		mov	r4, r0
+1070:FreeRTOS/Src/stream_buffer.c **** 										 ( uint32_t ) 0,
+ 1590              		.loc 1 1070 0
+ 1591 001e 4069     		ldr	r0, [r0, #20]
+ 1592              	.LVL216:
+ 1593 0020 0091     		str	r1, [sp]
+ 1594 0022 0023     		movs	r3, #0
+ 1595 0024 1A46     		mov	r2, r3
+ 1596 0026 1946     		mov	r1, r3
+ 1597              	.LVL217:
+ 1598 0028 FFF7FEFF 		bl	xTaskGenericNotifyFromISR
+ 1599              	.LVL218:
+1074:FreeRTOS/Src/stream_buffer.c **** 			xReturn = pdTRUE;
+ 1600              		.loc 1 1074 0
+ 1601 002c 0023     		movs	r3, #0
+ 1602 002e 6361     		str	r3, [r4, #20]
+ 1603              	.LVL219:
+1075:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1604              		.loc 1 1075 0
+ 1605 0030 0120     		movs	r0, #1
+ 1606 0032 00E0     		b	.L104
+ 1607              	.LVL220:
+ 1608              	.L105:
+1079:FreeRTOS/Src/stream_buffer.c **** 		}
+ 1609              		.loc 1 1079 0
+ 1610 0034 0020     		movs	r0, #0
+ 1611              	.LVL221:
+ 1612              	.L104:
+ 1613              	.LBB36:
+ 1614              	.LBB37:
+ 1615              		.loc 2 229 0
+ 1616              		.syntax unified
+ 1617              	@ 229 "FreeRTOS/ARM_CM3/portmacro.h" 1
+ 1618 0036 85F31188 			msr basepri, r5	
+ 1619              	@ 0 "" 2
+ 1620              	.LVL222:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 58
+
+
+ 1621              		.thumb
+ 1622              		.syntax unified
+ 1623              	.LBE37:
+ 1624              	.LBE36:
+1085:FreeRTOS/Src/stream_buffer.c **** /*-----------------------------------------------------------*/
+ 1625              		.loc 1 1085 0
+ 1626 003a 03B0     		add	sp, sp, #12
+ 1627              	.LCFI40:
+ 1628              		.cfi_def_cfa_offset 12
+ 1629              		@ sp needed
+ 1630 003c 30BD     		pop	{r4, r5, pc}
+ 1631              		.cfi_endproc
+ 1632              	.LFE48:
+ 1634 003e 00BF     		.text
+ 1635              	.Letext0:
+ 1636              		.file 3 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/machine/_default_types
+ 1637              		.file 4 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/sys/_stdint.h"
+ 1638              		.file 5 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/lib/gcc/arm-none-eabi/5.4.1/include/stddef.h
+ 1639              		.file 6 "FreeRTOS/Inc/task.h"
+ 1640              		.file 7 "FreeRTOS/Inc/stream_buffer.h"
+ 1641              		.file 8 "FreeRTOS/Inc/portable.h"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 59
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 stream_buffer.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:20     .text.prvBytesInBuffer:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:24     .text.prvBytesInBuffer:0000000000000000 prvBytesInBuffer
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:56     .text.prvInitialiseNewStreamBuffer:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:60     .text.prvInitialiseNewStreamBuffer:0000000000000000 prvInitialiseNewStreamBuffer
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:101    .text.prvWriteBytesToBuffer:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:105    .text.prvWriteBytesToBuffer:0000000000000000 prvWriteBytesToBuffer
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:172    .text.prvWriteMessageToBuffer:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:176    .text.prvWriteMessageToBuffer:0000000000000000 prvWriteMessageToBuffer
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:271    .text.prvReadBytesFromBuffer:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:275    .text.prvReadBytesFromBuffer:0000000000000000 prvReadBytesFromBuffer
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:354    .text.prvReadMessageFromBuffer:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:358    .text.prvReadMessageFromBuffer:0000000000000000 prvReadMessageFromBuffer
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:434    .text.xStreamBufferGenericCreate:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:439    .text.xStreamBufferGenericCreate:0000000000000000 xStreamBufferGenericCreate
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:504    .text.vStreamBufferDelete:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:509    .text.vStreamBufferDelete:0000000000000000 vStreamBufferDelete
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:542    .text.xStreamBufferReset:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:547    .text.xStreamBufferReset:0000000000000000 xStreamBufferReset
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:611    .text.xStreamBufferSetTriggerLevel:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:616    .text.xStreamBufferSetTriggerLevel:0000000000000000 xStreamBufferSetTriggerLevel
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:653    .text.xStreamBufferSpacesAvailable:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:658    .text.xStreamBufferSpacesAvailable:0000000000000000 xStreamBufferSpacesAvailable
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:692    .text.xStreamBufferBytesAvailable:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:697    .text.xStreamBufferBytesAvailable:0000000000000000 xStreamBufferBytesAvailable
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:719    .text.xStreamBufferSend:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:724    .text.xStreamBufferSend:0000000000000000 xStreamBufferSend
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:887    .text.xStreamBufferSendFromISR:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:892    .text.xStreamBufferSendFromISR:0000000000000000 xStreamBufferSendFromISR
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1016   .text.xStreamBufferReceive:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1021   .text.xStreamBufferReceive:0000000000000000 xStreamBufferReceive
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1167   .text.xStreamBufferNextMessageLengthBytes:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1172   .text.xStreamBufferNextMessageLengthBytes:0000000000000000 xStreamBufferNextMessageLengthBytes
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1250   .text.xStreamBufferReceiveFromISR:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1255   .text.xStreamBufferReceiveFromISR:0000000000000000 xStreamBufferReceiveFromISR
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1377   .text.xStreamBufferIsEmpty:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1382   .text.xStreamBufferIsEmpty:0000000000000000 xStreamBufferIsEmpty
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1412   .text.xStreamBufferIsFull:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1417   .text.xStreamBufferIsFull:0000000000000000 xStreamBufferIsFull
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1461   .text.xStreamBufferSendCompletedFromISR:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1466   .text.xStreamBufferSendCompletedFromISR:0000000000000000 xStreamBufferSendCompletedFromISR
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1548   .text.xStreamBufferReceiveCompletedFromISR:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s:1553   .text.xStreamBufferReceiveCompletedFromISR:0000000000000000 xStreamBufferReceiveCompletedFromISR
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+memset
+memcpy
+pvPortMalloc
+vPortFree
+vPortEnterCritical
+vPortExitCritical
+vTaskSetTimeOutState
+xTaskNotifyStateClear
+xTaskGetCurrentTaskHandle
+xTaskNotifyWait
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc14njl6.s 			page 60
+
+
+xTaskCheckForTimeOut
+vTaskSuspendAll
+xTaskGenericNotify
+xTaskResumeAll
+xTaskGenericNotifyFromISR

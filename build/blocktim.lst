@@ -1,0 +1,1701 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"blocktim.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.vSecondaryBlockTimeTestTask,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  24              	vSecondaryBlockTimeTestTask:
+  25              	.LFB34:
+  26              		.file 1 "FreeRTOS/test_Src/blocktim.c"
+   1:FreeRTOS/test_Src/blocktim.c **** /*
+   2:FreeRTOS/test_Src/blocktim.c ****  * FreeRTOS Kernel V10.1.1
+   3:FreeRTOS/test_Src/blocktim.c ****  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+   4:FreeRTOS/test_Src/blocktim.c ****  *
+   5:FreeRTOS/test_Src/blocktim.c ****  * Permission is hereby granted, free of charge, to any person obtaining a copy of
+   6:FreeRTOS/test_Src/blocktim.c ****  * this software and associated documentation files (the "Software"), to deal in
+   7:FreeRTOS/test_Src/blocktim.c ****  * the Software without restriction, including without limitation the rights to
+   8:FreeRTOS/test_Src/blocktim.c ****  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   9:FreeRTOS/test_Src/blocktim.c ****  * the Software, and to permit persons to whom the Software is furnished to do so,
+  10:FreeRTOS/test_Src/blocktim.c ****  * subject to the following conditions:
+  11:FreeRTOS/test_Src/blocktim.c ****  *
+  12:FreeRTOS/test_Src/blocktim.c ****  * The above copyright notice and this permission notice shall be included in all
+  13:FreeRTOS/test_Src/blocktim.c ****  * copies or substantial portions of the Software.
+  14:FreeRTOS/test_Src/blocktim.c ****  *
+  15:FreeRTOS/test_Src/blocktim.c ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  16:FreeRTOS/test_Src/blocktim.c ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  17:FreeRTOS/test_Src/blocktim.c ****  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  18:FreeRTOS/test_Src/blocktim.c ****  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  19:FreeRTOS/test_Src/blocktim.c ****  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  20:FreeRTOS/test_Src/blocktim.c ****  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  21:FreeRTOS/test_Src/blocktim.c ****  *
+  22:FreeRTOS/test_Src/blocktim.c ****  * http://www.FreeRTOS.org
+  23:FreeRTOS/test_Src/blocktim.c ****  * http://aws.amazon.com/freertos
+  24:FreeRTOS/test_Src/blocktim.c ****  *
+  25:FreeRTOS/test_Src/blocktim.c ****  * 1 tab == 4 spaces!
+  26:FreeRTOS/test_Src/blocktim.c ****  */
+  27:FreeRTOS/test_Src/blocktim.c **** 
+  28:FreeRTOS/test_Src/blocktim.c **** /*
+  29:FreeRTOS/test_Src/blocktim.c ****  * This file contains some test scenarios that ensure tasks do not exit queue
+  30:FreeRTOS/test_Src/blocktim.c ****  * send or receive functions prematurely.  A description of the tests is
+  31:FreeRTOS/test_Src/blocktim.c ****  * included within the code.
+  32:FreeRTOS/test_Src/blocktim.c ****  */
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 2
+
+
+  33:FreeRTOS/test_Src/blocktim.c **** 
+  34:FreeRTOS/test_Src/blocktim.c **** /* Kernel includes. */
+  35:FreeRTOS/test_Src/blocktim.c **** #include "FreeRTOS.h"
+  36:FreeRTOS/test_Src/blocktim.c **** #include "task.h"
+  37:FreeRTOS/test_Src/blocktim.c **** #include "queue.h"
+  38:FreeRTOS/test_Src/blocktim.c **** 
+  39:FreeRTOS/test_Src/blocktim.c **** /* Demo includes. */
+  40:FreeRTOS/test_Src/blocktim.c **** #include "blocktim.h"
+  41:FreeRTOS/test_Src/blocktim.c **** 
+  42:FreeRTOS/test_Src/blocktim.c **** /* Task priorities.  Allow these to be overridden. */
+  43:FreeRTOS/test_Src/blocktim.c **** #ifndef bktPRIMARY_PRIORITY
+  44:FreeRTOS/test_Src/blocktim.c **** 	#define bktPRIMARY_PRIORITY		( configMAX_PRIORITIES - 3 )
+  45:FreeRTOS/test_Src/blocktim.c **** #endif
+  46:FreeRTOS/test_Src/blocktim.c **** 
+  47:FreeRTOS/test_Src/blocktim.c **** #ifndef bktSECONDARY_PRIORITY
+  48:FreeRTOS/test_Src/blocktim.c **** 	#define bktSECONDARY_PRIORITY	( configMAX_PRIORITIES - 4 )
+  49:FreeRTOS/test_Src/blocktim.c **** #endif
+  50:FreeRTOS/test_Src/blocktim.c **** 
+  51:FreeRTOS/test_Src/blocktim.c **** /* Task behaviour. */
+  52:FreeRTOS/test_Src/blocktim.c **** #define bktQUEUE_LENGTH				( 5 )
+  53:FreeRTOS/test_Src/blocktim.c **** #define bktSHORT_WAIT				pdMS_TO_TICKS( ( TickType_t ) 20 )
+  54:FreeRTOS/test_Src/blocktim.c **** #define bktPRIMARY_BLOCK_TIME		( 10 )
+  55:FreeRTOS/test_Src/blocktim.c **** #define bktALLOWABLE_MARGIN			( 15 )
+  56:FreeRTOS/test_Src/blocktim.c **** #define bktTIME_TO_BLOCK			( 175 )
+  57:FreeRTOS/test_Src/blocktim.c **** #define bktDONT_BLOCK				( ( TickType_t ) 0 )
+  58:FreeRTOS/test_Src/blocktim.c **** #define bktRUN_INDICATOR			( ( UBaseType_t ) 0x55 )
+  59:FreeRTOS/test_Src/blocktim.c **** 
+  60:FreeRTOS/test_Src/blocktim.c **** /* In case the demo does not have software timers enabled, as this file uses
+  61:FreeRTOS/test_Src/blocktim.c **** the configTIMER_TASK_PRIORITY setting. */
+  62:FreeRTOS/test_Src/blocktim.c **** #ifndef configTIMER_TASK_PRIORITY
+  63:FreeRTOS/test_Src/blocktim.c **** 	#define configTIMER_TASK_PRIORITY ( configMAX_PRIORITIES - 1 )
+  64:FreeRTOS/test_Src/blocktim.c **** #endif
+  65:FreeRTOS/test_Src/blocktim.c **** 
+  66:FreeRTOS/test_Src/blocktim.c **** /*-----------------------------------------------------------*/
+  67:FreeRTOS/test_Src/blocktim.c **** 
+  68:FreeRTOS/test_Src/blocktim.c **** /*
+  69:FreeRTOS/test_Src/blocktim.c ****  * The two test tasks.  Their behaviour is commented within the functions.
+  70:FreeRTOS/test_Src/blocktim.c ****  */
+  71:FreeRTOS/test_Src/blocktim.c **** static void vPrimaryBlockTimeTestTask( void *pvParameters );
+  72:FreeRTOS/test_Src/blocktim.c **** static void vSecondaryBlockTimeTestTask( void *pvParameters );
+  73:FreeRTOS/test_Src/blocktim.c **** 
+  74:FreeRTOS/test_Src/blocktim.c **** /*
+  75:FreeRTOS/test_Src/blocktim.c ****  * Very basic tests to verify the block times are as expected.
+  76:FreeRTOS/test_Src/blocktim.c ****  */
+  77:FreeRTOS/test_Src/blocktim.c **** static void prvBasicDelayTests( void );
+  78:FreeRTOS/test_Src/blocktim.c **** 
+  79:FreeRTOS/test_Src/blocktim.c **** /*-----------------------------------------------------------*/
+  80:FreeRTOS/test_Src/blocktim.c **** 
+  81:FreeRTOS/test_Src/blocktim.c **** /* The queue on which the tasks block. */
+  82:FreeRTOS/test_Src/blocktim.c **** static QueueHandle_t xTestQueue;
+  83:FreeRTOS/test_Src/blocktim.c **** 
+  84:FreeRTOS/test_Src/blocktim.c **** /* Handle to the secondary task is required by the primary task for calls
+  85:FreeRTOS/test_Src/blocktim.c **** to vTaskSuspend/Resume(). */
+  86:FreeRTOS/test_Src/blocktim.c **** static TaskHandle_t xSecondary;
+  87:FreeRTOS/test_Src/blocktim.c **** 
+  88:FreeRTOS/test_Src/blocktim.c **** /* Used to ensure that tasks are still executing without error. */
+  89:FreeRTOS/test_Src/blocktim.c **** static volatile BaseType_t xPrimaryCycles = 0, xSecondaryCycles = 0;
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 3
+
+
+  90:FreeRTOS/test_Src/blocktim.c **** static volatile BaseType_t xErrorOccurred = pdFALSE;
+  91:FreeRTOS/test_Src/blocktim.c **** 
+  92:FreeRTOS/test_Src/blocktim.c **** /* Provides a simple mechanism for the primary task to know when the
+  93:FreeRTOS/test_Src/blocktim.c **** secondary task has executed. */
+  94:FreeRTOS/test_Src/blocktim.c **** static volatile UBaseType_t xRunIndicator;
+  95:FreeRTOS/test_Src/blocktim.c **** 
+  96:FreeRTOS/test_Src/blocktim.c **** /*-----------------------------------------------------------*/
+  97:FreeRTOS/test_Src/blocktim.c **** 
+  98:FreeRTOS/test_Src/blocktim.c **** void vCreateBlockTimeTasks( void )
+  99:FreeRTOS/test_Src/blocktim.c **** {
+ 100:FreeRTOS/test_Src/blocktim.c **** 	/* Create the queue on which the two tasks block. */
+ 101:FreeRTOS/test_Src/blocktim.c **** 	xTestQueue = xQueueCreate( bktQUEUE_LENGTH, sizeof( BaseType_t ) );
+ 102:FreeRTOS/test_Src/blocktim.c **** 
+ 103:FreeRTOS/test_Src/blocktim.c **** 	if( xTestQueue != NULL )
+ 104:FreeRTOS/test_Src/blocktim.c **** 	{
+ 105:FreeRTOS/test_Src/blocktim.c **** 		/* vQueueAddToRegistry() adds the queue to the queue registry, if one
+ 106:FreeRTOS/test_Src/blocktim.c **** 		is in use.  The queue registry is provided as a means for kernel aware
+ 107:FreeRTOS/test_Src/blocktim.c **** 		debuggers to locate queues and has no purpose if a kernel aware
+ 108:FreeRTOS/test_Src/blocktim.c **** 		debugger is not being used.  The call to vQueueAddToRegistry() will be
+ 109:FreeRTOS/test_Src/blocktim.c **** 		removed by the pre-processor if configQUEUE_REGISTRY_SIZE is not
+ 110:FreeRTOS/test_Src/blocktim.c **** 		defined or is defined to be less than 1. */
+ 111:FreeRTOS/test_Src/blocktim.c **** 		vQueueAddToRegistry( xTestQueue, "Block_Time_Queue" );
+ 112:FreeRTOS/test_Src/blocktim.c **** 
+ 113:FreeRTOS/test_Src/blocktim.c **** 		/* Create the two test tasks. */
+ 114:FreeRTOS/test_Src/blocktim.c **** 		xTaskCreate( vPrimaryBlockTimeTestTask, "BTest1", configMINIMAL_STACK_SIZE, NULL, bktPRIMARY_PRIO
+ 115:FreeRTOS/test_Src/blocktim.c **** 		xTaskCreate( vSecondaryBlockTimeTestTask, "BTest2", configMINIMAL_STACK_SIZE, NULL, bktSECONDARY_
+ 116:FreeRTOS/test_Src/blocktim.c **** 	}
+ 117:FreeRTOS/test_Src/blocktim.c **** }
+ 118:FreeRTOS/test_Src/blocktim.c **** /*-----------------------------------------------------------*/
+ 119:FreeRTOS/test_Src/blocktim.c **** 
+ 120:FreeRTOS/test_Src/blocktim.c **** static void vPrimaryBlockTimeTestTask( void *pvParameters )
+ 121:FreeRTOS/test_Src/blocktim.c **** {
+ 122:FreeRTOS/test_Src/blocktim.c **** BaseType_t xItem, xData;
+ 123:FreeRTOS/test_Src/blocktim.c **** TickType_t xTimeWhenBlocking;
+ 124:FreeRTOS/test_Src/blocktim.c **** TickType_t xTimeToBlock, xBlockedTime;
+ 125:FreeRTOS/test_Src/blocktim.c **** 
+ 126:FreeRTOS/test_Src/blocktim.c **** 	( void ) pvParameters;
+ 127:FreeRTOS/test_Src/blocktim.c **** 
+ 128:FreeRTOS/test_Src/blocktim.c **** 	for( ;; )
+ 129:FreeRTOS/test_Src/blocktim.c **** 	{
+ 130:FreeRTOS/test_Src/blocktim.c **** 		/*********************************************************************
+ 131:FreeRTOS/test_Src/blocktim.c **** 		Test 0
+ 132:FreeRTOS/test_Src/blocktim.c **** 
+ 133:FreeRTOS/test_Src/blocktim.c **** 		Basic vTaskDelay() and vTaskDelayUntil() tests. */
+ 134:FreeRTOS/test_Src/blocktim.c **** 		prvBasicDelayTests();
+ 135:FreeRTOS/test_Src/blocktim.c **** 
+ 136:FreeRTOS/test_Src/blocktim.c **** 
+ 137:FreeRTOS/test_Src/blocktim.c **** 		/*********************************************************************
+ 138:FreeRTOS/test_Src/blocktim.c **** 		Test 1
+ 139:FreeRTOS/test_Src/blocktim.c **** 
+ 140:FreeRTOS/test_Src/blocktim.c **** 		Simple block time wakeup test on queue receives. */
+ 141:FreeRTOS/test_Src/blocktim.c **** 		for( xItem = 0; xItem < bktQUEUE_LENGTH; xItem++ )
+ 142:FreeRTOS/test_Src/blocktim.c **** 		{
+ 143:FreeRTOS/test_Src/blocktim.c **** 			/* The queue is empty. Attempt to read from the queue using a block
+ 144:FreeRTOS/test_Src/blocktim.c **** 			time.  When we wake, ensure the delta in time is as expected. */
+ 145:FreeRTOS/test_Src/blocktim.c **** 			xTimeToBlock = ( TickType_t ) ( bktPRIMARY_BLOCK_TIME << xItem );
+ 146:FreeRTOS/test_Src/blocktim.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 4
+
+
+ 147:FreeRTOS/test_Src/blocktim.c **** 			xTimeWhenBlocking = xTaskGetTickCount();
+ 148:FreeRTOS/test_Src/blocktim.c **** 
+ 149:FreeRTOS/test_Src/blocktim.c **** 			/* We should unblock after xTimeToBlock having not received
+ 150:FreeRTOS/test_Src/blocktim.c **** 			anything on the queue. */
+ 151:FreeRTOS/test_Src/blocktim.c **** 			if( xQueueReceive( xTestQueue, &xData, xTimeToBlock ) != errQUEUE_EMPTY )
+ 152:FreeRTOS/test_Src/blocktim.c **** 			{
+ 153:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 154:FreeRTOS/test_Src/blocktim.c **** 			}
+ 155:FreeRTOS/test_Src/blocktim.c **** 
+ 156:FreeRTOS/test_Src/blocktim.c **** 			/* How long were we blocked for? */
+ 157:FreeRTOS/test_Src/blocktim.c **** 			xBlockedTime = xTaskGetTickCount() - xTimeWhenBlocking;
+ 158:FreeRTOS/test_Src/blocktim.c **** 
+ 159:FreeRTOS/test_Src/blocktim.c **** 			if( xBlockedTime < xTimeToBlock )
+ 160:FreeRTOS/test_Src/blocktim.c **** 			{
+ 161:FreeRTOS/test_Src/blocktim.c **** 				/* Should not have blocked for less than we requested. */
+ 162:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 163:FreeRTOS/test_Src/blocktim.c **** 			}
+ 164:FreeRTOS/test_Src/blocktim.c **** 
+ 165:FreeRTOS/test_Src/blocktim.c **** 			if( xBlockedTime > ( xTimeToBlock + bktALLOWABLE_MARGIN ) )
+ 166:FreeRTOS/test_Src/blocktim.c **** 			{
+ 167:FreeRTOS/test_Src/blocktim.c **** 				/* Should not have blocked for longer than we requested,
+ 168:FreeRTOS/test_Src/blocktim.c **** 				although we would not necessarily run as soon as we were
+ 169:FreeRTOS/test_Src/blocktim.c **** 				unblocked so a margin is allowed. */
+ 170:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 171:FreeRTOS/test_Src/blocktim.c **** 			}
+ 172:FreeRTOS/test_Src/blocktim.c **** 		}
+ 173:FreeRTOS/test_Src/blocktim.c **** 
+ 174:FreeRTOS/test_Src/blocktim.c **** 		/*********************************************************************
+ 175:FreeRTOS/test_Src/blocktim.c **** 		Test 2
+ 176:FreeRTOS/test_Src/blocktim.c **** 
+ 177:FreeRTOS/test_Src/blocktim.c **** 		Simple block time wakeup test on queue sends.
+ 178:FreeRTOS/test_Src/blocktim.c **** 
+ 179:FreeRTOS/test_Src/blocktim.c **** 		First fill the queue.  It should be empty so all sends should pass. */
+ 180:FreeRTOS/test_Src/blocktim.c **** 		for( xItem = 0; xItem < bktQUEUE_LENGTH; xItem++ )
+ 181:FreeRTOS/test_Src/blocktim.c **** 		{
+ 182:FreeRTOS/test_Src/blocktim.c **** 			if( xQueueSend( xTestQueue, &xItem, bktDONT_BLOCK ) != pdPASS )
+ 183:FreeRTOS/test_Src/blocktim.c **** 			{
+ 184:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 185:FreeRTOS/test_Src/blocktim.c **** 			}
+ 186:FreeRTOS/test_Src/blocktim.c **** 
+ 187:FreeRTOS/test_Src/blocktim.c **** 			#if configUSE_PREEMPTION == 0
+ 188:FreeRTOS/test_Src/blocktim.c **** 				taskYIELD();
+ 189:FreeRTOS/test_Src/blocktim.c **** 			#endif
+ 190:FreeRTOS/test_Src/blocktim.c **** 		}
+ 191:FreeRTOS/test_Src/blocktim.c **** 
+ 192:FreeRTOS/test_Src/blocktim.c **** 		for( xItem = 0; xItem < bktQUEUE_LENGTH; xItem++ )
+ 193:FreeRTOS/test_Src/blocktim.c **** 		{
+ 194:FreeRTOS/test_Src/blocktim.c **** 			/* The queue is full. Attempt to write to the queue using a block
+ 195:FreeRTOS/test_Src/blocktim.c **** 			time.  When we wake, ensure the delta in time is as expected. */
+ 196:FreeRTOS/test_Src/blocktim.c **** 			xTimeToBlock = ( TickType_t ) ( bktPRIMARY_BLOCK_TIME << xItem );
+ 197:FreeRTOS/test_Src/blocktim.c **** 
+ 198:FreeRTOS/test_Src/blocktim.c **** 			xTimeWhenBlocking = xTaskGetTickCount();
+ 199:FreeRTOS/test_Src/blocktim.c **** 
+ 200:FreeRTOS/test_Src/blocktim.c **** 			/* We should unblock after xTimeToBlock having not received
+ 201:FreeRTOS/test_Src/blocktim.c **** 			anything on the queue. */
+ 202:FreeRTOS/test_Src/blocktim.c **** 			if( xQueueSend( xTestQueue, &xItem, xTimeToBlock ) != errQUEUE_FULL )
+ 203:FreeRTOS/test_Src/blocktim.c **** 			{
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 5
+
+
+ 204:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 205:FreeRTOS/test_Src/blocktim.c **** 			}
+ 206:FreeRTOS/test_Src/blocktim.c **** 
+ 207:FreeRTOS/test_Src/blocktim.c **** 			/* How long were we blocked for? */
+ 208:FreeRTOS/test_Src/blocktim.c **** 			xBlockedTime = xTaskGetTickCount() - xTimeWhenBlocking;
+ 209:FreeRTOS/test_Src/blocktim.c **** 
+ 210:FreeRTOS/test_Src/blocktim.c **** 			if( xBlockedTime < xTimeToBlock )
+ 211:FreeRTOS/test_Src/blocktim.c **** 			{
+ 212:FreeRTOS/test_Src/blocktim.c **** 				/* Should not have blocked for less than we requested. */
+ 213:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 214:FreeRTOS/test_Src/blocktim.c **** 			}
+ 215:FreeRTOS/test_Src/blocktim.c **** 
+ 216:FreeRTOS/test_Src/blocktim.c **** 			if( xBlockedTime > ( xTimeToBlock + bktALLOWABLE_MARGIN ) )
+ 217:FreeRTOS/test_Src/blocktim.c **** 			{
+ 218:FreeRTOS/test_Src/blocktim.c **** 				/* Should not have blocked for longer than we requested,
+ 219:FreeRTOS/test_Src/blocktim.c **** 				although we would not necessarily run as soon as we were
+ 220:FreeRTOS/test_Src/blocktim.c **** 				unblocked so a margin is allowed. */
+ 221:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 222:FreeRTOS/test_Src/blocktim.c **** 			}
+ 223:FreeRTOS/test_Src/blocktim.c **** 		}
+ 224:FreeRTOS/test_Src/blocktim.c **** 
+ 225:FreeRTOS/test_Src/blocktim.c **** 		/*********************************************************************
+ 226:FreeRTOS/test_Src/blocktim.c **** 		Test 3
+ 227:FreeRTOS/test_Src/blocktim.c **** 
+ 228:FreeRTOS/test_Src/blocktim.c **** 		Wake the other task, it will block attempting to post to the queue.
+ 229:FreeRTOS/test_Src/blocktim.c **** 		When we read from the queue the other task will wake, but before it
+ 230:FreeRTOS/test_Src/blocktim.c **** 		can run we will post to the queue again.  When the other task runs it
+ 231:FreeRTOS/test_Src/blocktim.c **** 		will find the queue still full, even though it was woken.  It should
+ 232:FreeRTOS/test_Src/blocktim.c **** 		recognise that its block time has not expired and return to block for
+ 233:FreeRTOS/test_Src/blocktim.c **** 		the remains of its block time.
+ 234:FreeRTOS/test_Src/blocktim.c **** 
+ 235:FreeRTOS/test_Src/blocktim.c **** 		Wake the other task so it blocks attempting to post to the already
+ 236:FreeRTOS/test_Src/blocktim.c **** 		full queue. */
+ 237:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = 0;
+ 238:FreeRTOS/test_Src/blocktim.c **** 		vTaskResume( xSecondary );
+ 239:FreeRTOS/test_Src/blocktim.c **** 
+ 240:FreeRTOS/test_Src/blocktim.c **** 		/* We need to wait a little to ensure the other task executes. */
+ 241:FreeRTOS/test_Src/blocktim.c **** 		while( xRunIndicator != bktRUN_INDICATOR )
+ 242:FreeRTOS/test_Src/blocktim.c **** 		{
+ 243:FreeRTOS/test_Src/blocktim.c **** 			/* The other task has not yet executed. */
+ 244:FreeRTOS/test_Src/blocktim.c **** 			vTaskDelay( bktSHORT_WAIT );
+ 245:FreeRTOS/test_Src/blocktim.c **** 		}
+ 246:FreeRTOS/test_Src/blocktim.c **** 		/* Make sure the other task is blocked on the queue. */
+ 247:FreeRTOS/test_Src/blocktim.c **** 		vTaskDelay( bktSHORT_WAIT );
+ 248:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = 0;
+ 249:FreeRTOS/test_Src/blocktim.c **** 
+ 250:FreeRTOS/test_Src/blocktim.c **** 		for( xItem = 0; xItem < bktQUEUE_LENGTH; xItem++ )
+ 251:FreeRTOS/test_Src/blocktim.c **** 		{
+ 252:FreeRTOS/test_Src/blocktim.c **** 			/* Now when we make space on the queue the other task should wake
+ 253:FreeRTOS/test_Src/blocktim.c **** 			but not execute as this task has higher priority. */
+ 254:FreeRTOS/test_Src/blocktim.c **** 			if( xQueueReceive( xTestQueue, &xData, bktDONT_BLOCK ) != pdPASS )
+ 255:FreeRTOS/test_Src/blocktim.c **** 			{
+ 256:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 257:FreeRTOS/test_Src/blocktim.c **** 			}
+ 258:FreeRTOS/test_Src/blocktim.c **** 
+ 259:FreeRTOS/test_Src/blocktim.c **** 			/* Now fill the queue again before the other task gets a chance to
+ 260:FreeRTOS/test_Src/blocktim.c **** 			execute.  If the other task had executed we would find the queue
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 6
+
+
+ 261:FreeRTOS/test_Src/blocktim.c **** 			full ourselves, and the other task have set xRunIndicator. */
+ 262:FreeRTOS/test_Src/blocktim.c **** 			if( xQueueSend( xTestQueue, &xItem, bktDONT_BLOCK ) != pdPASS )
+ 263:FreeRTOS/test_Src/blocktim.c **** 			{
+ 264:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 265:FreeRTOS/test_Src/blocktim.c **** 			}
+ 266:FreeRTOS/test_Src/blocktim.c **** 
+ 267:FreeRTOS/test_Src/blocktim.c **** 			if( xRunIndicator == bktRUN_INDICATOR )
+ 268:FreeRTOS/test_Src/blocktim.c **** 			{
+ 269:FreeRTOS/test_Src/blocktim.c **** 				/* The other task should not have executed. */
+ 270:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 271:FreeRTOS/test_Src/blocktim.c **** 			}
+ 272:FreeRTOS/test_Src/blocktim.c **** 
+ 273:FreeRTOS/test_Src/blocktim.c **** 			/* Raise the priority of the other task so it executes and blocks
+ 274:FreeRTOS/test_Src/blocktim.c **** 			on the queue again. */
+ 275:FreeRTOS/test_Src/blocktim.c **** 			vTaskPrioritySet( xSecondary, bktPRIMARY_PRIORITY + 2 );
+ 276:FreeRTOS/test_Src/blocktim.c **** 
+ 277:FreeRTOS/test_Src/blocktim.c **** 			/* The other task should now have re-blocked without exiting the
+ 278:FreeRTOS/test_Src/blocktim.c **** 			queue function. */
+ 279:FreeRTOS/test_Src/blocktim.c **** 			if( xRunIndicator == bktRUN_INDICATOR )
+ 280:FreeRTOS/test_Src/blocktim.c **** 			{
+ 281:FreeRTOS/test_Src/blocktim.c **** 				/* The other task should not have executed outside of the
+ 282:FreeRTOS/test_Src/blocktim.c **** 				queue function. */
+ 283:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 284:FreeRTOS/test_Src/blocktim.c **** 			}
+ 285:FreeRTOS/test_Src/blocktim.c **** 
+ 286:FreeRTOS/test_Src/blocktim.c **** 			/* Set the priority back down. */
+ 287:FreeRTOS/test_Src/blocktim.c **** 			vTaskPrioritySet( xSecondary, bktSECONDARY_PRIORITY );
+ 288:FreeRTOS/test_Src/blocktim.c **** 		}
+ 289:FreeRTOS/test_Src/blocktim.c **** 
+ 290:FreeRTOS/test_Src/blocktim.c **** 		/* Let the other task timeout.  When it unblockes it will check that it
+ 291:FreeRTOS/test_Src/blocktim.c **** 		unblocked at the correct time, then suspend itself. */
+ 292:FreeRTOS/test_Src/blocktim.c **** 		while( xRunIndicator != bktRUN_INDICATOR )
+ 293:FreeRTOS/test_Src/blocktim.c **** 		{
+ 294:FreeRTOS/test_Src/blocktim.c **** 			vTaskDelay( bktSHORT_WAIT );
+ 295:FreeRTOS/test_Src/blocktim.c **** 		}
+ 296:FreeRTOS/test_Src/blocktim.c **** 		vTaskDelay( bktSHORT_WAIT );
+ 297:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = 0;
+ 298:FreeRTOS/test_Src/blocktim.c **** 
+ 299:FreeRTOS/test_Src/blocktim.c **** 
+ 300:FreeRTOS/test_Src/blocktim.c **** 		/*********************************************************************
+ 301:FreeRTOS/test_Src/blocktim.c **** 		Test 4
+ 302:FreeRTOS/test_Src/blocktim.c **** 
+ 303:FreeRTOS/test_Src/blocktim.c **** 		As per test 3 - but with the send and receive the other way around.
+ 304:FreeRTOS/test_Src/blocktim.c **** 		The other task blocks attempting to read from the queue.
+ 305:FreeRTOS/test_Src/blocktim.c **** 
+ 306:FreeRTOS/test_Src/blocktim.c **** 		Empty the queue.  We should find that it is full. */
+ 307:FreeRTOS/test_Src/blocktim.c **** 		for( xItem = 0; xItem < bktQUEUE_LENGTH; xItem++ )
+ 308:FreeRTOS/test_Src/blocktim.c **** 		{
+ 309:FreeRTOS/test_Src/blocktim.c **** 			if( xQueueReceive( xTestQueue, &xData, bktDONT_BLOCK ) != pdPASS )
+ 310:FreeRTOS/test_Src/blocktim.c **** 			{
+ 311:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 312:FreeRTOS/test_Src/blocktim.c **** 			}
+ 313:FreeRTOS/test_Src/blocktim.c **** 		}
+ 314:FreeRTOS/test_Src/blocktim.c **** 
+ 315:FreeRTOS/test_Src/blocktim.c **** 		/* Wake the other task so it blocks attempting to read from  the
+ 316:FreeRTOS/test_Src/blocktim.c **** 		already	empty queue. */
+ 317:FreeRTOS/test_Src/blocktim.c **** 		vTaskResume( xSecondary );
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 7
+
+
+ 318:FreeRTOS/test_Src/blocktim.c **** 
+ 319:FreeRTOS/test_Src/blocktim.c **** 		/* We need to wait a little to ensure the other task executes. */
+ 320:FreeRTOS/test_Src/blocktim.c **** 		while( xRunIndicator != bktRUN_INDICATOR )
+ 321:FreeRTOS/test_Src/blocktim.c **** 		{
+ 322:FreeRTOS/test_Src/blocktim.c **** 			vTaskDelay( bktSHORT_WAIT );
+ 323:FreeRTOS/test_Src/blocktim.c **** 		}
+ 324:FreeRTOS/test_Src/blocktim.c **** 		vTaskDelay( bktSHORT_WAIT );
+ 325:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = 0;
+ 326:FreeRTOS/test_Src/blocktim.c **** 
+ 327:FreeRTOS/test_Src/blocktim.c **** 		for( xItem = 0; xItem < bktQUEUE_LENGTH; xItem++ )
+ 328:FreeRTOS/test_Src/blocktim.c **** 		{
+ 329:FreeRTOS/test_Src/blocktim.c **** 			/* Now when we place an item on the queue the other task should
+ 330:FreeRTOS/test_Src/blocktim.c **** 			wake but not execute as this task has higher priority. */
+ 331:FreeRTOS/test_Src/blocktim.c **** 			if( xQueueSend( xTestQueue, &xItem, bktDONT_BLOCK ) != pdPASS )
+ 332:FreeRTOS/test_Src/blocktim.c **** 			{
+ 333:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 334:FreeRTOS/test_Src/blocktim.c **** 			}
+ 335:FreeRTOS/test_Src/blocktim.c **** 
+ 336:FreeRTOS/test_Src/blocktim.c **** 			/* Now empty the queue again before the other task gets a chance to
+ 337:FreeRTOS/test_Src/blocktim.c **** 			execute.  If the other task had executed we would find the queue
+ 338:FreeRTOS/test_Src/blocktim.c **** 			empty ourselves, and the other task would be suspended. */
+ 339:FreeRTOS/test_Src/blocktim.c **** 			if( xQueueReceive( xTestQueue, &xData, bktDONT_BLOCK ) != pdPASS )
+ 340:FreeRTOS/test_Src/blocktim.c **** 			{
+ 341:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 342:FreeRTOS/test_Src/blocktim.c **** 			}
+ 343:FreeRTOS/test_Src/blocktim.c **** 
+ 344:FreeRTOS/test_Src/blocktim.c **** 			if( xRunIndicator == bktRUN_INDICATOR )
+ 345:FreeRTOS/test_Src/blocktim.c **** 			{
+ 346:FreeRTOS/test_Src/blocktim.c **** 				/* The other task should not have executed. */
+ 347:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 348:FreeRTOS/test_Src/blocktim.c **** 			}
+ 349:FreeRTOS/test_Src/blocktim.c **** 
+ 350:FreeRTOS/test_Src/blocktim.c **** 			/* Raise the priority of the other task so it executes and blocks
+ 351:FreeRTOS/test_Src/blocktim.c **** 			on the queue again. */
+ 352:FreeRTOS/test_Src/blocktim.c **** 			vTaskPrioritySet( xSecondary, bktPRIMARY_PRIORITY + 2 );
+ 353:FreeRTOS/test_Src/blocktim.c **** 
+ 354:FreeRTOS/test_Src/blocktim.c **** 			/* The other task should now have re-blocked without exiting the
+ 355:FreeRTOS/test_Src/blocktim.c **** 			queue function. */
+ 356:FreeRTOS/test_Src/blocktim.c **** 			if( xRunIndicator == bktRUN_INDICATOR )
+ 357:FreeRTOS/test_Src/blocktim.c **** 			{
+ 358:FreeRTOS/test_Src/blocktim.c **** 				/* The other task should not have executed outside of the
+ 359:FreeRTOS/test_Src/blocktim.c **** 				queue function. */
+ 360:FreeRTOS/test_Src/blocktim.c **** 				xErrorOccurred = pdTRUE;
+ 361:FreeRTOS/test_Src/blocktim.c **** 			}
+ 362:FreeRTOS/test_Src/blocktim.c **** 			vTaskPrioritySet( xSecondary, bktSECONDARY_PRIORITY );
+ 363:FreeRTOS/test_Src/blocktim.c **** 		}
+ 364:FreeRTOS/test_Src/blocktim.c **** 
+ 365:FreeRTOS/test_Src/blocktim.c **** 		/* Let the other task timeout.  When it unblockes it will check that it
+ 366:FreeRTOS/test_Src/blocktim.c **** 		unblocked at the correct time, then suspend itself. */
+ 367:FreeRTOS/test_Src/blocktim.c **** 		while( xRunIndicator != bktRUN_INDICATOR )
+ 368:FreeRTOS/test_Src/blocktim.c **** 		{
+ 369:FreeRTOS/test_Src/blocktim.c **** 			vTaskDelay( bktSHORT_WAIT );
+ 370:FreeRTOS/test_Src/blocktim.c **** 		}
+ 371:FreeRTOS/test_Src/blocktim.c **** 		vTaskDelay( bktSHORT_WAIT );
+ 372:FreeRTOS/test_Src/blocktim.c **** 
+ 373:FreeRTOS/test_Src/blocktim.c **** 		xPrimaryCycles++;
+ 374:FreeRTOS/test_Src/blocktim.c **** 	}
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 8
+
+
+ 375:FreeRTOS/test_Src/blocktim.c **** }
+ 376:FreeRTOS/test_Src/blocktim.c **** /*-----------------------------------------------------------*/
+ 377:FreeRTOS/test_Src/blocktim.c **** 
+ 378:FreeRTOS/test_Src/blocktim.c **** static void vSecondaryBlockTimeTestTask( void *pvParameters )
+ 379:FreeRTOS/test_Src/blocktim.c **** {
+  27              		.loc 1 379 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 8
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              	.LVL0:
+  32 0000 70B5     		push	{r4, r5, r6, lr}
+  33              	.LCFI0:
+  34              		.cfi_def_cfa_offset 16
+  35              		.cfi_offset 4, -16
+  36              		.cfi_offset 5, -12
+  37              		.cfi_offset 6, -8
+  38              		.cfi_offset 14, -4
+  39 0002 82B0     		sub	sp, sp, #8
+  40              	.LCFI1:
+  41              		.cfi_def_cfa_offset 24
+  42              	.LVL1:
+  43              	.L8:
+ 380:FreeRTOS/test_Src/blocktim.c **** TickType_t xTimeWhenBlocking, xBlockedTime;
+ 381:FreeRTOS/test_Src/blocktim.c **** BaseType_t xData;
+ 382:FreeRTOS/test_Src/blocktim.c **** 
+ 383:FreeRTOS/test_Src/blocktim.c **** 	( void ) pvParameters;
+ 384:FreeRTOS/test_Src/blocktim.c **** 
+ 385:FreeRTOS/test_Src/blocktim.c **** 	for( ;; )
+ 386:FreeRTOS/test_Src/blocktim.c **** 	{
+ 387:FreeRTOS/test_Src/blocktim.c **** 		/*********************************************************************
+ 388:FreeRTOS/test_Src/blocktim.c **** 		Test 0, 1 and 2
+ 389:FreeRTOS/test_Src/blocktim.c **** 
+ 390:FreeRTOS/test_Src/blocktim.c **** 		This task does not participate in these tests. */
+ 391:FreeRTOS/test_Src/blocktim.c **** 		vTaskSuspend( NULL );
+  44              		.loc 1 391 0
+  45 0004 0020     		movs	r0, #0
+  46 0006 FFF7FEFF 		bl	vTaskSuspend
+  47              	.LVL2:
+ 392:FreeRTOS/test_Src/blocktim.c **** 
+ 393:FreeRTOS/test_Src/blocktim.c **** 		/*********************************************************************
+ 394:FreeRTOS/test_Src/blocktim.c **** 		Test 3
+ 395:FreeRTOS/test_Src/blocktim.c **** 
+ 396:FreeRTOS/test_Src/blocktim.c **** 		The first thing we do is attempt to read from the queue.  It should be
+ 397:FreeRTOS/test_Src/blocktim.c **** 		full so we block.  Note the time before we block so we can check the
+ 398:FreeRTOS/test_Src/blocktim.c **** 		wake time is as per that expected. */
+ 399:FreeRTOS/test_Src/blocktim.c **** 		xTimeWhenBlocking = xTaskGetTickCount();
+  48              		.loc 1 399 0
+  49 000a FFF7FEFF 		bl	xTaskGetTickCount
+  50              	.LVL3:
+  51 000e 0446     		mov	r4, r0
+  52              	.LVL4:
+ 400:FreeRTOS/test_Src/blocktim.c **** 
+ 401:FreeRTOS/test_Src/blocktim.c **** 		/* We should unblock after bktTIME_TO_BLOCK having not sent anything to
+ 402:FreeRTOS/test_Src/blocktim.c **** 		the queue. */
+ 403:FreeRTOS/test_Src/blocktim.c **** 		xData = 0;
+  53              		.loc 1 403 0
+  54 0010 0023     		movs	r3, #0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 9
+
+
+  55 0012 02A9     		add	r1, sp, #8
+  56 0014 41F8043D 		str	r3, [r1, #-4]!
+ 404:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = bktRUN_INDICATOR;
+  57              		.loc 1 404 0
+  58 0018 5520     		movs	r0, #85
+  59              	.LVL5:
+  60 001a 204A     		ldr	r2, .L10
+  61 001c 1060     		str	r0, [r2]
+ 405:FreeRTOS/test_Src/blocktim.c **** 		if( xQueueSend( xTestQueue, &xData, bktTIME_TO_BLOCK ) != errQUEUE_FULL )
+  62              		.loc 1 405 0
+  63 001e AF22     		movs	r2, #175
+  64 0020 1F48     		ldr	r0, .L10+4
+  65 0022 0068     		ldr	r0, [r0]
+  66 0024 FFF7FEFF 		bl	xQueueGenericSend
+  67              	.LVL6:
+  68 0028 10B1     		cbz	r0, .L2
+ 406:FreeRTOS/test_Src/blocktim.c **** 		{
+ 407:FreeRTOS/test_Src/blocktim.c **** 			xErrorOccurred = pdTRUE;
+  69              		.loc 1 407 0
+  70 002a 0122     		movs	r2, #1
+  71 002c 1D4B     		ldr	r3, .L10+8
+  72 002e 1A60     		str	r2, [r3]
+  73              	.L2:
+ 408:FreeRTOS/test_Src/blocktim.c **** 		}
+ 409:FreeRTOS/test_Src/blocktim.c **** 
+ 410:FreeRTOS/test_Src/blocktim.c **** 		/* How long were we inside the send function? */
+ 411:FreeRTOS/test_Src/blocktim.c **** 		xBlockedTime = xTaskGetTickCount() - xTimeWhenBlocking;
+  74              		.loc 1 411 0
+  75 0030 FFF7FEFF 		bl	xTaskGetTickCount
+  76              	.LVL7:
+  77 0034 001B     		subs	r0, r0, r4
+  78              	.LVL8:
+ 412:FreeRTOS/test_Src/blocktim.c **** 
+ 413:FreeRTOS/test_Src/blocktim.c **** 		/* We should not have blocked for less time than bktTIME_TO_BLOCK. */
+ 414:FreeRTOS/test_Src/blocktim.c **** 		if( xBlockedTime < bktTIME_TO_BLOCK )
+  79              		.loc 1 414 0
+  80 0036 AE28     		cmp	r0, #174
+  81 0038 02D8     		bhi	.L3
+ 415:FreeRTOS/test_Src/blocktim.c **** 		{
+ 416:FreeRTOS/test_Src/blocktim.c **** 			xErrorOccurred = pdTRUE;
+  82              		.loc 1 416 0
+  83 003a 0122     		movs	r2, #1
+  84 003c 194B     		ldr	r3, .L10+8
+  85 003e 1A60     		str	r2, [r3]
+  86              	.L3:
+ 417:FreeRTOS/test_Src/blocktim.c **** 		}
+ 418:FreeRTOS/test_Src/blocktim.c **** 
+ 419:FreeRTOS/test_Src/blocktim.c **** 		/* We should of not blocked for much longer than bktALLOWABLE_MARGIN
+ 420:FreeRTOS/test_Src/blocktim.c **** 		either.  A margin is permitted as we would not necessarily run as
+ 421:FreeRTOS/test_Src/blocktim.c **** 		soon as we unblocked. */
+ 422:FreeRTOS/test_Src/blocktim.c **** 		if( xBlockedTime > ( bktTIME_TO_BLOCK + bktALLOWABLE_MARGIN ) )
+  87              		.loc 1 422 0
+  88 0040 BE28     		cmp	r0, #190
+  89 0042 02D9     		bls	.L4
+ 423:FreeRTOS/test_Src/blocktim.c **** 		{
+ 424:FreeRTOS/test_Src/blocktim.c **** 			xErrorOccurred = pdTRUE;
+  90              		.loc 1 424 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 10
+
+
+  91 0044 0122     		movs	r2, #1
+  92 0046 174B     		ldr	r3, .L10+8
+  93 0048 1A60     		str	r2, [r3]
+  94              	.L4:
+ 425:FreeRTOS/test_Src/blocktim.c **** 		}
+ 426:FreeRTOS/test_Src/blocktim.c **** 
+ 427:FreeRTOS/test_Src/blocktim.c **** 		/* Suspend ready for test 3. */
+ 428:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = bktRUN_INDICATOR;
+  95              		.loc 1 428 0
+  96 004a 144D     		ldr	r5, .L10
+  97 004c 5526     		movs	r6, #85
+  98 004e 2E60     		str	r6, [r5]
+ 429:FreeRTOS/test_Src/blocktim.c **** 		vTaskSuspend( NULL );
+  99              		.loc 1 429 0
+ 100 0050 0020     		movs	r0, #0
+ 101              	.LVL9:
+ 102 0052 FFF7FEFF 		bl	vTaskSuspend
+ 103              	.LVL10:
+ 430:FreeRTOS/test_Src/blocktim.c **** 
+ 431:FreeRTOS/test_Src/blocktim.c **** 		/*********************************************************************
+ 432:FreeRTOS/test_Src/blocktim.c ****         Test 4
+ 433:FreeRTOS/test_Src/blocktim.c **** 
+ 434:FreeRTOS/test_Src/blocktim.c **** 		As per test three, but with the send and receive reversed. */
+ 435:FreeRTOS/test_Src/blocktim.c **** 		xTimeWhenBlocking = xTaskGetTickCount();
+ 104              		.loc 1 435 0
+ 105 0056 FFF7FEFF 		bl	xTaskGetTickCount
+ 106              	.LVL11:
+ 107 005a 0446     		mov	r4, r0
+ 108              	.LVL12:
+ 436:FreeRTOS/test_Src/blocktim.c **** 
+ 437:FreeRTOS/test_Src/blocktim.c **** 		/* We should unblock after bktTIME_TO_BLOCK having not received
+ 438:FreeRTOS/test_Src/blocktim.c **** 		anything on the queue. */
+ 439:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = bktRUN_INDICATOR;
+ 109              		.loc 1 439 0
+ 110 005c 2E60     		str	r6, [r5]
+ 440:FreeRTOS/test_Src/blocktim.c **** 		if( xQueueReceive( xTestQueue, &xData, bktTIME_TO_BLOCK ) != errQUEUE_EMPTY )
+ 111              		.loc 1 440 0
+ 112 005e AF22     		movs	r2, #175
+ 113 0060 01A9     		add	r1, sp, #4
+ 114 0062 0F4B     		ldr	r3, .L10+4
+ 115 0064 1868     		ldr	r0, [r3]
+ 116              	.LVL13:
+ 117 0066 FFF7FEFF 		bl	xQueueReceive
+ 118              	.LVL14:
+ 119 006a 10B1     		cbz	r0, .L5
+ 441:FreeRTOS/test_Src/blocktim.c **** 		{
+ 442:FreeRTOS/test_Src/blocktim.c **** 			xErrorOccurred = pdTRUE;
+ 120              		.loc 1 442 0
+ 121 006c 0122     		movs	r2, #1
+ 122 006e 0D4B     		ldr	r3, .L10+8
+ 123 0070 1A60     		str	r2, [r3]
+ 124              	.L5:
+ 443:FreeRTOS/test_Src/blocktim.c **** 		}
+ 444:FreeRTOS/test_Src/blocktim.c **** 
+ 445:FreeRTOS/test_Src/blocktim.c **** 		xBlockedTime = xTaskGetTickCount() - xTimeWhenBlocking;
+ 125              		.loc 1 445 0
+ 126 0072 FFF7FEFF 		bl	xTaskGetTickCount
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 11
+
+
+ 127              	.LVL15:
+ 128 0076 001B     		subs	r0, r0, r4
+ 129              	.LVL16:
+ 446:FreeRTOS/test_Src/blocktim.c **** 
+ 447:FreeRTOS/test_Src/blocktim.c **** 		/* We should not have blocked for less time than bktTIME_TO_BLOCK. */
+ 448:FreeRTOS/test_Src/blocktim.c **** 		if( xBlockedTime < bktTIME_TO_BLOCK )
+ 130              		.loc 1 448 0
+ 131 0078 AE28     		cmp	r0, #174
+ 132 007a 02D8     		bhi	.L6
+ 449:FreeRTOS/test_Src/blocktim.c **** 		{
+ 450:FreeRTOS/test_Src/blocktim.c **** 			xErrorOccurred = pdTRUE;
+ 133              		.loc 1 450 0
+ 134 007c 0122     		movs	r2, #1
+ 135 007e 094B     		ldr	r3, .L10+8
+ 136 0080 1A60     		str	r2, [r3]
+ 137              	.L6:
+ 451:FreeRTOS/test_Src/blocktim.c **** 		}
+ 452:FreeRTOS/test_Src/blocktim.c **** 
+ 453:FreeRTOS/test_Src/blocktim.c **** 		/* We should of not blocked for much longer than bktALLOWABLE_MARGIN
+ 454:FreeRTOS/test_Src/blocktim.c **** 		either.  A margin is permitted as we would not necessarily run as soon
+ 455:FreeRTOS/test_Src/blocktim.c **** 		as we unblocked. */
+ 456:FreeRTOS/test_Src/blocktim.c **** 		if( xBlockedTime > ( bktTIME_TO_BLOCK + bktALLOWABLE_MARGIN ) )
+ 138              		.loc 1 456 0
+ 139 0082 BE28     		cmp	r0, #190
+ 140 0084 02D9     		bls	.L7
+ 457:FreeRTOS/test_Src/blocktim.c **** 		{
+ 458:FreeRTOS/test_Src/blocktim.c **** 			xErrorOccurred = pdTRUE;
+ 141              		.loc 1 458 0
+ 142 0086 0122     		movs	r2, #1
+ 143 0088 064B     		ldr	r3, .L10+8
+ 144 008a 1A60     		str	r2, [r3]
+ 145              	.L7:
+ 459:FreeRTOS/test_Src/blocktim.c **** 		}
+ 460:FreeRTOS/test_Src/blocktim.c **** 
+ 461:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = bktRUN_INDICATOR;
+ 146              		.loc 1 461 0
+ 147 008c 5522     		movs	r2, #85
+ 148 008e 034B     		ldr	r3, .L10
+ 149 0090 1A60     		str	r2, [r3]
+ 462:FreeRTOS/test_Src/blocktim.c **** 
+ 463:FreeRTOS/test_Src/blocktim.c **** 		xSecondaryCycles++;
+ 150              		.loc 1 463 0
+ 151 0092 054A     		ldr	r2, .L10+12
+ 152 0094 1368     		ldr	r3, [r2]
+ 153 0096 0133     		adds	r3, r3, #1
+ 154 0098 1360     		str	r3, [r2]
+ 464:FreeRTOS/test_Src/blocktim.c **** 	}
+ 155              		.loc 1 464 0
+ 156 009a B3E7     		b	.L8
+ 157              	.L11:
+ 158              		.align	2
+ 159              	.L10:
+ 160 009c 00000000 		.word	.LANCHOR0
+ 161 00a0 00000000 		.word	.LANCHOR1
+ 162 00a4 00000000 		.word	.LANCHOR2
+ 163 00a8 00000000 		.word	.LANCHOR3
+ 164              		.cfi_endproc
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 12
+
+
+ 165              	.LFE34:
+ 167              		.section	.text.prvBasicDelayTests,"ax",%progbits
+ 168              		.align	2
+ 169              		.thumb
+ 170              		.thumb_func
+ 172              	prvBasicDelayTests:
+ 173              	.LFB35:
+ 465:FreeRTOS/test_Src/blocktim.c **** }
+ 466:FreeRTOS/test_Src/blocktim.c **** /*-----------------------------------------------------------*/
+ 467:FreeRTOS/test_Src/blocktim.c **** 
+ 468:FreeRTOS/test_Src/blocktim.c **** static void prvBasicDelayTests( void )
+ 469:FreeRTOS/test_Src/blocktim.c **** {
+ 174              		.loc 1 469 0
+ 175              		.cfi_startproc
+ 176              		@ args = 0, pretend = 0, frame = 8
+ 177              		@ frame_needed = 0, uses_anonymous_args = 0
+ 178 0000 70B5     		push	{r4, r5, r6, lr}
+ 179              	.LCFI2:
+ 180              		.cfi_def_cfa_offset 16
+ 181              		.cfi_offset 4, -16
+ 182              		.cfi_offset 5, -12
+ 183              		.cfi_offset 6, -8
+ 184              		.cfi_offset 14, -4
+ 185 0002 82B0     		sub	sp, sp, #8
+ 186              	.LCFI3:
+ 187              		.cfi_def_cfa_offset 24
+ 188              	.LVL17:
+ 470:FreeRTOS/test_Src/blocktim.c **** TickType_t xPreTime, xPostTime, x, xLastUnblockTime, xExpectedUnblockTime;
+ 471:FreeRTOS/test_Src/blocktim.c **** const TickType_t xPeriod = 75, xCycles = 5, xAllowableMargin = ( bktALLOWABLE_MARGIN >> 1 );
+ 472:FreeRTOS/test_Src/blocktim.c **** 
+ 473:FreeRTOS/test_Src/blocktim.c **** 	/* Temporarily increase priority so the timing is more accurate, but not so
+ 474:FreeRTOS/test_Src/blocktim.c **** 	high as to disrupt the timer tests. */
+ 475:FreeRTOS/test_Src/blocktim.c **** 	vTaskPrioritySet( NULL, configTIMER_TASK_PRIORITY - 1 );
+ 189              		.loc 1 475 0
+ 190 0004 0321     		movs	r1, #3
+ 191 0006 0020     		movs	r0, #0
+ 192 0008 FFF7FEFF 		bl	vTaskPrioritySet
+ 193              	.LVL18:
+ 476:FreeRTOS/test_Src/blocktim.c **** 
+ 477:FreeRTOS/test_Src/blocktim.c **** 	/* Crude check to too that vTaskDelay() blocks for the expected period. */
+ 478:FreeRTOS/test_Src/blocktim.c **** 	xPreTime = xTaskGetTickCount();
+ 194              		.loc 1 478 0
+ 195 000c FFF7FEFF 		bl	xTaskGetTickCount
+ 196              	.LVL19:
+ 197 0010 0446     		mov	r4, r0
+ 198              	.LVL20:
+ 479:FreeRTOS/test_Src/blocktim.c **** 	vTaskDelay( bktTIME_TO_BLOCK );
+ 199              		.loc 1 479 0
+ 200 0012 AF20     		movs	r0, #175
+ 201              	.LVL21:
+ 202 0014 FFF7FEFF 		bl	vTaskDelay
+ 203              	.LVL22:
+ 480:FreeRTOS/test_Src/blocktim.c **** 	xPostTime = xTaskGetTickCount();
+ 204              		.loc 1 480 0
+ 205 0018 FFF7FEFF 		bl	xTaskGetTickCount
+ 206              	.LVL23:
+ 481:FreeRTOS/test_Src/blocktim.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 13
+
+
+ 482:FreeRTOS/test_Src/blocktim.c **** 	/* The priority is higher, so the allowable margin is halved when compared
+ 483:FreeRTOS/test_Src/blocktim.c **** 	to the other tests in this file. */
+ 484:FreeRTOS/test_Src/blocktim.c **** 	if( ( xPostTime - xPreTime ) > ( bktTIME_TO_BLOCK + xAllowableMargin ) )
+ 207              		.loc 1 484 0
+ 208 001c 001B     		subs	r0, r0, r4
+ 209              	.LVL24:
+ 210 001e B628     		cmp	r0, #182
+ 211 0020 02D9     		bls	.L13
+ 485:FreeRTOS/test_Src/blocktim.c **** 	{
+ 486:FreeRTOS/test_Src/blocktim.c **** 		xErrorOccurred = pdTRUE;
+ 212              		.loc 1 486 0
+ 213 0022 0122     		movs	r2, #1
+ 214 0024 124B     		ldr	r3, .L18
+ 215 0026 1A60     		str	r2, [r3]
+ 216              	.L13:
+ 487:FreeRTOS/test_Src/blocktim.c **** 	}
+ 488:FreeRTOS/test_Src/blocktim.c **** 
+ 489:FreeRTOS/test_Src/blocktim.c **** 	/* Now crude tests to check the vTaskDelayUntil() functionality. */
+ 490:FreeRTOS/test_Src/blocktim.c **** 	xPostTime = xTaskGetTickCount();
+ 217              		.loc 1 490 0
+ 218 0028 FFF7FEFF 		bl	xTaskGetTickCount
+ 219              	.LVL25:
+ 220 002c 0646     		mov	r6, r0
+ 221              	.LVL26:
+ 491:FreeRTOS/test_Src/blocktim.c **** 	xLastUnblockTime = xPostTime;
+ 222              		.loc 1 491 0
+ 223 002e 0190     		str	r0, [sp, #4]
+ 224              	.LVL27:
+ 492:FreeRTOS/test_Src/blocktim.c **** 
+ 493:FreeRTOS/test_Src/blocktim.c **** 	for( x = 0; x < xCycles; x++ )
+ 225              		.loc 1 493 0
+ 226 0030 0025     		movs	r5, #0
+ 227 0032 15E0     		b	.L14
+ 228              	.LVL28:
+ 229              	.L16:
+ 494:FreeRTOS/test_Src/blocktim.c **** 	{
+ 495:FreeRTOS/test_Src/blocktim.c **** 		/* Calculate the next expected unblock time from the time taken before
+ 496:FreeRTOS/test_Src/blocktim.c **** 		this loop was entered. */
+ 497:FreeRTOS/test_Src/blocktim.c **** 		xExpectedUnblockTime = xPostTime + ( x * xPeriod );
+ 230              		.loc 1 497 0
+ 231 0034 05EB8500 		add	r0, r5, r5, lsl #2
+ 232 0038 C0EB0010 		rsb	r0, r0, r0, lsl #4
+ 233 003c 3418     		adds	r4, r6, r0
+ 234              	.LVL29:
+ 498:FreeRTOS/test_Src/blocktim.c **** 
+ 499:FreeRTOS/test_Src/blocktim.c **** 		vTaskDelayUntil( &xLastUnblockTime, xPeriod );
+ 235              		.loc 1 499 0
+ 236 003e 4B21     		movs	r1, #75
+ 237 0040 01A8     		add	r0, sp, #4
+ 238 0042 FFF7FEFF 		bl	vTaskDelayUntil
+ 239              	.LVL30:
+ 500:FreeRTOS/test_Src/blocktim.c **** 
+ 501:FreeRTOS/test_Src/blocktim.c **** 		if( ( xTaskGetTickCount() - xExpectedUnblockTime ) > ( bktTIME_TO_BLOCK + xAllowableMargin ) )
+ 240              		.loc 1 501 0
+ 241 0046 FFF7FEFF 		bl	xTaskGetTickCount
+ 242              	.LVL31:
+ 243 004a 001B     		subs	r0, r0, r4
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 14
+
+
+ 244 004c B628     		cmp	r0, #182
+ 245 004e 02D9     		bls	.L15
+ 502:FreeRTOS/test_Src/blocktim.c **** 		{
+ 503:FreeRTOS/test_Src/blocktim.c **** 			xErrorOccurred = pdTRUE;
+ 246              		.loc 1 503 0
+ 247 0050 0122     		movs	r2, #1
+ 248 0052 074B     		ldr	r3, .L18
+ 249 0054 1A60     		str	r2, [r3]
+ 250              	.L15:
+ 504:FreeRTOS/test_Src/blocktim.c **** 		}
+ 505:FreeRTOS/test_Src/blocktim.c **** 
+ 506:FreeRTOS/test_Src/blocktim.c **** 		xPrimaryCycles++;
+ 251              		.loc 1 506 0 discriminator 2
+ 252 0056 074A     		ldr	r2, .L18+4
+ 253 0058 1368     		ldr	r3, [r2]
+ 254 005a 0133     		adds	r3, r3, #1
+ 255 005c 1360     		str	r3, [r2]
+ 493:FreeRTOS/test_Src/blocktim.c **** 	{
+ 256              		.loc 1 493 0 discriminator 2
+ 257 005e 0135     		adds	r5, r5, #1
+ 258              	.LVL32:
+ 259              	.L14:
+ 493:FreeRTOS/test_Src/blocktim.c **** 	{
+ 260              		.loc 1 493 0 is_stmt 0 discriminator 1
+ 261 0060 042D     		cmp	r5, #4
+ 262 0062 E7D9     		bls	.L16
+ 507:FreeRTOS/test_Src/blocktim.c **** 	}
+ 508:FreeRTOS/test_Src/blocktim.c **** 
+ 509:FreeRTOS/test_Src/blocktim.c **** 	/* Reset to the original task priority ready for the other tests. */
+ 510:FreeRTOS/test_Src/blocktim.c **** 	vTaskPrioritySet( NULL, bktPRIMARY_PRIORITY );
+ 263              		.loc 1 510 0 is_stmt 1
+ 264 0064 0221     		movs	r1, #2
+ 265 0066 0020     		movs	r0, #0
+ 266 0068 FFF7FEFF 		bl	vTaskPrioritySet
+ 267              	.LVL33:
+ 511:FreeRTOS/test_Src/blocktim.c **** }
+ 268              		.loc 1 511 0
+ 269 006c 02B0     		add	sp, sp, #8
+ 270              	.LCFI4:
+ 271              		.cfi_def_cfa_offset 16
+ 272              		@ sp needed
+ 273 006e 70BD     		pop	{r4, r5, r6, pc}
+ 274              	.LVL34:
+ 275              	.L19:
+ 276              		.align	2
+ 277              	.L18:
+ 278 0070 00000000 		.word	.LANCHOR2
+ 279 0074 00000000 		.word	.LANCHOR4
+ 280              		.cfi_endproc
+ 281              	.LFE35:
+ 283              		.section	.text.vPrimaryBlockTimeTestTask,"ax",%progbits
+ 284              		.align	2
+ 285              		.thumb
+ 286              		.thumb_func
+ 288              	vPrimaryBlockTimeTestTask:
+ 289              	.LFB33:
+ 121:FreeRTOS/test_Src/blocktim.c **** BaseType_t xItem, xData;
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 15
+
+
+ 290              		.loc 1 121 0
+ 291              		.cfi_startproc
+ 292              		@ args = 0, pretend = 0, frame = 8
+ 293              		@ frame_needed = 0, uses_anonymous_args = 0
+ 294              	.LVL35:
+ 295 0000 30B5     		push	{r4, r5, lr}
+ 296              	.LCFI5:
+ 297              		.cfi_def_cfa_offset 12
+ 298              		.cfi_offset 4, -12
+ 299              		.cfi_offset 5, -8
+ 300              		.cfi_offset 14, -4
+ 301 0002 83B0     		sub	sp, sp, #12
+ 302              	.LCFI6:
+ 303              		.cfi_def_cfa_offset 24
+ 304              	.LVL36:
+ 305              	.L57:
+ 134:FreeRTOS/test_Src/blocktim.c **** 
+ 306              		.loc 1 134 0
+ 307 0004 FFF7FEFF 		bl	prvBasicDelayTests
+ 308              	.LVL37:
+ 141:FreeRTOS/test_Src/blocktim.c **** 		{
+ 309              		.loc 1 141 0
+ 310 0008 0023     		movs	r3, #0
+ 311 000a 0193     		str	r3, [sp, #4]
+ 312 000c 20E0     		b	.L21
+ 313              	.L25:
+ 145:FreeRTOS/test_Src/blocktim.c **** 
+ 314              		.loc 1 145 0
+ 315 000e 0A23     		movs	r3, #10
+ 316 0010 03FA04F4 		lsl	r4, r3, r4
+ 317              	.LVL38:
+ 147:FreeRTOS/test_Src/blocktim.c **** 
+ 318              		.loc 1 147 0
+ 319 0014 FFF7FEFF 		bl	xTaskGetTickCount
+ 320              	.LVL39:
+ 321 0018 0546     		mov	r5, r0
+ 322              	.LVL40:
+ 151:FreeRTOS/test_Src/blocktim.c **** 			{
+ 323              		.loc 1 151 0
+ 324 001a 2246     		mov	r2, r4
+ 325 001c 6946     		mov	r1, sp
+ 326 001e 8F4B     		ldr	r3, .L59
+ 327 0020 1868     		ldr	r0, [r3]
+ 328              	.LVL41:
+ 329 0022 FFF7FEFF 		bl	xQueueReceive
+ 330              	.LVL42:
+ 331 0026 10B1     		cbz	r0, .L22
+ 153:FreeRTOS/test_Src/blocktim.c **** 			}
+ 332              		.loc 1 153 0
+ 333 0028 0122     		movs	r2, #1
+ 334 002a 8D4B     		ldr	r3, .L59+4
+ 335 002c 1A60     		str	r2, [r3]
+ 336              	.L22:
+ 157:FreeRTOS/test_Src/blocktim.c **** 
+ 337              		.loc 1 157 0
+ 338 002e FFF7FEFF 		bl	xTaskGetTickCount
+ 339              	.LVL43:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 16
+
+
+ 340 0032 401B     		subs	r0, r0, r5
+ 341              	.LVL44:
+ 159:FreeRTOS/test_Src/blocktim.c **** 			{
+ 342              		.loc 1 159 0
+ 343 0034 8442     		cmp	r4, r0
+ 344 0036 02D9     		bls	.L23
+ 162:FreeRTOS/test_Src/blocktim.c **** 			}
+ 345              		.loc 1 162 0
+ 346 0038 0122     		movs	r2, #1
+ 347 003a 894B     		ldr	r3, .L59+4
+ 348 003c 1A60     		str	r2, [r3]
+ 349              	.L23:
+ 165:FreeRTOS/test_Src/blocktim.c **** 			{
+ 350              		.loc 1 165 0
+ 351 003e 0F34     		adds	r4, r4, #15
+ 352              	.LVL45:
+ 353 0040 A042     		cmp	r0, r4
+ 354 0042 02D9     		bls	.L24
+ 170:FreeRTOS/test_Src/blocktim.c **** 			}
+ 355              		.loc 1 170 0
+ 356 0044 0122     		movs	r2, #1
+ 357 0046 864B     		ldr	r3, .L59+4
+ 358 0048 1A60     		str	r2, [r3]
+ 359              	.L24:
+ 141:FreeRTOS/test_Src/blocktim.c **** 		{
+ 360              		.loc 1 141 0 discriminator 2
+ 361 004a 019B     		ldr	r3, [sp, #4]
+ 362 004c 0133     		adds	r3, r3, #1
+ 363 004e 0193     		str	r3, [sp, #4]
+ 364              	.LVL46:
+ 365              	.L21:
+ 141:FreeRTOS/test_Src/blocktim.c **** 		{
+ 366              		.loc 1 141 0 is_stmt 0 discriminator 1
+ 367 0050 019C     		ldr	r4, [sp, #4]
+ 368 0052 042C     		cmp	r4, #4
+ 369 0054 DBDD     		ble	.L25
+ 180:FreeRTOS/test_Src/blocktim.c **** 		{
+ 370              		.loc 1 180 0 is_stmt 1
+ 371 0056 0023     		movs	r3, #0
+ 372 0058 0193     		str	r3, [sp, #4]
+ 373 005a 0EE0     		b	.L26
+ 374              	.L28:
+ 182:FreeRTOS/test_Src/blocktim.c **** 			{
+ 375              		.loc 1 182 0
+ 376 005c 0023     		movs	r3, #0
+ 377 005e 1A46     		mov	r2, r3
+ 378 0060 01A9     		add	r1, sp, #4
+ 379 0062 7E48     		ldr	r0, .L59
+ 380 0064 0068     		ldr	r0, [r0]
+ 381 0066 FFF7FEFF 		bl	xQueueGenericSend
+ 382              	.LVL47:
+ 383 006a 0128     		cmp	r0, #1
+ 384 006c 02D0     		beq	.L27
+ 184:FreeRTOS/test_Src/blocktim.c **** 			}
+ 385              		.loc 1 184 0
+ 386 006e 0122     		movs	r2, #1
+ 387 0070 7B4B     		ldr	r3, .L59+4
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 17
+
+
+ 388 0072 1A60     		str	r2, [r3]
+ 389              	.L27:
+ 180:FreeRTOS/test_Src/blocktim.c **** 		{
+ 390              		.loc 1 180 0 discriminator 2
+ 391 0074 019B     		ldr	r3, [sp, #4]
+ 392 0076 0133     		adds	r3, r3, #1
+ 393 0078 0193     		str	r3, [sp, #4]
+ 394              	.L26:
+ 180:FreeRTOS/test_Src/blocktim.c **** 		{
+ 395              		.loc 1 180 0 is_stmt 0 discriminator 1
+ 396 007a 019B     		ldr	r3, [sp, #4]
+ 397 007c 042B     		cmp	r3, #4
+ 398 007e EDDD     		ble	.L28
+ 192:FreeRTOS/test_Src/blocktim.c **** 		{
+ 399              		.loc 1 192 0 is_stmt 1
+ 400 0080 0023     		movs	r3, #0
+ 401 0082 0193     		str	r3, [sp, #4]
+ 402 0084 21E0     		b	.L29
+ 403              	.L33:
+ 196:FreeRTOS/test_Src/blocktim.c **** 
+ 404              		.loc 1 196 0
+ 405 0086 0A23     		movs	r3, #10
+ 406 0088 03FA04F4 		lsl	r4, r3, r4
+ 407              	.LVL48:
+ 198:FreeRTOS/test_Src/blocktim.c **** 
+ 408              		.loc 1 198 0
+ 409 008c FFF7FEFF 		bl	xTaskGetTickCount
+ 410              	.LVL49:
+ 411 0090 0546     		mov	r5, r0
+ 412              	.LVL50:
+ 202:FreeRTOS/test_Src/blocktim.c **** 			{
+ 413              		.loc 1 202 0
+ 414 0092 0023     		movs	r3, #0
+ 415 0094 2246     		mov	r2, r4
+ 416 0096 01A9     		add	r1, sp, #4
+ 417 0098 7048     		ldr	r0, .L59
+ 418              	.LVL51:
+ 419 009a 0068     		ldr	r0, [r0]
+ 420 009c FFF7FEFF 		bl	xQueueGenericSend
+ 421              	.LVL52:
+ 422 00a0 10B1     		cbz	r0, .L30
+ 204:FreeRTOS/test_Src/blocktim.c **** 			}
+ 423              		.loc 1 204 0
+ 424 00a2 0122     		movs	r2, #1
+ 425 00a4 6E4B     		ldr	r3, .L59+4
+ 426 00a6 1A60     		str	r2, [r3]
+ 427              	.L30:
+ 208:FreeRTOS/test_Src/blocktim.c **** 
+ 428              		.loc 1 208 0
+ 429 00a8 FFF7FEFF 		bl	xTaskGetTickCount
+ 430              	.LVL53:
+ 431 00ac 401B     		subs	r0, r0, r5
+ 432              	.LVL54:
+ 210:FreeRTOS/test_Src/blocktim.c **** 			{
+ 433              		.loc 1 210 0
+ 434 00ae 8442     		cmp	r4, r0
+ 435 00b0 02D9     		bls	.L31
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 18
+
+
+ 213:FreeRTOS/test_Src/blocktim.c **** 			}
+ 436              		.loc 1 213 0
+ 437 00b2 0122     		movs	r2, #1
+ 438 00b4 6A4B     		ldr	r3, .L59+4
+ 439 00b6 1A60     		str	r2, [r3]
+ 440              	.L31:
+ 216:FreeRTOS/test_Src/blocktim.c **** 			{
+ 441              		.loc 1 216 0
+ 442 00b8 0F34     		adds	r4, r4, #15
+ 443              	.LVL55:
+ 444 00ba A042     		cmp	r0, r4
+ 445 00bc 02D9     		bls	.L32
+ 221:FreeRTOS/test_Src/blocktim.c **** 			}
+ 446              		.loc 1 221 0
+ 447 00be 0122     		movs	r2, #1
+ 448 00c0 674B     		ldr	r3, .L59+4
+ 449 00c2 1A60     		str	r2, [r3]
+ 450              	.L32:
+ 192:FreeRTOS/test_Src/blocktim.c **** 		{
+ 451              		.loc 1 192 0 discriminator 2
+ 452 00c4 019B     		ldr	r3, [sp, #4]
+ 453 00c6 0133     		adds	r3, r3, #1
+ 454 00c8 0193     		str	r3, [sp, #4]
+ 455              	.LVL56:
+ 456              	.L29:
+ 192:FreeRTOS/test_Src/blocktim.c **** 		{
+ 457              		.loc 1 192 0 is_stmt 0 discriminator 1
+ 458 00ca 019C     		ldr	r4, [sp, #4]
+ 459 00cc 042C     		cmp	r4, #4
+ 460 00ce DADD     		ble	.L33
+ 237:FreeRTOS/test_Src/blocktim.c **** 		vTaskResume( xSecondary );
+ 461              		.loc 1 237 0 is_stmt 1
+ 462 00d0 0022     		movs	r2, #0
+ 463 00d2 644B     		ldr	r3, .L59+8
+ 464 00d4 1A60     		str	r2, [r3]
+ 238:FreeRTOS/test_Src/blocktim.c **** 
+ 465              		.loc 1 238 0
+ 466 00d6 644B     		ldr	r3, .L59+12
+ 467 00d8 1868     		ldr	r0, [r3]
+ 468 00da FFF7FEFF 		bl	vTaskResume
+ 469              	.LVL57:
+ 241:FreeRTOS/test_Src/blocktim.c **** 		{
+ 470              		.loc 1 241 0
+ 471 00de 02E0     		b	.L34
+ 472              	.L35:
+ 244:FreeRTOS/test_Src/blocktim.c **** 		}
+ 473              		.loc 1 244 0
+ 474 00e0 1420     		movs	r0, #20
+ 475 00e2 FFF7FEFF 		bl	vTaskDelay
+ 476              	.LVL58:
+ 477              	.L34:
+ 241:FreeRTOS/test_Src/blocktim.c **** 		{
+ 478              		.loc 1 241 0
+ 479 00e6 5F4B     		ldr	r3, .L59+8
+ 480 00e8 1B68     		ldr	r3, [r3]
+ 481 00ea 552B     		cmp	r3, #85
+ 482 00ec F8D1     		bne	.L35
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 19
+
+
+ 247:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = 0;
+ 483              		.loc 1 247 0
+ 484 00ee 1420     		movs	r0, #20
+ 485 00f0 FFF7FEFF 		bl	vTaskDelay
+ 486              	.LVL59:
+ 248:FreeRTOS/test_Src/blocktim.c **** 
+ 487              		.loc 1 248 0
+ 488 00f4 0023     		movs	r3, #0
+ 489 00f6 5B4A     		ldr	r2, .L59+8
+ 490 00f8 1360     		str	r3, [r2]
+ 250:FreeRTOS/test_Src/blocktim.c **** 		{
+ 491              		.loc 1 250 0
+ 492 00fa 0193     		str	r3, [sp, #4]
+ 493 00fc 31E0     		b	.L36
+ 494              	.L41:
+ 254:FreeRTOS/test_Src/blocktim.c **** 			{
+ 495              		.loc 1 254 0
+ 496 00fe 0022     		movs	r2, #0
+ 497 0100 6946     		mov	r1, sp
+ 498 0102 564B     		ldr	r3, .L59
+ 499 0104 1868     		ldr	r0, [r3]
+ 500 0106 FFF7FEFF 		bl	xQueueReceive
+ 501              	.LVL60:
+ 502 010a 0128     		cmp	r0, #1
+ 503 010c 02D0     		beq	.L37
+ 256:FreeRTOS/test_Src/blocktim.c **** 			}
+ 504              		.loc 1 256 0
+ 505 010e 0122     		movs	r2, #1
+ 506 0110 534B     		ldr	r3, .L59+4
+ 507 0112 1A60     		str	r2, [r3]
+ 508              	.L37:
+ 262:FreeRTOS/test_Src/blocktim.c **** 			{
+ 509              		.loc 1 262 0
+ 510 0114 0023     		movs	r3, #0
+ 511 0116 1A46     		mov	r2, r3
+ 512 0118 01A9     		add	r1, sp, #4
+ 513 011a 5048     		ldr	r0, .L59
+ 514 011c 0068     		ldr	r0, [r0]
+ 515 011e FFF7FEFF 		bl	xQueueGenericSend
+ 516              	.LVL61:
+ 517 0122 0128     		cmp	r0, #1
+ 518 0124 02D0     		beq	.L38
+ 264:FreeRTOS/test_Src/blocktim.c **** 			}
+ 519              		.loc 1 264 0
+ 520 0126 0122     		movs	r2, #1
+ 521 0128 4D4B     		ldr	r3, .L59+4
+ 522 012a 1A60     		str	r2, [r3]
+ 523              	.L38:
+ 267:FreeRTOS/test_Src/blocktim.c **** 			{
+ 524              		.loc 1 267 0
+ 525 012c 4D4B     		ldr	r3, .L59+8
+ 526 012e 1B68     		ldr	r3, [r3]
+ 527 0130 552B     		cmp	r3, #85
+ 528 0132 02D1     		bne	.L39
+ 270:FreeRTOS/test_Src/blocktim.c **** 			}
+ 529              		.loc 1 270 0
+ 530 0134 0122     		movs	r2, #1
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 20
+
+
+ 531 0136 4A4B     		ldr	r3, .L59+4
+ 532 0138 1A60     		str	r2, [r3]
+ 533              	.L39:
+ 275:FreeRTOS/test_Src/blocktim.c **** 
+ 534              		.loc 1 275 0
+ 535 013a 0421     		movs	r1, #4
+ 536 013c 4A4B     		ldr	r3, .L59+12
+ 537 013e 1868     		ldr	r0, [r3]
+ 538 0140 FFF7FEFF 		bl	vTaskPrioritySet
+ 539              	.LVL62:
+ 279:FreeRTOS/test_Src/blocktim.c **** 			{
+ 540              		.loc 1 279 0
+ 541 0144 474B     		ldr	r3, .L59+8
+ 542 0146 1B68     		ldr	r3, [r3]
+ 543 0148 552B     		cmp	r3, #85
+ 544 014a 02D1     		bne	.L40
+ 283:FreeRTOS/test_Src/blocktim.c **** 			}
+ 545              		.loc 1 283 0
+ 546 014c 0122     		movs	r2, #1
+ 547 014e 444B     		ldr	r3, .L59+4
+ 548 0150 1A60     		str	r2, [r3]
+ 549              	.L40:
+ 287:FreeRTOS/test_Src/blocktim.c **** 		}
+ 550              		.loc 1 287 0 discriminator 2
+ 551 0152 0121     		movs	r1, #1
+ 552 0154 444B     		ldr	r3, .L59+12
+ 553 0156 1868     		ldr	r0, [r3]
+ 554 0158 FFF7FEFF 		bl	vTaskPrioritySet
+ 555              	.LVL63:
+ 250:FreeRTOS/test_Src/blocktim.c **** 		{
+ 556              		.loc 1 250 0 discriminator 2
+ 557 015c 019B     		ldr	r3, [sp, #4]
+ 558 015e 0133     		adds	r3, r3, #1
+ 559 0160 0193     		str	r3, [sp, #4]
+ 560              	.L36:
+ 250:FreeRTOS/test_Src/blocktim.c **** 		{
+ 561              		.loc 1 250 0 is_stmt 0 discriminator 1
+ 562 0162 019B     		ldr	r3, [sp, #4]
+ 563 0164 042B     		cmp	r3, #4
+ 564 0166 CADD     		ble	.L41
+ 565 0168 02E0     		b	.L42
+ 566              	.L43:
+ 294:FreeRTOS/test_Src/blocktim.c **** 		}
+ 567              		.loc 1 294 0 is_stmt 1
+ 568 016a 1420     		movs	r0, #20
+ 569 016c FFF7FEFF 		bl	vTaskDelay
+ 570              	.LVL64:
+ 571              	.L42:
+ 292:FreeRTOS/test_Src/blocktim.c **** 		{
+ 572              		.loc 1 292 0
+ 573 0170 3C4B     		ldr	r3, .L59+8
+ 574 0172 1B68     		ldr	r3, [r3]
+ 575 0174 552B     		cmp	r3, #85
+ 576 0176 F8D1     		bne	.L43
+ 296:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = 0;
+ 577              		.loc 1 296 0
+ 578 0178 1420     		movs	r0, #20
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 21
+
+
+ 579 017a FFF7FEFF 		bl	vTaskDelay
+ 580              	.LVL65:
+ 297:FreeRTOS/test_Src/blocktim.c **** 
+ 581              		.loc 1 297 0
+ 582 017e 0023     		movs	r3, #0
+ 583 0180 384A     		ldr	r2, .L59+8
+ 584 0182 1360     		str	r3, [r2]
+ 307:FreeRTOS/test_Src/blocktim.c **** 		{
+ 585              		.loc 1 307 0
+ 586 0184 0193     		str	r3, [sp, #4]
+ 587 0186 0DE0     		b	.L44
+ 588              	.L46:
+ 309:FreeRTOS/test_Src/blocktim.c **** 			{
+ 589              		.loc 1 309 0
+ 590 0188 0022     		movs	r2, #0
+ 591 018a 6946     		mov	r1, sp
+ 592 018c 334B     		ldr	r3, .L59
+ 593 018e 1868     		ldr	r0, [r3]
+ 594 0190 FFF7FEFF 		bl	xQueueReceive
+ 595              	.LVL66:
+ 596 0194 0128     		cmp	r0, #1
+ 597 0196 02D0     		beq	.L45
+ 311:FreeRTOS/test_Src/blocktim.c **** 			}
+ 598              		.loc 1 311 0
+ 599 0198 0122     		movs	r2, #1
+ 600 019a 314B     		ldr	r3, .L59+4
+ 601 019c 1A60     		str	r2, [r3]
+ 602              	.L45:
+ 307:FreeRTOS/test_Src/blocktim.c **** 		{
+ 603              		.loc 1 307 0 discriminator 2
+ 604 019e 019B     		ldr	r3, [sp, #4]
+ 605 01a0 0133     		adds	r3, r3, #1
+ 606 01a2 0193     		str	r3, [sp, #4]
+ 607              	.L44:
+ 307:FreeRTOS/test_Src/blocktim.c **** 		{
+ 608              		.loc 1 307 0 is_stmt 0 discriminator 1
+ 609 01a4 019B     		ldr	r3, [sp, #4]
+ 610 01a6 042B     		cmp	r3, #4
+ 611 01a8 EEDD     		ble	.L46
+ 317:FreeRTOS/test_Src/blocktim.c **** 
+ 612              		.loc 1 317 0 is_stmt 1
+ 613 01aa 2F4B     		ldr	r3, .L59+12
+ 614 01ac 1868     		ldr	r0, [r3]
+ 615 01ae FFF7FEFF 		bl	vTaskResume
+ 616              	.LVL67:
+ 320:FreeRTOS/test_Src/blocktim.c **** 		{
+ 617              		.loc 1 320 0
+ 618 01b2 02E0     		b	.L47
+ 619              	.L48:
+ 322:FreeRTOS/test_Src/blocktim.c **** 		}
+ 620              		.loc 1 322 0
+ 621 01b4 1420     		movs	r0, #20
+ 622 01b6 FFF7FEFF 		bl	vTaskDelay
+ 623              	.LVL68:
+ 624              	.L47:
+ 320:FreeRTOS/test_Src/blocktim.c **** 		{
+ 625              		.loc 1 320 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 22
+
+
+ 626 01ba 2A4B     		ldr	r3, .L59+8
+ 627 01bc 1B68     		ldr	r3, [r3]
+ 628 01be 552B     		cmp	r3, #85
+ 629 01c0 F8D1     		bne	.L48
+ 324:FreeRTOS/test_Src/blocktim.c **** 		xRunIndicator = 0;
+ 630              		.loc 1 324 0
+ 631 01c2 1420     		movs	r0, #20
+ 632 01c4 FFF7FEFF 		bl	vTaskDelay
+ 633              	.LVL69:
+ 325:FreeRTOS/test_Src/blocktim.c **** 
+ 634              		.loc 1 325 0
+ 635 01c8 0023     		movs	r3, #0
+ 636 01ca 264A     		ldr	r2, .L59+8
+ 637 01cc 1360     		str	r3, [r2]
+ 327:FreeRTOS/test_Src/blocktim.c **** 		{
+ 638              		.loc 1 327 0
+ 639 01ce 0193     		str	r3, [sp, #4]
+ 640 01d0 31E0     		b	.L49
+ 641              	.L54:
+ 331:FreeRTOS/test_Src/blocktim.c **** 			{
+ 642              		.loc 1 331 0
+ 643 01d2 0023     		movs	r3, #0
+ 644 01d4 1A46     		mov	r2, r3
+ 645 01d6 01A9     		add	r1, sp, #4
+ 646 01d8 2048     		ldr	r0, .L59
+ 647 01da 0068     		ldr	r0, [r0]
+ 648 01dc FFF7FEFF 		bl	xQueueGenericSend
+ 649              	.LVL70:
+ 650 01e0 0128     		cmp	r0, #1
+ 651 01e2 02D0     		beq	.L50
+ 333:FreeRTOS/test_Src/blocktim.c **** 			}
+ 652              		.loc 1 333 0
+ 653 01e4 0122     		movs	r2, #1
+ 654 01e6 1E4B     		ldr	r3, .L59+4
+ 655 01e8 1A60     		str	r2, [r3]
+ 656              	.L50:
+ 339:FreeRTOS/test_Src/blocktim.c **** 			{
+ 657              		.loc 1 339 0
+ 658 01ea 0022     		movs	r2, #0
+ 659 01ec 6946     		mov	r1, sp
+ 660 01ee 1B4B     		ldr	r3, .L59
+ 661 01f0 1868     		ldr	r0, [r3]
+ 662 01f2 FFF7FEFF 		bl	xQueueReceive
+ 663              	.LVL71:
+ 664 01f6 0128     		cmp	r0, #1
+ 665 01f8 02D0     		beq	.L51
+ 341:FreeRTOS/test_Src/blocktim.c **** 			}
+ 666              		.loc 1 341 0
+ 667 01fa 0122     		movs	r2, #1
+ 668 01fc 184B     		ldr	r3, .L59+4
+ 669 01fe 1A60     		str	r2, [r3]
+ 670              	.L51:
+ 344:FreeRTOS/test_Src/blocktim.c **** 			{
+ 671              		.loc 1 344 0
+ 672 0200 184B     		ldr	r3, .L59+8
+ 673 0202 1B68     		ldr	r3, [r3]
+ 674 0204 552B     		cmp	r3, #85
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 23
+
+
+ 675 0206 02D1     		bne	.L52
+ 347:FreeRTOS/test_Src/blocktim.c **** 			}
+ 676              		.loc 1 347 0
+ 677 0208 0122     		movs	r2, #1
+ 678 020a 154B     		ldr	r3, .L59+4
+ 679 020c 1A60     		str	r2, [r3]
+ 680              	.L52:
+ 352:FreeRTOS/test_Src/blocktim.c **** 
+ 681              		.loc 1 352 0
+ 682 020e 0421     		movs	r1, #4
+ 683 0210 154B     		ldr	r3, .L59+12
+ 684 0212 1868     		ldr	r0, [r3]
+ 685 0214 FFF7FEFF 		bl	vTaskPrioritySet
+ 686              	.LVL72:
+ 356:FreeRTOS/test_Src/blocktim.c **** 			{
+ 687              		.loc 1 356 0
+ 688 0218 124B     		ldr	r3, .L59+8
+ 689 021a 1B68     		ldr	r3, [r3]
+ 690 021c 552B     		cmp	r3, #85
+ 691 021e 02D1     		bne	.L53
+ 360:FreeRTOS/test_Src/blocktim.c **** 			}
+ 692              		.loc 1 360 0
+ 693 0220 0122     		movs	r2, #1
+ 694 0222 0F4B     		ldr	r3, .L59+4
+ 695 0224 1A60     		str	r2, [r3]
+ 696              	.L53:
+ 362:FreeRTOS/test_Src/blocktim.c **** 		}
+ 697              		.loc 1 362 0 discriminator 2
+ 698 0226 0121     		movs	r1, #1
+ 699 0228 0F4B     		ldr	r3, .L59+12
+ 700 022a 1868     		ldr	r0, [r3]
+ 701 022c FFF7FEFF 		bl	vTaskPrioritySet
+ 702              	.LVL73:
+ 327:FreeRTOS/test_Src/blocktim.c **** 		{
+ 703              		.loc 1 327 0 discriminator 2
+ 704 0230 019B     		ldr	r3, [sp, #4]
+ 705 0232 0133     		adds	r3, r3, #1
+ 706 0234 0193     		str	r3, [sp, #4]
+ 707              	.L49:
+ 327:FreeRTOS/test_Src/blocktim.c **** 		{
+ 708              		.loc 1 327 0 is_stmt 0 discriminator 1
+ 709 0236 019B     		ldr	r3, [sp, #4]
+ 710 0238 042B     		cmp	r3, #4
+ 711 023a CADD     		ble	.L54
+ 712 023c 02E0     		b	.L55
+ 713              	.L56:
+ 369:FreeRTOS/test_Src/blocktim.c **** 		}
+ 714              		.loc 1 369 0 is_stmt 1
+ 715 023e 1420     		movs	r0, #20
+ 716 0240 FFF7FEFF 		bl	vTaskDelay
+ 717              	.LVL74:
+ 718              	.L55:
+ 367:FreeRTOS/test_Src/blocktim.c **** 		{
+ 719              		.loc 1 367 0
+ 720 0244 074B     		ldr	r3, .L59+8
+ 721 0246 1B68     		ldr	r3, [r3]
+ 722 0248 552B     		cmp	r3, #85
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 24
+
+
+ 723 024a F8D1     		bne	.L56
+ 371:FreeRTOS/test_Src/blocktim.c **** 
+ 724              		.loc 1 371 0
+ 725 024c 1420     		movs	r0, #20
+ 726 024e FFF7FEFF 		bl	vTaskDelay
+ 727              	.LVL75:
+ 373:FreeRTOS/test_Src/blocktim.c **** 	}
+ 728              		.loc 1 373 0
+ 729 0252 064A     		ldr	r2, .L59+16
+ 730 0254 1368     		ldr	r3, [r2]
+ 731 0256 0133     		adds	r3, r3, #1
+ 732 0258 1360     		str	r3, [r2]
+ 374:FreeRTOS/test_Src/blocktim.c **** }
+ 733              		.loc 1 374 0
+ 734 025a D3E6     		b	.L57
+ 735              	.L60:
+ 736              		.align	2
+ 737              	.L59:
+ 738 025c 00000000 		.word	.LANCHOR1
+ 739 0260 00000000 		.word	.LANCHOR2
+ 740 0264 00000000 		.word	.LANCHOR0
+ 741 0268 00000000 		.word	.LANCHOR5
+ 742 026c 00000000 		.word	.LANCHOR4
+ 743              		.cfi_endproc
+ 744              	.LFE33:
+ 746              		.section	.text.vCreateBlockTimeTasks,"ax",%progbits
+ 747              		.align	2
+ 748              		.global	vCreateBlockTimeTasks
+ 749              		.thumb
+ 750              		.thumb_func
+ 752              	vCreateBlockTimeTasks:
+ 753              	.LFB32:
+  99:FreeRTOS/test_Src/blocktim.c **** 	/* Create the queue on which the two tasks block. */
+ 754              		.loc 1 99 0
+ 755              		.cfi_startproc
+ 756              		@ args = 0, pretend = 0, frame = 0
+ 757              		@ frame_needed = 0, uses_anonymous_args = 0
+ 758 0000 10B5     		push	{r4, lr}
+ 759              	.LCFI7:
+ 760              		.cfi_def_cfa_offset 8
+ 761              		.cfi_offset 4, -8
+ 762              		.cfi_offset 14, -4
+ 763 0002 82B0     		sub	sp, sp, #8
+ 764              	.LCFI8:
+ 765              		.cfi_def_cfa_offset 16
+ 101:FreeRTOS/test_Src/blocktim.c **** 
+ 766              		.loc 1 101 0
+ 767 0004 0022     		movs	r2, #0
+ 768 0006 0421     		movs	r1, #4
+ 769 0008 0520     		movs	r0, #5
+ 770 000a FFF7FEFF 		bl	xQueueGenericCreate
+ 771              	.LVL76:
+ 772 000e 0C4B     		ldr	r3, .L64
+ 773 0010 1860     		str	r0, [r3]
+ 103:FreeRTOS/test_Src/blocktim.c **** 	{
+ 774              		.loc 1 103 0
+ 775 0012 98B1     		cbz	r0, .L61
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 25
+
+
+ 114:FreeRTOS/test_Src/blocktim.c **** 		xTaskCreate( vSecondaryBlockTimeTestTask, "BTest2", configMINIMAL_STACK_SIZE, NULL, bktSECONDARY_
+ 776              		.loc 1 114 0
+ 777 0014 0024     		movs	r4, #0
+ 778 0016 0194     		str	r4, [sp, #4]
+ 779 0018 0223     		movs	r3, #2
+ 780 001a 0093     		str	r3, [sp]
+ 781 001c 2346     		mov	r3, r4
+ 782 001e 8022     		movs	r2, #128
+ 783 0020 0849     		ldr	r1, .L64+4
+ 784 0022 0948     		ldr	r0, .L64+8
+ 785 0024 FFF7FEFF 		bl	xTaskCreate
+ 786              	.LVL77:
+ 115:FreeRTOS/test_Src/blocktim.c **** 	}
+ 787              		.loc 1 115 0
+ 788 0028 084B     		ldr	r3, .L64+12
+ 789 002a 0193     		str	r3, [sp, #4]
+ 790 002c 0123     		movs	r3, #1
+ 791 002e 0093     		str	r3, [sp]
+ 792 0030 2346     		mov	r3, r4
+ 793 0032 8022     		movs	r2, #128
+ 794 0034 0649     		ldr	r1, .L64+16
+ 795 0036 0748     		ldr	r0, .L64+20
+ 796 0038 FFF7FEFF 		bl	xTaskCreate
+ 797              	.LVL78:
+ 798              	.L61:
+ 117:FreeRTOS/test_Src/blocktim.c **** /*-----------------------------------------------------------*/
+ 799              		.loc 1 117 0
+ 800 003c 02B0     		add	sp, sp, #8
+ 801              	.LCFI9:
+ 802              		.cfi_def_cfa_offset 8
+ 803              		@ sp needed
+ 804 003e 10BD     		pop	{r4, pc}
+ 805              	.L65:
+ 806              		.align	2
+ 807              	.L64:
+ 808 0040 00000000 		.word	.LANCHOR1
+ 809 0044 00000000 		.word	.LC0
+ 810 0048 00000000 		.word	vPrimaryBlockTimeTestTask
+ 811 004c 00000000 		.word	.LANCHOR5
+ 812 0050 08000000 		.word	.LC1
+ 813 0054 00000000 		.word	vSecondaryBlockTimeTestTask
+ 814              		.cfi_endproc
+ 815              	.LFE32:
+ 817              		.section	.text.xAreBlockTimeTestTasksStillRunning,"ax",%progbits
+ 818              		.align	2
+ 819              		.global	xAreBlockTimeTestTasksStillRunning
+ 820              		.thumb
+ 821              		.thumb_func
+ 823              	xAreBlockTimeTestTasksStillRunning:
+ 824              	.LFB36:
+ 512:FreeRTOS/test_Src/blocktim.c **** /*-----------------------------------------------------------*/
+ 513:FreeRTOS/test_Src/blocktim.c **** 
+ 514:FreeRTOS/test_Src/blocktim.c **** BaseType_t xAreBlockTimeTestTasksStillRunning( void )
+ 515:FreeRTOS/test_Src/blocktim.c **** {
+ 825              		.loc 1 515 0
+ 826              		.cfi_startproc
+ 827              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 26
+
+
+ 828              		@ frame_needed = 0, uses_anonymous_args = 0
+ 829              		@ link register save eliminated.
+ 830              	.LVL79:
+ 516:FreeRTOS/test_Src/blocktim.c **** static BaseType_t xLastPrimaryCycleCount = 0, xLastSecondaryCycleCount = 0;
+ 517:FreeRTOS/test_Src/blocktim.c **** BaseType_t xReturn = pdPASS;
+ 518:FreeRTOS/test_Src/blocktim.c **** 
+ 519:FreeRTOS/test_Src/blocktim.c **** 	/* Have both tasks performed at least one cycle since this function was
+ 520:FreeRTOS/test_Src/blocktim.c **** 	last called? */
+ 521:FreeRTOS/test_Src/blocktim.c **** 	if( xPrimaryCycles == xLastPrimaryCycleCount )
+ 831              		.loc 1 521 0
+ 832 0000 0E4B     		ldr	r3, .L73
+ 833 0002 1A68     		ldr	r2, [r3]
+ 834 0004 0E4B     		ldr	r3, .L73+4
+ 835 0006 1B68     		ldr	r3, [r3]
+ 836 0008 9A42     		cmp	r2, r3
+ 837 000a 01D0     		beq	.L70
+ 517:FreeRTOS/test_Src/blocktim.c **** 
+ 838              		.loc 1 517 0
+ 839 000c 0120     		movs	r0, #1
+ 840 000e 00E0     		b	.L67
+ 841              	.L70:
+ 522:FreeRTOS/test_Src/blocktim.c **** 	{
+ 523:FreeRTOS/test_Src/blocktim.c **** 		xReturn = pdFAIL;
+ 842              		.loc 1 523 0
+ 843 0010 0020     		movs	r0, #0
+ 844              	.L67:
+ 845              	.LVL80:
+ 524:FreeRTOS/test_Src/blocktim.c **** 	}
+ 525:FreeRTOS/test_Src/blocktim.c **** 
+ 526:FreeRTOS/test_Src/blocktim.c **** 	if( xSecondaryCycles == xLastSecondaryCycleCount )
+ 846              		.loc 1 526 0
+ 847 0012 0C4B     		ldr	r3, .L73+8
+ 848 0014 1A68     		ldr	r2, [r3]
+ 849 0016 0C4B     		ldr	r3, .L73+12
+ 850 0018 1B68     		ldr	r3, [r3]
+ 851 001a 9A42     		cmp	r2, r3
+ 852 001c 00D1     		bne	.L68
+ 527:FreeRTOS/test_Src/blocktim.c **** 	{
+ 528:FreeRTOS/test_Src/blocktim.c **** 		xReturn = pdFAIL;
+ 853              		.loc 1 528 0
+ 854 001e 0020     		movs	r0, #0
+ 855              	.LVL81:
+ 856              	.L68:
+ 529:FreeRTOS/test_Src/blocktim.c **** 	}
+ 530:FreeRTOS/test_Src/blocktim.c **** 
+ 531:FreeRTOS/test_Src/blocktim.c **** 	if( xErrorOccurred == pdTRUE )
+ 857              		.loc 1 531 0
+ 858 0020 0A4B     		ldr	r3, .L73+16
+ 859 0022 1B68     		ldr	r3, [r3]
+ 860 0024 012B     		cmp	r3, #1
+ 861 0026 00D1     		bne	.L69
+ 532:FreeRTOS/test_Src/blocktim.c **** 	{
+ 533:FreeRTOS/test_Src/blocktim.c **** 		xReturn = pdFAIL;
+ 862              		.loc 1 533 0
+ 863 0028 0020     		movs	r0, #0
+ 864              	.LVL82:
+ 865              	.L69:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 27
+
+
+ 534:FreeRTOS/test_Src/blocktim.c **** 	}
+ 535:FreeRTOS/test_Src/blocktim.c **** 
+ 536:FreeRTOS/test_Src/blocktim.c **** 	xLastSecondaryCycleCount = xSecondaryCycles;
+ 866              		.loc 1 536 0
+ 867 002a 064B     		ldr	r3, .L73+8
+ 868 002c 1A68     		ldr	r2, [r3]
+ 869 002e 064B     		ldr	r3, .L73+12
+ 870 0030 1A60     		str	r2, [r3]
+ 537:FreeRTOS/test_Src/blocktim.c **** 	xLastPrimaryCycleCount = xPrimaryCycles;
+ 871              		.loc 1 537 0
+ 872 0032 024B     		ldr	r3, .L73
+ 873 0034 1A68     		ldr	r2, [r3]
+ 874 0036 024B     		ldr	r3, .L73+4
+ 875 0038 1A60     		str	r2, [r3]
+ 538:FreeRTOS/test_Src/blocktim.c **** 
+ 539:FreeRTOS/test_Src/blocktim.c **** 	return xReturn;
+ 540:FreeRTOS/test_Src/blocktim.c **** }
+ 876              		.loc 1 540 0
+ 877 003a 7047     		bx	lr
+ 878              	.L74:
+ 879              		.align	2
+ 880              	.L73:
+ 881 003c 00000000 		.word	.LANCHOR4
+ 882 0040 00000000 		.word	.LANCHOR6
+ 883 0044 00000000 		.word	.LANCHOR3
+ 884 0048 00000000 		.word	.LANCHOR7
+ 885 004c 00000000 		.word	.LANCHOR2
+ 886              		.cfi_endproc
+ 887              	.LFE36:
+ 889              		.section	.bss.xPrimaryCycles,"aw",%nobits
+ 890              		.align	2
+ 891              		.set	.LANCHOR4,. + 0
+ 894              	xPrimaryCycles:
+ 895 0000 00000000 		.space	4
+ 896              		.section	.bss.xRunIndicator,"aw",%nobits
+ 897              		.align	2
+ 898              		.set	.LANCHOR0,. + 0
+ 901              	xRunIndicator:
+ 902 0000 00000000 		.space	4
+ 903              		.section	.bss.xLastPrimaryCycleCount.6988,"aw",%nobits
+ 904              		.align	2
+ 905              		.set	.LANCHOR6,. + 0
+ 908              	xLastPrimaryCycleCount.6988:
+ 909 0000 00000000 		.space	4
+ 910              		.section	.bss.xSecondary,"aw",%nobits
+ 911              		.align	2
+ 912              		.set	.LANCHOR5,. + 0
+ 915              	xSecondary:
+ 916 0000 00000000 		.space	4
+ 917              		.section	.bss.xTestQueue,"aw",%nobits
+ 918              		.align	2
+ 919              		.set	.LANCHOR1,. + 0
+ 922              	xTestQueue:
+ 923 0000 00000000 		.space	4
+ 924              		.section	.bss.xErrorOccurred,"aw",%nobits
+ 925              		.align	2
+ 926              		.set	.LANCHOR2,. + 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 28
+
+
+ 929              	xErrorOccurred:
+ 930 0000 00000000 		.space	4
+ 931              		.section	.bss.xLastSecondaryCycleCount.6989,"aw",%nobits
+ 932              		.align	2
+ 933              		.set	.LANCHOR7,. + 0
+ 936              	xLastSecondaryCycleCount.6989:
+ 937 0000 00000000 		.space	4
+ 938              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 939              		.align	2
+ 940              	.LC0:
+ 941 0000 42546573 		.ascii	"BTest1\000"
+ 941      743100
+ 942 0007 00       		.space	1
+ 943              	.LC1:
+ 944 0008 42546573 		.ascii	"BTest2\000"
+ 944      743200
+ 945              		.section	.bss.xSecondaryCycles,"aw",%nobits
+ 946              		.align	2
+ 947              		.set	.LANCHOR3,. + 0
+ 950              	xSecondaryCycles:
+ 951 0000 00000000 		.space	4
+ 952              		.text
+ 953              	.Letext0:
+ 954              		.file 2 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/machine/_default_types
+ 955              		.file 3 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/sys/_stdint.h"
+ 956              		.file 4 "FreeRTOS/ARM_CM3/portmacro.h"
+ 957              		.file 5 "FreeRTOS/Inc/task.h"
+ 958              		.file 6 "FreeRTOS/Inc/queue.h"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s 			page 29
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 blocktim.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:20     .text.vSecondaryBlockTimeTestTask:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:24     .text.vSecondaryBlockTimeTestTask:0000000000000000 vSecondaryBlockTimeTestTask
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:160    .text.vSecondaryBlockTimeTestTask:000000000000009c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:168    .text.prvBasicDelayTests:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:172    .text.prvBasicDelayTests:0000000000000000 prvBasicDelayTests
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:278    .text.prvBasicDelayTests:0000000000000070 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:284    .text.vPrimaryBlockTimeTestTask:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:288    .text.vPrimaryBlockTimeTestTask:0000000000000000 vPrimaryBlockTimeTestTask
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:738    .text.vPrimaryBlockTimeTestTask:000000000000025c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:747    .text.vCreateBlockTimeTasks:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:752    .text.vCreateBlockTimeTasks:0000000000000000 vCreateBlockTimeTasks
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:808    .text.vCreateBlockTimeTasks:0000000000000040 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:818    .text.xAreBlockTimeTestTasksStillRunning:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:823    .text.xAreBlockTimeTestTasksStillRunning:0000000000000000 xAreBlockTimeTestTasksStillRunning
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:881    .text.xAreBlockTimeTestTasksStillRunning:000000000000003c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:890    .bss.xPrimaryCycles:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:894    .bss.xPrimaryCycles:0000000000000000 xPrimaryCycles
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:897    .bss.xRunIndicator:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:901    .bss.xRunIndicator:0000000000000000 xRunIndicator
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:904    .bss.xLastPrimaryCycleCount.6988:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:908    .bss.xLastPrimaryCycleCount.6988:0000000000000000 xLastPrimaryCycleCount.6988
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:911    .bss.xSecondary:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:915    .bss.xSecondary:0000000000000000 xSecondary
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:918    .bss.xTestQueue:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:922    .bss.xTestQueue:0000000000000000 xTestQueue
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:925    .bss.xErrorOccurred:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:929    .bss.xErrorOccurred:0000000000000000 xErrorOccurred
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:932    .bss.xLastSecondaryCycleCount.6989:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:936    .bss.xLastSecondaryCycleCount.6989:0000000000000000 xLastSecondaryCycleCount.6989
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:939    .rodata.str1.4:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:946    .bss.xSecondaryCycles:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccDXBJX6.s:950    .bss.xSecondaryCycles:0000000000000000 xSecondaryCycles
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+vTaskSuspend
+xTaskGetTickCount
+xQueueGenericSend
+xQueueReceive
+vTaskPrioritySet
+vTaskDelay
+vTaskDelayUntil
+vTaskResume
+xQueueGenericCreate
+xTaskCreate

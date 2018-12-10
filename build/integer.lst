@@ -1,0 +1,448 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"integer.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.vCompeteingIntMathTask,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  24              	vCompeteingIntMathTask:
+  25              	.LFB33:
+  26              		.file 1 "FreeRTOS/test_Src/integer.c"
+   1:FreeRTOS/test_Src/integer.c **** /*
+   2:FreeRTOS/test_Src/integer.c ****  * FreeRTOS Kernel V10.1.1
+   3:FreeRTOS/test_Src/integer.c ****  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+   4:FreeRTOS/test_Src/integer.c ****  *
+   5:FreeRTOS/test_Src/integer.c ****  * Permission is hereby granted, free of charge, to any person obtaining a copy of
+   6:FreeRTOS/test_Src/integer.c ****  * this software and associated documentation files (the "Software"), to deal in
+   7:FreeRTOS/test_Src/integer.c ****  * the Software without restriction, including without limitation the rights to
+   8:FreeRTOS/test_Src/integer.c ****  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   9:FreeRTOS/test_Src/integer.c ****  * the Software, and to permit persons to whom the Software is furnished to do so,
+  10:FreeRTOS/test_Src/integer.c ****  * subject to the following conditions:
+  11:FreeRTOS/test_Src/integer.c ****  *
+  12:FreeRTOS/test_Src/integer.c ****  * The above copyright notice and this permission notice shall be included in all
+  13:FreeRTOS/test_Src/integer.c ****  * copies or substantial portions of the Software.
+  14:FreeRTOS/test_Src/integer.c ****  *
+  15:FreeRTOS/test_Src/integer.c ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  16:FreeRTOS/test_Src/integer.c ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  17:FreeRTOS/test_Src/integer.c ****  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  18:FreeRTOS/test_Src/integer.c ****  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  19:FreeRTOS/test_Src/integer.c ****  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  20:FreeRTOS/test_Src/integer.c ****  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  21:FreeRTOS/test_Src/integer.c ****  *
+  22:FreeRTOS/test_Src/integer.c ****  * http://www.FreeRTOS.org
+  23:FreeRTOS/test_Src/integer.c ****  * http://aws.amazon.com/freertos
+  24:FreeRTOS/test_Src/integer.c ****  *
+  25:FreeRTOS/test_Src/integer.c ****  * 1 tab == 4 spaces!
+  26:FreeRTOS/test_Src/integer.c ****  */
+  27:FreeRTOS/test_Src/integer.c **** 
+  28:FreeRTOS/test_Src/integer.c **** /*
+  29:FreeRTOS/test_Src/integer.c ****  * Creates one or more tasks that repeatedly perform a set of integer
+  30:FreeRTOS/test_Src/integer.c ****  * calculations.  The result of each run-time calculation is compared to the
+  31:FreeRTOS/test_Src/integer.c ****  * known expected result - with a mismatch being indicative of an error in the
+  32:FreeRTOS/test_Src/integer.c ****  * context switch mechanism.
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s 			page 2
+
+
+  33:FreeRTOS/test_Src/integer.c ****  */
+  34:FreeRTOS/test_Src/integer.c **** 
+  35:FreeRTOS/test_Src/integer.c **** #include <stdlib.h>
+  36:FreeRTOS/test_Src/integer.c **** 
+  37:FreeRTOS/test_Src/integer.c **** /* Scheduler include files. */
+  38:FreeRTOS/test_Src/integer.c **** #include "FreeRTOS.h"
+  39:FreeRTOS/test_Src/integer.c **** #include "task.h"
+  40:FreeRTOS/test_Src/integer.c **** 
+  41:FreeRTOS/test_Src/integer.c **** /* Demo program include files. */
+  42:FreeRTOS/test_Src/integer.c **** #include "integer.h"
+  43:FreeRTOS/test_Src/integer.c **** 
+  44:FreeRTOS/test_Src/integer.c **** /* The constants used in the calculation. */
+  45:FreeRTOS/test_Src/integer.c **** #define intgCONST1				( ( long ) 123 )
+  46:FreeRTOS/test_Src/integer.c **** #define intgCONST2				( ( long ) 234567 )
+  47:FreeRTOS/test_Src/integer.c **** #define intgCONST3				( ( long ) -3 )
+  48:FreeRTOS/test_Src/integer.c **** #define intgCONST4				( ( long ) 7 )
+  49:FreeRTOS/test_Src/integer.c **** #define intgEXPECTED_ANSWER		( ( ( intgCONST1 + intgCONST2 ) * intgCONST3 ) / intgCONST4 )
+  50:FreeRTOS/test_Src/integer.c **** 
+  51:FreeRTOS/test_Src/integer.c **** #define intgSTACK_SIZE			configMINIMAL_STACK_SIZE
+  52:FreeRTOS/test_Src/integer.c **** 
+  53:FreeRTOS/test_Src/integer.c **** /* As this is the minimal version, we will only create one task. */
+  54:FreeRTOS/test_Src/integer.c **** #define intgNUMBER_OF_TASKS		( 1 )
+  55:FreeRTOS/test_Src/integer.c **** 
+  56:FreeRTOS/test_Src/integer.c **** /* The task function.  Repeatedly performs a 32 bit calculation, checking the
+  57:FreeRTOS/test_Src/integer.c **** result against the expected result.  If the result is incorrect then the
+  58:FreeRTOS/test_Src/integer.c **** context switch must have caused some corruption. */
+  59:FreeRTOS/test_Src/integer.c **** static portTASK_FUNCTION_PROTO( vCompeteingIntMathTask, pvParameters );
+  60:FreeRTOS/test_Src/integer.c **** 
+  61:FreeRTOS/test_Src/integer.c **** /* Variables that are set to true within the calculation task to indicate
+  62:FreeRTOS/test_Src/integer.c **** that the task is still executing.  The check task sets the variable back to
+  63:FreeRTOS/test_Src/integer.c **** false, flagging an error if the variable is still false the next time it
+  64:FreeRTOS/test_Src/integer.c **** is called. */
+  65:FreeRTOS/test_Src/integer.c **** static BaseType_t xTaskCheck[ intgNUMBER_OF_TASKS ] = { ( BaseType_t ) pdFALSE };
+  66:FreeRTOS/test_Src/integer.c **** 
+  67:FreeRTOS/test_Src/integer.c **** /*-----------------------------------------------------------*/
+  68:FreeRTOS/test_Src/integer.c **** 
+  69:FreeRTOS/test_Src/integer.c **** void vStartIntegerMathTasks( UBaseType_t uxPriority )
+  70:FreeRTOS/test_Src/integer.c **** {
+  71:FreeRTOS/test_Src/integer.c **** short sTask;
+  72:FreeRTOS/test_Src/integer.c **** 
+  73:FreeRTOS/test_Src/integer.c **** 	for( sTask = 0; sTask < intgNUMBER_OF_TASKS; sTask++ )
+  74:FreeRTOS/test_Src/integer.c **** 	{
+  75:FreeRTOS/test_Src/integer.c **** 		xTaskCreate( vCompeteingIntMathTask, "IntMath", intgSTACK_SIZE, ( void * ) &( xTaskCheck[ sTask ]
+  76:FreeRTOS/test_Src/integer.c **** 	}
+  77:FreeRTOS/test_Src/integer.c **** }
+  78:FreeRTOS/test_Src/integer.c **** /*-----------------------------------------------------------*/
+  79:FreeRTOS/test_Src/integer.c **** 
+  80:FreeRTOS/test_Src/integer.c **** static portTASK_FUNCTION( vCompeteingIntMathTask, pvParameters )
+  81:FreeRTOS/test_Src/integer.c **** {
+  27              		.loc 1 81 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 8
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              	.LVL0:
+  32 0000 30B5     		push	{r4, r5, lr}
+  33              	.LCFI0:
+  34              		.cfi_def_cfa_offset 12
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s 			page 3
+
+
+  35              		.cfi_offset 4, -12
+  36              		.cfi_offset 5, -8
+  37              		.cfi_offset 14, -4
+  38 0002 83B0     		sub	sp, sp, #12
+  39              	.LCFI1:
+  40              		.cfi_def_cfa_offset 24
+  41 0004 0546     		mov	r5, r0
+  42              	.LVL1:
+  82:FreeRTOS/test_Src/integer.c **** /* These variables are all effectively set to constants so they are volatile to
+  83:FreeRTOS/test_Src/integer.c **** ensure the compiler does not just get rid of them. */
+  84:FreeRTOS/test_Src/integer.c **** volatile long lValue;
+  85:FreeRTOS/test_Src/integer.c **** short sError = pdFALSE;
+  43              		.loc 1 85 0
+  44 0006 0024     		movs	r4, #0
+  45              	.LVL2:
+  46              	.L2:
+  86:FreeRTOS/test_Src/integer.c **** volatile BaseType_t *pxTaskHasExecuted;
+  87:FreeRTOS/test_Src/integer.c **** 
+  88:FreeRTOS/test_Src/integer.c **** 	/* Set a pointer to the variable we are going to set to true each
+  89:FreeRTOS/test_Src/integer.c **** 	iteration.  This is also a good test of the parameter passing mechanism
+  90:FreeRTOS/test_Src/integer.c **** 	within each port. */
+  91:FreeRTOS/test_Src/integer.c **** 	pxTaskHasExecuted = ( volatile BaseType_t * ) pvParameters;
+  92:FreeRTOS/test_Src/integer.c **** 
+  93:FreeRTOS/test_Src/integer.c **** 	/* Keep performing a calculation and checking the result against a constant. */
+  94:FreeRTOS/test_Src/integer.c **** 	for( ;; )
+  95:FreeRTOS/test_Src/integer.c **** 	{
+  96:FreeRTOS/test_Src/integer.c **** 		/* Perform the calculation.  This will store partial value in
+  97:FreeRTOS/test_Src/integer.c **** 		registers, resulting in a good test of the context switch mechanism. */
+  98:FreeRTOS/test_Src/integer.c **** 		lValue = intgCONST1;
+  47              		.loc 1 98 0
+  48 0008 7B23     		movs	r3, #123
+  49 000a 0193     		str	r3, [sp, #4]
+  99:FreeRTOS/test_Src/integer.c **** 		lValue += intgCONST2;
+  50              		.loc 1 99 0
+  51 000c 019B     		ldr	r3, [sp, #4]
+  52 000e 03F56533 		add	r3, r3, #234496
+  53 0012 4733     		adds	r3, r3, #71
+  54 0014 0193     		str	r3, [sp, #4]
+ 100:FreeRTOS/test_Src/integer.c **** 
+ 101:FreeRTOS/test_Src/integer.c **** 		/* Yield in case cooperative scheduling is being used. */
+ 102:FreeRTOS/test_Src/integer.c **** 		#if configUSE_PREEMPTION == 0
+ 103:FreeRTOS/test_Src/integer.c **** 		{
+ 104:FreeRTOS/test_Src/integer.c **** 			taskYIELD();
+ 105:FreeRTOS/test_Src/integer.c **** 		}
+ 106:FreeRTOS/test_Src/integer.c **** 		#endif
+ 107:FreeRTOS/test_Src/integer.c **** 
+ 108:FreeRTOS/test_Src/integer.c **** 		/* Finish off the calculation. */
+ 109:FreeRTOS/test_Src/integer.c **** 		lValue *= intgCONST3;
+  55              		.loc 1 109 0
+  56 0016 019B     		ldr	r3, [sp, #4]
+  57 0018 A3EB8303 		sub	r3, r3, r3, lsl #2
+  58 001c 0193     		str	r3, [sp, #4]
+ 110:FreeRTOS/test_Src/integer.c **** 		lValue /= intgCONST4;
+  59              		.loc 1 110 0
+  60 001e 019B     		ldr	r3, [sp, #4]
+  61 0020 0A4A     		ldr	r2, .L7
+  62 0022 82FB0312 		smull	r1, r2, r2, r3
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s 			page 4
+
+
+  63 0026 1A44     		add	r2, r2, r3
+  64 0028 DB17     		asrs	r3, r3, #31
+  65 002a C3EBA203 		rsb	r3, r3, r2, asr #2
+  66 002e 0193     		str	r3, [sp, #4]
+ 111:FreeRTOS/test_Src/integer.c **** 
+ 112:FreeRTOS/test_Src/integer.c **** 		/* If the calculation is found to be incorrect we stop setting the
+ 113:FreeRTOS/test_Src/integer.c **** 		TaskHasExecuted variable so the check task can see an error has
+ 114:FreeRTOS/test_Src/integer.c **** 		occurred. */
+ 115:FreeRTOS/test_Src/integer.c **** 		if( lValue != intgEXPECTED_ANSWER ) /*lint !e774 volatile used to prevent this being optimised ou
+  67              		.loc 1 115 0
+  68 0030 019A     		ldr	r2, [sp, #4]
+  69 0032 074B     		ldr	r3, .L7+4
+  70 0034 9A42     		cmp	r2, r3
+  71 0036 00D0     		beq	.L3
+ 116:FreeRTOS/test_Src/integer.c **** 		{
+ 117:FreeRTOS/test_Src/integer.c **** 			sError = pdTRUE;
+  72              		.loc 1 117 0
+  73 0038 0124     		movs	r4, #1
+  74              	.LVL3:
+  75              	.L3:
+ 118:FreeRTOS/test_Src/integer.c **** 		}
+ 119:FreeRTOS/test_Src/integer.c **** 
+ 120:FreeRTOS/test_Src/integer.c **** 		if( sError == pdFALSE )
+  76              		.loc 1 120 0
+  77 003a 002C     		cmp	r4, #0
+  78 003c E4D1     		bne	.L2
+ 121:FreeRTOS/test_Src/integer.c **** 		{
+ 122:FreeRTOS/test_Src/integer.c **** 			/* We have not encountered any errors, so set the flag that show
+ 123:FreeRTOS/test_Src/integer.c **** 			we are still executing.  This will be periodically cleared by
+ 124:FreeRTOS/test_Src/integer.c **** 			the check task. */
+ 125:FreeRTOS/test_Src/integer.c **** 			portENTER_CRITICAL();
+  79              		.loc 1 125 0
+  80 003e FFF7FEFF 		bl	vPortEnterCritical
+  81              	.LVL4:
+ 126:FreeRTOS/test_Src/integer.c **** 				*pxTaskHasExecuted = pdTRUE;
+  82              		.loc 1 126 0
+  83 0042 0123     		movs	r3, #1
+  84 0044 2B60     		str	r3, [r5]
+ 127:FreeRTOS/test_Src/integer.c **** 			portEXIT_CRITICAL();
+  85              		.loc 1 127 0
+  86 0046 FFF7FEFF 		bl	vPortExitCritical
+  87              	.LVL5:
+  88 004a DDE7     		b	.L2
+  89              	.L8:
+  90              		.align	2
+  91              	.L7:
+  92 004c 93244992 		.word	-1840700269
+  93 0050 1B77FEFF 		.word	-100581
+  94              		.cfi_endproc
+  95              	.LFE33:
+  97              		.section	.text.vStartIntegerMathTasks,"ax",%progbits
+  98              		.align	2
+  99              		.global	vStartIntegerMathTasks
+ 100              		.thumb
+ 101              		.thumb_func
+ 103              	vStartIntegerMathTasks:
+ 104              	.LFB32:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s 			page 5
+
+
+  70:FreeRTOS/test_Src/integer.c **** short sTask;
+ 105              		.loc 1 70 0
+ 106              		.cfi_startproc
+ 107              		@ args = 0, pretend = 0, frame = 0
+ 108              		@ frame_needed = 0, uses_anonymous_args = 0
+ 109              	.LVL6:
+ 110 0000 30B5     		push	{r4, r5, lr}
+ 111              	.LCFI2:
+ 112              		.cfi_def_cfa_offset 12
+ 113              		.cfi_offset 4, -12
+ 114              		.cfi_offset 5, -8
+ 115              		.cfi_offset 14, -4
+ 116 0002 83B0     		sub	sp, sp, #12
+ 117              	.LCFI3:
+ 118              		.cfi_def_cfa_offset 24
+ 119 0004 0546     		mov	r5, r0
+ 120              	.LVL7:
+  73:FreeRTOS/test_Src/integer.c **** 	{
+ 121              		.loc 1 73 0
+ 122 0006 0024     		movs	r4, #0
+ 123 0008 0CE0     		b	.L10
+ 124              	.LVL8:
+ 125              	.L11:
+  75:FreeRTOS/test_Src/integer.c **** 	}
+ 126              		.loc 1 75 0 discriminator 3
+ 127 000a 0023     		movs	r3, #0
+ 128 000c 0193     		str	r3, [sp, #4]
+ 129 000e 0095     		str	r5, [sp]
+ 130 0010 064B     		ldr	r3, .L13
+ 131 0012 03EB8403 		add	r3, r3, r4, lsl #2
+ 132 0016 8022     		movs	r2, #128
+ 133 0018 0549     		ldr	r1, .L13+4
+ 134 001a 0648     		ldr	r0, .L13+8
+ 135 001c FFF7FEFF 		bl	xTaskCreate
+ 136              	.LVL9:
+  73:FreeRTOS/test_Src/integer.c **** 	{
+ 137              		.loc 1 73 0 discriminator 3
+ 138 0020 0134     		adds	r4, r4, #1
+ 139              	.LVL10:
+ 140 0022 24B2     		sxth	r4, r4
+ 141              	.LVL11:
+ 142              	.L10:
+  73:FreeRTOS/test_Src/integer.c **** 	{
+ 143              		.loc 1 73 0 is_stmt 0 discriminator 1
+ 144 0024 002C     		cmp	r4, #0
+ 145 0026 F0DD     		ble	.L11
+  77:FreeRTOS/test_Src/integer.c **** /*-----------------------------------------------------------*/
+ 146              		.loc 1 77 0 is_stmt 1
+ 147 0028 03B0     		add	sp, sp, #12
+ 148              	.LCFI4:
+ 149              		.cfi_def_cfa_offset 12
+ 150              		@ sp needed
+ 151 002a 30BD     		pop	{r4, r5, pc}
+ 152              	.LVL12:
+ 153              	.L14:
+ 154              		.align	2
+ 155              	.L13:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s 			page 6
+
+
+ 156 002c 00000000 		.word	.LANCHOR0
+ 157 0030 00000000 		.word	.LC0
+ 158 0034 00000000 		.word	vCompeteingIntMathTask
+ 159              		.cfi_endproc
+ 160              	.LFE32:
+ 162              		.section	.text.xAreIntegerMathsTaskStillRunning,"ax",%progbits
+ 163              		.align	2
+ 164              		.global	xAreIntegerMathsTaskStillRunning
+ 165              		.thumb
+ 166              		.thumb_func
+ 168              	xAreIntegerMathsTaskStillRunning:
+ 169              	.LFB34:
+ 128:FreeRTOS/test_Src/integer.c **** 		}
+ 129:FreeRTOS/test_Src/integer.c **** 
+ 130:FreeRTOS/test_Src/integer.c **** 		/* Yield in case cooperative scheduling is being used. */
+ 131:FreeRTOS/test_Src/integer.c **** 		#if configUSE_PREEMPTION == 0
+ 132:FreeRTOS/test_Src/integer.c **** 		{
+ 133:FreeRTOS/test_Src/integer.c **** 			taskYIELD();
+ 134:FreeRTOS/test_Src/integer.c **** 		}
+ 135:FreeRTOS/test_Src/integer.c **** 		#endif
+ 136:FreeRTOS/test_Src/integer.c **** 	}
+ 137:FreeRTOS/test_Src/integer.c **** }
+ 138:FreeRTOS/test_Src/integer.c **** /*-----------------------------------------------------------*/
+ 139:FreeRTOS/test_Src/integer.c **** 
+ 140:FreeRTOS/test_Src/integer.c **** /* This is called to check that all the created tasks are still running. */
+ 141:FreeRTOS/test_Src/integer.c **** BaseType_t xAreIntegerMathsTaskStillRunning( void )
+ 142:FreeRTOS/test_Src/integer.c **** {
+ 170              		.loc 1 142 0
+ 171              		.cfi_startproc
+ 172              		@ args = 0, pretend = 0, frame = 0
+ 173              		@ frame_needed = 0, uses_anonymous_args = 0
+ 174              		@ link register save eliminated.
+ 175 0000 10B4     		push	{r4}
+ 176              	.LCFI5:
+ 177              		.cfi_def_cfa_offset 4
+ 178              		.cfi_offset 4, -4
+ 179              	.LVL13:
+ 143:FreeRTOS/test_Src/integer.c **** BaseType_t xReturn = pdTRUE;
+ 144:FreeRTOS/test_Src/integer.c **** short sTask;
+ 145:FreeRTOS/test_Src/integer.c **** 
+ 146:FreeRTOS/test_Src/integer.c **** 	/* Check the maths tasks are still running by ensuring their check variables
+ 147:FreeRTOS/test_Src/integer.c **** 	are still being set to true. */
+ 148:FreeRTOS/test_Src/integer.c **** 	for( sTask = 0; sTask < intgNUMBER_OF_TASKS; sTask++ )
+ 180              		.loc 1 148 0
+ 181 0002 0023     		movs	r3, #0
+ 143:FreeRTOS/test_Src/integer.c **** BaseType_t xReturn = pdTRUE;
+ 182              		.loc 1 143 0
+ 183 0004 0120     		movs	r0, #1
+ 184              		.loc 1 148 0
+ 185 0006 0BE0     		b	.L16
+ 186              	.LVL14:
+ 187              	.L18:
+ 149:FreeRTOS/test_Src/integer.c **** 	{
+ 150:FreeRTOS/test_Src/integer.c **** 		if( xTaskCheck[ sTask ] == pdFALSE )
+ 188              		.loc 1 150 0
+ 189 0008 1946     		mov	r1, r3
+ 190 000a 074A     		ldr	r2, .L21
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s 			page 7
+
+
+ 191 000c 52F82320 		ldr	r2, [r2, r3, lsl #2]
+ 192 0010 02B9     		cbnz	r2, .L17
+ 151:FreeRTOS/test_Src/integer.c **** 		{
+ 152:FreeRTOS/test_Src/integer.c **** 			/* The check has not incremented so an error exists. */
+ 153:FreeRTOS/test_Src/integer.c **** 			xReturn = pdFALSE;
+ 193              		.loc 1 153 0
+ 194 0012 0020     		movs	r0, #0
+ 195              	.LVL15:
+ 196              	.L17:
+ 154:FreeRTOS/test_Src/integer.c **** 		}
+ 155:FreeRTOS/test_Src/integer.c **** 
+ 156:FreeRTOS/test_Src/integer.c **** 		/* Reset the check variable so we can tell if it has been set by
+ 157:FreeRTOS/test_Src/integer.c **** 		the next time around. */
+ 158:FreeRTOS/test_Src/integer.c **** 		xTaskCheck[ sTask ] = pdFALSE;
+ 197              		.loc 1 158 0 discriminator 2
+ 198 0014 0024     		movs	r4, #0
+ 199 0016 044A     		ldr	r2, .L21
+ 200 0018 42F82140 		str	r4, [r2, r1, lsl #2]
+ 148:FreeRTOS/test_Src/integer.c **** 	{
+ 201              		.loc 1 148 0 discriminator 2
+ 202 001c 0133     		adds	r3, r3, #1
+ 203              	.LVL16:
+ 204 001e 1BB2     		sxth	r3, r3
+ 205              	.LVL17:
+ 206              	.L16:
+ 148:FreeRTOS/test_Src/integer.c **** 	{
+ 207              		.loc 1 148 0 is_stmt 0 discriminator 1
+ 208 0020 002B     		cmp	r3, #0
+ 209 0022 F1DD     		ble	.L18
+ 159:FreeRTOS/test_Src/integer.c **** 	}
+ 160:FreeRTOS/test_Src/integer.c **** 
+ 161:FreeRTOS/test_Src/integer.c **** 	return xReturn;
+ 162:FreeRTOS/test_Src/integer.c **** }
+ 210              		.loc 1 162 0 is_stmt 1
+ 211 0024 10BC     		pop	{r4}
+ 212              	.LCFI6:
+ 213              		.cfi_restore 4
+ 214              		.cfi_def_cfa_offset 0
+ 215 0026 7047     		bx	lr
+ 216              	.L22:
+ 217              		.align	2
+ 218              	.L21:
+ 219 0028 00000000 		.word	.LANCHOR0
+ 220              		.cfi_endproc
+ 221              	.LFE34:
+ 223              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 224              		.align	2
+ 225              	.LC0:
+ 226 0000 496E744D 		.ascii	"IntMath\000"
+ 226      61746800 
+ 227              		.section	.bss.xTaskCheck,"aw",%nobits
+ 228              		.align	2
+ 229              		.set	.LANCHOR0,. + 0
+ 232              	xTaskCheck:
+ 233 0000 00000000 		.space	4
+ 234              		.text
+ 235              	.Letext0:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s 			page 8
+
+
+ 236              		.file 2 "FreeRTOS/ARM_CM3/portmacro.h"
+ 237              		.file 3 "FreeRTOS/Inc/task.h"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s 			page 9
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 integer.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:20     .text.vCompeteingIntMathTask:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:24     .text.vCompeteingIntMathTask:0000000000000000 vCompeteingIntMathTask
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:92     .text.vCompeteingIntMathTask:000000000000004c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:98     .text.vStartIntegerMathTasks:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:103    .text.vStartIntegerMathTasks:0000000000000000 vStartIntegerMathTasks
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:156    .text.vStartIntegerMathTasks:000000000000002c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:163    .text.xAreIntegerMathsTaskStillRunning:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:168    .text.xAreIntegerMathsTaskStillRunning:0000000000000000 xAreIntegerMathsTaskStillRunning
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:219    .text.xAreIntegerMathsTaskStillRunning:0000000000000028 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:224    .rodata.str1.4:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:228    .bss.xTaskCheck:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//cc762YUw.s:232    .bss.xTaskCheck:0000000000000000 xTaskCheck
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+vPortEnterCritical
+vPortExitCritical
+xTaskCreate

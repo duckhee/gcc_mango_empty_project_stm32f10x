@@ -141,6 +141,13 @@ static void prvConfigureLCD( void );
  */
 static void vLCDTask( void *pvParameters );
 
+static void tdelay(int cnt)
+{
+	volatile int i;
+	for(i = 0; i < cnt * 10000; i++);
+}
+
+
 /*
  * Retargets the C library printf function to the USART.
  */
@@ -178,7 +185,15 @@ int main( void )
 #endif
 
 	prvSetupHardware();
+	vParTestToggleLED(0);
+	tdelay(100);
+	vParTestToggleLED(1);
+	tdelay(100);
+	vParTestToggleLED(2);
+	tdelay(100);
 
+
+	printf("hardware setting\r\n");
 	/* Create the queue used by the LCD task.  Messages for display on the LCD
 	are received via this queue. */
 	xLCDQueue = xQueueCreate( mainLCD_QUEUE_SIZE, sizeof( xLCDMessage ) );
@@ -191,7 +206,7 @@ int main( void )
     vStartIntegerMathTasks( mainINTEGER_TASK_PRIORITY );
 	vStartLEDFlashTasks( mainFLASH_TASK_PRIORITY );
 	vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
-
+	printf("task setting\r\n");
 	/* Start the tasks defined within this file/specific to this demo. */
     xTaskCreate( vCheckTask, "Check", mainCHECK_TASK_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
 	xTaskCreate( vLCDTask, "LCD", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
@@ -206,7 +221,7 @@ int main( void )
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
-
+	printf("scheduler start \r\n");
 	/* Will only get here if there was not enough heap space to create the
 	idle task. */
 	return 0;

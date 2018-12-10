@@ -1,0 +1,1413 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"main_menu.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.do_test,"ax",%progbits
+  20              		.align	2
+  21              		.global	do_test
+  22              		.thumb
+  23              		.thumb_func
+  25              	do_test:
+  26              	.LFB36:
+  27              		.file 1 "Menu/src/main_menu.c"
+   1:Menu/src/main_menu.c **** #define MAIN_MENU_LOCAL
+   2:Menu/src/main_menu.c **** 
+   3:Menu/src/main_menu.c **** #include "main_menu.h"
+   4:Menu/src/main_menu.c **** 
+   5:Menu/src/main_menu.c **** #define MAX_ARGS            30
+   6:Menu/src/main_menu.c **** typedef bool;
+   7:Menu/src/main_menu.c **** #define true                1
+   8:Menu/src/main_menu.c **** #define false               0
+   9:Menu/src/main_menu.c **** 
+  10:Menu/src/main_menu.c **** RCC_ClocksTypeDef  rcc_clocks;
+  11:Menu/src/main_menu.c **** uint8_t ch;
+  12:Menu/src/main_menu.c **** 
+  13:Menu/src/main_menu.c **** void System_Information()
+  14:Menu/src/main_menu.c **** {
+  15:Menu/src/main_menu.c ****     printf("SYSCLK_Frequency = %d\r\n",rcc_clocks.SYSCLK_Frequency );
+  16:Menu/src/main_menu.c ****     printf("HCLK_Frequency = %d\r\n",rcc_clocks.HCLK_Frequency );
+  17:Menu/src/main_menu.c ****     printf("PCLK1_Frequency = %d\r\n",rcc_clocks.PCLK1_Frequency );
+  18:Menu/src/main_menu.c ****     printf("PCLK2_Frequency = %d\r\n",rcc_clocks.PCLK2_Frequency );
+  19:Menu/src/main_menu.c ****     printf("ADCCLK_Frequency = %d\r\n",rcc_clocks.ADCCLK_Frequency );
+  20:Menu/src/main_menu.c **** }
+  21:Menu/src/main_menu.c **** 
+  22:Menu/src/main_menu.c **** void USB_Test_Start (void)
+  23:Menu/src/main_menu.c **** {
+  24:Menu/src/main_menu.c ****     USB_Interrupts_Config();
+  25:Menu/src/main_menu.c ****     Set_USBClock();
+  26:Menu/src/main_menu.c ****     USB_Init();
+  27:Menu/src/main_menu.c **** }
+  28:Menu/src/main_menu.c **** 
+  29:Menu/src/main_menu.c **** void default_menu()
+  30:Menu/src/main_menu.c **** {
+  31:Menu/src/main_menu.c ****     while(1){
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 2
+
+
+  32:Menu/src/main_menu.c ****         printf("\r\n---------------------\r\n");
+  33:Menu/src/main_menu.c **** #ifdef BOARD_DEF_MANGO_M32
+  34:Menu/src/main_menu.c ****         printf("Mango M32 test start...\n");
+  35:Menu/src/main_menu.c **** #elif  BOARD_DEF_MANGO_Z1
+  36:Menu/src/main_menu.c ****         printf("Mango Z1 test start...\n");
+  37:Menu/src/main_menu.c **** #endif
+  38:Menu/src/main_menu.c ****         printf("Press menu key\r\n");
+  39:Menu/src/main_menu.c ****         printf("---------------------\r\n");
+  40:Menu/src/main_menu.c ****         printf("0> System Information\r\n");
+  41:Menu/src/main_menu.c ****         printf("---------------------\r\n");
+  42:Menu/src/main_menu.c ****         printf("1> LED Test\r\n");
+  43:Menu/src/main_menu.c ****         printf("2> KEY Test\r\n");
+  44:Menu/src/main_menu.c **** #ifdef BOARD_DEF_MANGO_M32
+  45:Menu/src/main_menu.c ****         printf("3> 7-Segment Test\r\n");
+  46:Menu/src/main_menu.c **** #elif  BOARD_DEF_MANGO_Z1
+  47:Menu/src/main_menu.c ****         printf("3> ZigBee Test\r\n");
+  48:Menu/src/main_menu.c **** #endif
+  49:Menu/src/main_menu.c ****         printf("4> USB HID Test\r\n");
+  50:Menu/src/main_menu.c ****         printf("5> \r\n");
+  51:Menu/src/main_menu.c ****         printf("---------------------\r\n");
+  52:Menu/src/main_menu.c ****         printf("x> quit\r\n\r\n");
+  53:Menu/src/main_menu.c **** 
+  54:Menu/src/main_menu.c ****         ch = USART_GetCharacter(USART1);
+  55:Menu/src/main_menu.c ****         printf(" is selected\r\n\r\n");
+  56:Menu/src/main_menu.c **** 
+  57:Menu/src/main_menu.c ****         switch((char)ch)
+  58:Menu/src/main_menu.c ****         {
+  59:Menu/src/main_menu.c ****         case '0':
+  60:Menu/src/main_menu.c ****             System_Information();
+  61:Menu/src/main_menu.c ****             break;
+  62:Menu/src/main_menu.c **** 
+  63:Menu/src/main_menu.c ****         case '1':
+  64:Menu/src/main_menu.c ****             LED_Test();
+  65:Menu/src/main_menu.c ****             break;
+  66:Menu/src/main_menu.c **** 
+  67:Menu/src/main_menu.c ****         case '2':
+  68:Menu/src/main_menu.c ****             KEY_Test();
+  69:Menu/src/main_menu.c ****             break;
+  70:Menu/src/main_menu.c **** 
+  71:Menu/src/main_menu.c ****         case '3':
+  72:Menu/src/main_menu.c **** #ifdef BOARD_DEF_MANGO_M32
+  73:Menu/src/main_menu.c ****             Seven_Segment_Test();
+  74:Menu/src/main_menu.c **** #elif  BOARD_DEF_MANGO_Z1
+  75:Menu/src/main_menu.c ****             ZigBee_Test();
+  76:Menu/src/main_menu.c **** #endif
+  77:Menu/src/main_menu.c ****             break;
+  78:Menu/src/main_menu.c **** 
+  79:Menu/src/main_menu.c ****         case '4':
+  80:Menu/src/main_menu.c ****             g_TestProcessState = TRUE;
+  81:Menu/src/main_menu.c **** 
+  82:Menu/src/main_menu.c ****             /* USB initialization */
+  83:Menu/src/main_menu.c ****             USB_Test_Start();
+  84:Menu/src/main_menu.c ****             Delay(500);
+  85:Menu/src/main_menu.c ****             USB_Cable_Config(ENABLE);
+  86:Menu/src/main_menu.c ****             break;
+  87:Menu/src/main_menu.c **** 
+  88:Menu/src/main_menu.c ****         case '5':
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 3
+
+
+  89:Menu/src/main_menu.c ****             break;
+  90:Menu/src/main_menu.c **** 
+  91:Menu/src/main_menu.c ****         }
+  92:Menu/src/main_menu.c **** 
+  93:Menu/src/main_menu.c ****         if('x' == (char)ch)
+  94:Menu/src/main_menu.c ****         {
+  95:Menu/src/main_menu.c ****             break;
+  96:Menu/src/main_menu.c ****         }    
+  97:Menu/src/main_menu.c ****     }
+  98:Menu/src/main_menu.c **** }
+  99:Menu/src/main_menu.c **** 
+ 100:Menu/src/main_menu.c **** typedef enum
+ 101:Menu/src/main_menu.c **** {
+ 102:Menu/src/main_menu.c ****     VAR_LONG = 32,
+ 103:Menu/src/main_menu.c ****     VAR_SHORT = 16,
+ 104:Menu/src/main_menu.c ****     VAR_CHAR = 8
+ 105:Menu/src/main_menu.c **** } VAR_TYPE;
+ 106:Menu/src/main_menu.c **** 
+ 107:Menu/src/main_menu.c **** #define NULL ((void *)0)
+ 108:Menu/src/main_menu.c **** 
+ 109:Menu/src/main_menu.c **** char cmd[128]; //one word
+ 110:Menu/src/main_menu.c **** int cmd_size;
+ 111:Menu/src/main_menu.c **** // 구조체 선언
+ 112:Menu/src/main_menu.c **** struct _CMD_TBL{
+ 113:Menu/src/main_menu.c ****     // 예약된 명령어
+ 114:Menu/src/main_menu.c ****     char *cmd;
+ 115:Menu/src/main_menu.c ****     // 함수 포인터, 이중포인터는 포인터 배열을 가리킨다.
+ 116:Menu/src/main_menu.c ****     bool (*run)(struct _CMD_TBL *cptr, int argc, char **argv);
+ 117:Menu/src/main_menu.c ****     // 해당되는 명령어의 사용법
+ 118:Menu/src/main_menu.c ****     char *usage;
+ 119:Menu/src/main_menu.c ****     // 해당되는 명령어의 도움말, 더 자세한 사용법
+ 120:Menu/src/main_menu.c ****     char *help;
+ 121:Menu/src/main_menu.c ****     char *help_more;
+ 122:Menu/src/main_menu.c **** };
+ 123:Menu/src/main_menu.c **** 
+ 124:Menu/src/main_menu.c **** //초기화
+ 125:Menu/src/main_menu.c **** #define CMD_TBL_TEST                  {"test",      do_test, 0, 0, 0}
+ 126:Menu/src/main_menu.c **** #define CMD_TBL_END                   {0,           0,       0, 0, 0}
+ 127:Menu/src/main_menu.c **** 
+ 128:Menu/src/main_menu.c **** 
+ 129:Menu/src/main_menu.c **** //함수 프로토 타입 선언
+ 130:Menu/src/main_menu.c **** void display_prompt(char *prompt);
+ 131:Menu/src/main_menu.c **** bool do_print_help(int argc, char **argv);
+ 132:Menu/src/main_menu.c **** int get_command(char *cmd, int len, int timeout);
+ 133:Menu/src/main_menu.c **** int get_args(char *s, char **argv);
+ 134:Menu/src/main_menu.c **** 
+ 135:Menu/src/main_menu.c **** bool do_test(struct _CMD_TBL *cptr, int argc, char **argv);
+ 136:Menu/src/main_menu.c **** 
+ 137:Menu/src/main_menu.c **** //구조체를 배열로 할당(구조체 배열)
+ 138:Menu/src/main_menu.c **** struct _CMD_TBL cmd_tbl[] =
+ 139:Menu/src/main_menu.c **** {
+ 140:Menu/src/main_menu.c ****     CMD_TBL_TEST,
+ 141:Menu/src/main_menu.c ****     //추가 시작
+ 142:Menu/src/main_menu.c ****     
+ 143:Menu/src/main_menu.c ****     //end는 0으로 되어있고 command에서 cptr이 0이면, for문은 빠져나오게 되어 �
+ 144:Menu/src/main_menu.c ****     //end 밑에 추가하면 동작이 안된다.
+ 145:Menu/src/main_menu.c ****     //추가 끝
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 4
+
+
+ 146:Menu/src/main_menu.c ****     CMD_TBL_END
+ 147:Menu/src/main_menu.c **** };
+ 148:Menu/src/main_menu.c **** 
+ 149:Menu/src/main_menu.c **** //함수 프로토 타입 선언
+ 150:Menu/src/main_menu.c **** void display_prompt(char *prompt);
+ 151:Menu/src/main_menu.c **** bool do_print_help(int argc, char **argv);
+ 152:Menu/src/main_menu.c **** int get_command(char *cmd, int len, int timeout);
+ 153:Menu/src/main_menu.c **** int get_args(char *s, char **argv);
+ 154:Menu/src/main_menu.c **** 
+ 155:Menu/src/main_menu.c **** MAIN_MENU_DEF void Sys_Info(void);
+ 156:Menu/src/main_menu.c **** 
+ 157:Menu/src/main_menu.c **** RCC_ClocksTypeDef rcc_clocks;
+ 158:Menu/src/main_menu.c **** 
+ 159:Menu/src/main_menu.c **** MAIN_MENU_DEF void Sys_Info(void)
+ 160:Menu/src/main_menu.c **** {
+ 161:Menu/src/main_menu.c ****     printf("SYSCLK_Frequency = %d\r\n",rcc_clocks.SYSCLK_Frequency );
+ 162:Menu/src/main_menu.c ****     printf("HCLK_Frequency = %d\r\n",rcc_clocks.HCLK_Frequency );
+ 163:Menu/src/main_menu.c ****     printf("PCLK1_Frequency = %d\r\n",rcc_clocks.PCLK1_Frequency );
+ 164:Menu/src/main_menu.c ****     printf("PCLK2_Frequency = %d\r\n",rcc_clocks.PCLK2_Frequency );
+ 165:Menu/src/main_menu.c ****     printf("ADCCLK_Frequency = %d\r\n",rcc_clocks.ADCCLK_Frequency );
+ 166:Menu/src/main_menu.c **** }
+ 167:Menu/src/main_menu.c **** 
+ 168:Menu/src/main_menu.c **** 
+ 169:Menu/src/main_menu.c **** 
+ 170:Menu/src/main_menu.c **** void display_prompt(char *prompt)
+ 171:Menu/src/main_menu.c **** {
+ 172:Menu/src/main_menu.c ****     if(prompt == NULL)
+ 173:Menu/src/main_menu.c ****     {
+ 174:Menu/src/main_menu.c ****         printf(">>> ");
+ 175:Menu/src/main_menu.c ****     }
+ 176:Menu/src/main_menu.c ****     else
+ 177:Menu/src/main_menu.c ****     {
+ 178:Menu/src/main_menu.c ****         printf("%s\r\n", prompt);
+ 179:Menu/src/main_menu.c ****     }
+ 180:Menu/src/main_menu.c **** }
+ 181:Menu/src/main_menu.c **** int get_command(char *cmd, int len, int timeout)
+ 182:Menu/src/main_menu.c **** {
+ 183:Menu/src/main_menu.c ****     char key;
+ 184:Menu/src/main_menu.c ****     int i, rd_cnt, rd_max;
+ 185:Menu/src/main_menu.c ****     rd_max = len - 1;
+ 186:Menu/src/main_menu.c ****     for(rd_cnt = 0, i = 0; rd_cnt < rd_max; )
+ 187:Menu/src/main_menu.c ****     {
+ 188:Menu/src/main_menu.c ****         key = USART_GetCharacter(USART1);
+ 189:Menu/src/main_menu.c ****         if((key == '\n') || (key == '\r'))
+ 190:Menu/src/main_menu.c ****         {
+ 191:Menu/src/main_menu.c ****             cmd[i++] = '\0';
+ 192:Menu/src/main_menu.c ****             printf("\r\n");
+ 193:Menu/src/main_menu.c ****             return rd_cnt;
+ 194:Menu/src/main_menu.c ****         }
+ 195:Menu/src/main_menu.c ****         else if(key == '\b')
+ 196:Menu/src/main_menu.c ****         {
+ 197:Menu/src/main_menu.c ****             if(i > 0)
+ 198:Menu/src/main_menu.c ****             {
+ 199:Menu/src/main_menu.c ****                 i--;
+ 200:Menu/src/main_menu.c ****                 rd_cnt--;
+ 201:Menu/src/main_menu.c ****                 printf("\b \b");
+ 202:Menu/src/main_menu.c ****             }
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 5
+
+
+ 203:Menu/src/main_menu.c ****             
+ 204:Menu/src/main_menu.c ****         }
+ 205:Menu/src/main_menu.c ****         else if(key == '\0')
+ 206:Menu/src/main_menu.c ****         {
+ 207:Menu/src/main_menu.c ****             cmd[cmd_size] = '\0';
+ 208:Menu/src/main_menu.c ****             printf("\r\n");
+ 209:Menu/src/main_menu.c ****             return cmd_size;
+ 210:Menu/src/main_menu.c ****         }
+ 211:Menu/src/main_menu.c ****         else
+ 212:Menu/src/main_menu.c ****         {
+ 213:Menu/src/main_menu.c ****             cmd[i++] = key;
+ 214:Menu/src/main_menu.c ****             rd_cnt++;
+ 215:Menu/src/main_menu.c ****             printf("%c", key);
+ 216:Menu/src/main_menu.c ****         }
+ 217:Menu/src/main_menu.c **** 
+ 218:Menu/src/main_menu.c ****     }
+ 219:Menu/src/main_menu.c **** }
+ 220:Menu/src/main_menu.c **** 
+ 221:Menu/src/main_menu.c **** int get_args(char *s, char **argv)
+ 222:Menu/src/main_menu.c **** {
+ 223:Menu/src/main_menu.c ****     int args = 0;
+ 224:Menu/src/main_menu.c ****     if(!s || *s == '\0')
+ 225:Menu/src/main_menu.c ****     {
+ 226:Menu/src/main_menu.c ****         return 0;
+ 227:Menu/src/main_menu.c ****     }
+ 228:Menu/src/main_menu.c ****     while(args < MAX_ARGS)
+ 229:Menu/src/main_menu.c ****     {
+ 230:Menu/src/main_menu.c ****         while((*s == ' ') || (*s == '\t'))
+ 231:Menu/src/main_menu.c ****         {
+ 232:Menu/src/main_menu.c ****             s++;
+ 233:Menu/src/main_menu.c ****         }
+ 234:Menu/src/main_menu.c **** 
+ 235:Menu/src/main_menu.c ****         if(*s == '\0')
+ 236:Menu/src/main_menu.c ****         {
+ 237:Menu/src/main_menu.c ****             argv[args] = 0;
+ 238:Menu/src/main_menu.c ****             return args;
+ 239:Menu/src/main_menu.c ****         }
+ 240:Menu/src/main_menu.c ****         argv[args++] = s;
+ 241:Menu/src/main_menu.c ****         while(*s && (*s != ' ') && (*s != '\t'))
+ 242:Menu/src/main_menu.c ****         {
+ 243:Menu/src/main_menu.c ****             s++;
+ 244:Menu/src/main_menu.c ****         }
+ 245:Menu/src/main_menu.c ****         if(*s == '\0')
+ 246:Menu/src/main_menu.c ****         {
+ 247:Menu/src/main_menu.c ****             argv[args] = 0;
+ 248:Menu/src/main_menu.c ****             return args;
+ 249:Menu/src/main_menu.c ****         }
+ 250:Menu/src/main_menu.c ****         *s++ ='\0';
+ 251:Menu/src/main_menu.c ****     }
+ 252:Menu/src/main_menu.c ****     return args;
+ 253:Menu/src/main_menu.c **** }
+ 254:Menu/src/main_menu.c **** 
+ 255:Menu/src/main_menu.c **** 
+ 256:Menu/src/main_menu.c **** bool do_print_help(int argc, char **argv)
+ 257:Menu/src/main_menu.c **** {
+ 258:Menu/src/main_menu.c ****     struct _CMD_TBL *cptr;
+ 259:Menu/src/main_menu.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 6
+
+
+ 260:Menu/src/main_menu.c ****     if(argc == 1)
+ 261:Menu/src/main_menu.c ****     {
+ 262:Menu/src/main_menu.c ****         printf("\nThe following command are supported : \n");
+ 263:Menu/src/main_menu.c ****         printf("Help : Help for commands. \n");
+ 264:Menu/src/main_menu.c **** 
+ 265:Menu/src/main_menu.c ****         for(cptr = cmd_tbl; cptr->cmd; cptr++)
+ 266:Menu/src/main_menu.c ****         {
+ 267:Menu/src/main_menu.c ****             if(cptr->help_more)
+ 268:Menu/src/main_menu.c ****             {
+ 269:Menu/src/main_menu.c ****                 printf(cptr->help_more);
+ 270:Menu/src/main_menu.c ****             }
+ 271:Menu/src/main_menu.c ****         }
+ 272:Menu/src/main_menu.c ****         printf("\n\n");
+ 273:Menu/src/main_menu.c ****     }
+ 274:Menu/src/main_menu.c ****     else
+ 275:Menu/src/main_menu.c ****     {
+ 276:Menu/src/main_menu.c ****         printf("\n\t Unknow command : %s\n", argv[0]);
+ 277:Menu/src/main_menu.c ****     }
+ 278:Menu/src/main_menu.c **** 
+ 279:Menu/src/main_menu.c ****     return true;
+ 280:Menu/src/main_menu.c **** }
+ 281:Menu/src/main_menu.c **** 
+ 282:Menu/src/main_menu.c **** bool do_test(struct _CMD_TBL *cptr, int argc, char **argv)
+ 283:Menu/src/main_menu.c **** {
+  28              		.loc 1 283 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              	.LVL0:
+  33 0000 08B5     		push	{r3, lr}
+  34              	.LCFI0:
+  35              		.cfi_def_cfa_offset 8
+  36              		.cfi_offset 3, -8
+  37              		.cfi_offset 14, -4
+ 284:Menu/src/main_menu.c ****     printf("\nThis is test\n");
+  38              		.loc 1 284 0
+  39 0002 0248     		ldr	r0, .L3
+  40              	.LVL1:
+  41 0004 FFF7FEFF 		bl	puts
+  42              	.LVL2:
+ 285:Menu/src/main_menu.c ****     return true;
+ 286:Menu/src/main_menu.c **** }
+  43              		.loc 1 286 0
+  44 0008 0120     		movs	r0, #1
+  45 000a 08BD     		pop	{r3, pc}
+  46              	.L4:
+  47              		.align	2
+  48              	.L3:
+  49 000c 00000000 		.word	.LC0
+  50              		.cfi_endproc
+  51              	.LFE36:
+  53              		.section	.text.System_Information,"ax",%progbits
+  54              		.align	2
+  55              		.global	System_Information
+  56              		.thumb
+  57              		.thumb_func
+  59              	System_Information:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 7
+
+
+  60              	.LFB28:
+  14:Menu/src/main_menu.c ****     printf("SYSCLK_Frequency = %d\r\n",rcc_clocks.SYSCLK_Frequency );
+  61              		.loc 1 14 0
+  62              		.cfi_startproc
+  63              		@ args = 0, pretend = 0, frame = 0
+  64              		@ frame_needed = 0, uses_anonymous_args = 0
+  65 0000 10B5     		push	{r4, lr}
+  66              	.LCFI1:
+  67              		.cfi_def_cfa_offset 8
+  68              		.cfi_offset 4, -8
+  69              		.cfi_offset 14, -4
+  15:Menu/src/main_menu.c ****     printf("HCLK_Frequency = %d\r\n",rcc_clocks.HCLK_Frequency );
+  70              		.loc 1 15 0
+  71 0002 0B4C     		ldr	r4, .L7
+  72 0004 2168     		ldr	r1, [r4]
+  73 0006 0B48     		ldr	r0, .L7+4
+  74 0008 FFF7FEFF 		bl	printf
+  75              	.LVL3:
+  16:Menu/src/main_menu.c ****     printf("PCLK1_Frequency = %d\r\n",rcc_clocks.PCLK1_Frequency );
+  76              		.loc 1 16 0
+  77 000c 6168     		ldr	r1, [r4, #4]
+  78 000e 0A48     		ldr	r0, .L7+8
+  79 0010 FFF7FEFF 		bl	printf
+  80              	.LVL4:
+  17:Menu/src/main_menu.c ****     printf("PCLK2_Frequency = %d\r\n",rcc_clocks.PCLK2_Frequency );
+  81              		.loc 1 17 0
+  82 0014 A168     		ldr	r1, [r4, #8]
+  83 0016 0948     		ldr	r0, .L7+12
+  84 0018 FFF7FEFF 		bl	printf
+  85              	.LVL5:
+  18:Menu/src/main_menu.c ****     printf("ADCCLK_Frequency = %d\r\n",rcc_clocks.ADCCLK_Frequency );
+  86              		.loc 1 18 0
+  87 001c E168     		ldr	r1, [r4, #12]
+  88 001e 0848     		ldr	r0, .L7+16
+  89 0020 FFF7FEFF 		bl	printf
+  90              	.LVL6:
+  19:Menu/src/main_menu.c **** }
+  91              		.loc 1 19 0
+  92 0024 2169     		ldr	r1, [r4, #16]
+  93 0026 0748     		ldr	r0, .L7+20
+  94 0028 FFF7FEFF 		bl	printf
+  95              	.LVL7:
+  96 002c 10BD     		pop	{r4, pc}
+  97              	.L8:
+  98 002e 00BF     		.align	2
+  99              	.L7:
+ 100 0030 00000000 		.word	rcc_clocks
+ 101 0034 10000000 		.word	.LC1
+ 102 0038 28000000 		.word	.LC2
+ 103 003c 40000000 		.word	.LC3
+ 104 0040 58000000 		.word	.LC4
+ 105 0044 70000000 		.word	.LC5
+ 106              		.cfi_endproc
+ 107              	.LFE28:
+ 109              		.section	.text.USB_Test_Start,"ax",%progbits
+ 110              		.align	2
+ 111              		.global	USB_Test_Start
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 8
+
+
+ 112              		.thumb
+ 113              		.thumb_func
+ 115              	USB_Test_Start:
+ 116              	.LFB29:
+  23:Menu/src/main_menu.c ****     USB_Interrupts_Config();
+ 117              		.loc 1 23 0
+ 118              		.cfi_startproc
+ 119              		@ args = 0, pretend = 0, frame = 0
+ 120              		@ frame_needed = 0, uses_anonymous_args = 0
+ 121 0000 08B5     		push	{r3, lr}
+ 122              	.LCFI2:
+ 123              		.cfi_def_cfa_offset 8
+ 124              		.cfi_offset 3, -8
+ 125              		.cfi_offset 14, -4
+  24:Menu/src/main_menu.c ****     Set_USBClock();
+ 126              		.loc 1 24 0
+ 127 0002 FFF7FEFF 		bl	USB_Interrupts_Config
+ 128              	.LVL8:
+  25:Menu/src/main_menu.c ****     USB_Init();
+ 129              		.loc 1 25 0
+ 130 0006 FFF7FEFF 		bl	Set_USBClock
+ 131              	.LVL9:
+  26:Menu/src/main_menu.c **** }
+ 132              		.loc 1 26 0
+ 133 000a FFF7FEFF 		bl	USB_Init
+ 134              	.LVL10:
+ 135 000e 08BD     		pop	{r3, pc}
+ 136              		.cfi_endproc
+ 137              	.LFE29:
+ 139              		.section	.text.default_menu,"ax",%progbits
+ 140              		.align	2
+ 141              		.global	default_menu
+ 142              		.thumb
+ 143              		.thumb_func
+ 145              	default_menu:
+ 146              	.LFB30:
+  30:Menu/src/main_menu.c ****     while(1){
+ 147              		.loc 1 30 0
+ 148              		.cfi_startproc
+ 149              		@ args = 0, pretend = 0, frame = 0
+ 150              		@ frame_needed = 0, uses_anonymous_args = 0
+ 151 0000 10B5     		push	{r4, lr}
+ 152              	.LCFI3:
+ 153              		.cfi_def_cfa_offset 8
+ 154              		.cfi_offset 4, -8
+ 155              		.cfi_offset 14, -4
+ 156              	.L19:
+  32:Menu/src/main_menu.c **** #ifdef BOARD_DEF_MANGO_M32
+ 157              		.loc 1 32 0
+ 158 0002 2B48     		ldr	r0, .L21
+ 159 0004 FFF7FEFF 		bl	puts
+ 160              	.LVL11:
+  34:Menu/src/main_menu.c **** #elif  BOARD_DEF_MANGO_Z1
+ 161              		.loc 1 34 0
+ 162 0008 2A48     		ldr	r0, .L21+4
+ 163 000a FFF7FEFF 		bl	puts
+ 164              	.LVL12:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 9
+
+
+  38:Menu/src/main_menu.c ****         printf("---------------------\r\n");
+ 165              		.loc 1 38 0
+ 166 000e 2A48     		ldr	r0, .L21+8
+ 167 0010 FFF7FEFF 		bl	puts
+ 168              	.LVL13:
+  39:Menu/src/main_menu.c ****         printf("0> System Information\r\n");
+ 169              		.loc 1 39 0
+ 170 0014 294C     		ldr	r4, .L21+12
+ 171 0016 2046     		mov	r0, r4
+ 172 0018 FFF7FEFF 		bl	puts
+ 173              	.LVL14:
+  40:Menu/src/main_menu.c ****         printf("---------------------\r\n");
+ 174              		.loc 1 40 0
+ 175 001c 2848     		ldr	r0, .L21+16
+ 176 001e FFF7FEFF 		bl	puts
+ 177              	.LVL15:
+  41:Menu/src/main_menu.c ****         printf("1> LED Test\r\n");
+ 178              		.loc 1 41 0
+ 179 0022 2046     		mov	r0, r4
+ 180 0024 FFF7FEFF 		bl	puts
+ 181              	.LVL16:
+  42:Menu/src/main_menu.c ****         printf("2> KEY Test\r\n");
+ 182              		.loc 1 42 0
+ 183 0028 2648     		ldr	r0, .L21+20
+ 184 002a FFF7FEFF 		bl	puts
+ 185              	.LVL17:
+  43:Menu/src/main_menu.c **** #ifdef BOARD_DEF_MANGO_M32
+ 186              		.loc 1 43 0
+ 187 002e 2648     		ldr	r0, .L21+24
+ 188 0030 FFF7FEFF 		bl	puts
+ 189              	.LVL18:
+  45:Menu/src/main_menu.c **** #elif  BOARD_DEF_MANGO_Z1
+ 190              		.loc 1 45 0
+ 191 0034 2548     		ldr	r0, .L21+28
+ 192 0036 FFF7FEFF 		bl	puts
+ 193              	.LVL19:
+  49:Menu/src/main_menu.c ****         printf("5> \r\n");
+ 194              		.loc 1 49 0
+ 195 003a 2548     		ldr	r0, .L21+32
+ 196 003c FFF7FEFF 		bl	puts
+ 197              	.LVL20:
+  50:Menu/src/main_menu.c ****         printf("---------------------\r\n");
+ 198              		.loc 1 50 0
+ 199 0040 2448     		ldr	r0, .L21+36
+ 200 0042 FFF7FEFF 		bl	puts
+ 201              	.LVL21:
+  51:Menu/src/main_menu.c ****         printf("x> quit\r\n\r\n");
+ 202              		.loc 1 51 0
+ 203 0046 2046     		mov	r0, r4
+ 204 0048 FFF7FEFF 		bl	puts
+ 205              	.LVL22:
+  52:Menu/src/main_menu.c **** 
+ 206              		.loc 1 52 0
+ 207 004c 2248     		ldr	r0, .L21+40
+ 208 004e FFF7FEFF 		bl	puts
+ 209              	.LVL23:
+  54:Menu/src/main_menu.c ****         printf(" is selected\r\n\r\n");
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 10
+
+
+ 210              		.loc 1 54 0
+ 211 0052 2248     		ldr	r0, .L21+44
+ 212 0054 FFF7FEFF 		bl	USART_GetCharacter
+ 213              	.LVL24:
+ 214 0058 214C     		ldr	r4, .L21+48
+ 215 005a 2070     		strb	r0, [r4]
+  55:Menu/src/main_menu.c **** 
+ 216              		.loc 1 55 0
+ 217 005c 2148     		ldr	r0, .L21+52
+ 218 005e FFF7FEFF 		bl	puts
+ 219              	.LVL25:
+  57:Menu/src/main_menu.c ****         {
+ 220              		.loc 1 57 0
+ 221 0062 2378     		ldrb	r3, [r4]	@ zero_extendqisi2
+ 222 0064 303B     		subs	r3, r3, #48
+ 223 0066 042B     		cmp	r3, #4
+ 224 0068 1CD8     		bhi	.L12
+ 225 006a DFE803F0 		tbb	[pc, r3]
+ 226              	.L14:
+ 227 006e 03       		.byte	(.L13-.L14)/2
+ 228 006f 06       		.byte	(.L15-.L14)/2
+ 229 0070 09       		.byte	(.L16-.L14)/2
+ 230 0071 0C       		.byte	(.L17-.L14)/2
+ 231 0072 0F       		.byte	(.L18-.L14)/2
+ 232 0073 00       		.p2align 1
+ 233              	.L13:
+  60:Menu/src/main_menu.c ****             break;
+ 234              		.loc 1 60 0
+ 235 0074 FFF7FEFF 		bl	System_Information
+ 236              	.LVL26:
+  61:Menu/src/main_menu.c **** 
+ 237              		.loc 1 61 0
+ 238 0078 14E0     		b	.L12
+ 239              	.L15:
+  64:Menu/src/main_menu.c ****             break;
+ 240              		.loc 1 64 0
+ 241 007a FFF7FEFF 		bl	LED_Test
+ 242              	.LVL27:
+  65:Menu/src/main_menu.c **** 
+ 243              		.loc 1 65 0
+ 244 007e 11E0     		b	.L12
+ 245              	.L16:
+  68:Menu/src/main_menu.c ****             break;
+ 246              		.loc 1 68 0
+ 247 0080 FFF7FEFF 		bl	KEY_Test
+ 248              	.LVL28:
+  69:Menu/src/main_menu.c **** 
+ 249              		.loc 1 69 0
+ 250 0084 0EE0     		b	.L12
+ 251              	.L17:
+  73:Menu/src/main_menu.c **** #elif  BOARD_DEF_MANGO_Z1
+ 252              		.loc 1 73 0
+ 253 0086 FFF7FEFF 		bl	Seven_Segment_Test
+ 254              	.LVL29:
+  77:Menu/src/main_menu.c **** 
+ 255              		.loc 1 77 0
+ 256 008a 0BE0     		b	.L12
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 11
+
+
+ 257              	.L18:
+  80:Menu/src/main_menu.c **** 
+ 258              		.loc 1 80 0
+ 259 008c 0124     		movs	r4, #1
+ 260 008e 164B     		ldr	r3, .L21+56
+ 261 0090 1C70     		strb	r4, [r3]
+  83:Menu/src/main_menu.c ****             Delay(500);
+ 262              		.loc 1 83 0
+ 263 0092 FFF7FEFF 		bl	USB_Test_Start
+ 264              	.LVL30:
+  84:Menu/src/main_menu.c ****             USB_Cable_Config(ENABLE);
+ 265              		.loc 1 84 0
+ 266 0096 4FF4FA70 		mov	r0, #500
+ 267 009a FFF7FEFF 		bl	Delay
+ 268              	.LVL31:
+  85:Menu/src/main_menu.c ****             break;
+ 269              		.loc 1 85 0
+ 270 009e 2046     		mov	r0, r4
+ 271 00a0 FFF7FEFF 		bl	USB_Cable_Config
+ 272              	.LVL32:
+ 273              	.L12:
+  93:Menu/src/main_menu.c ****         {
+ 274              		.loc 1 93 0
+ 275 00a4 0E4B     		ldr	r3, .L21+48
+ 276 00a6 1B78     		ldrb	r3, [r3]	@ zero_extendqisi2
+ 277 00a8 782B     		cmp	r3, #120
+ 278 00aa AAD1     		bne	.L19
+  98:Menu/src/main_menu.c **** 
+ 279              		.loc 1 98 0
+ 280 00ac 10BD     		pop	{r4, pc}
+ 281              	.L22:
+ 282 00ae 00BF     		.align	2
+ 283              	.L21:
+ 284 00b0 88000000 		.word	.LC6
+ 285 00b4 A4000000 		.word	.LC7
+ 286 00b8 BC000000 		.word	.LC8
+ 287 00bc CC000000 		.word	.LC9
+ 288 00c0 E4000000 		.word	.LC10
+ 289 00c4 FC000000 		.word	.LC11
+ 290 00c8 0C010000 		.word	.LC12
+ 291 00cc 1C010000 		.word	.LC13
+ 292 00d0 30010000 		.word	.LC14
+ 293 00d4 44010000 		.word	.LC15
+ 294 00d8 4C010000 		.word	.LC16
+ 295 00dc 00380140 		.word	1073821696
+ 296 00e0 00000000 		.word	ch
+ 297 00e4 58010000 		.word	.LC17
+ 298 00e8 00000000 		.word	g_TestProcessState
+ 299              		.cfi_endproc
+ 300              	.LFE30:
+ 302              		.section	.text.Sys_Info,"ax",%progbits
+ 303              		.align	2
+ 304              		.global	Sys_Info
+ 305              		.thumb
+ 306              		.thumb_func
+ 308              	Sys_Info:
+ 309              	.LFB31:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 12
+
+
+ 160:Menu/src/main_menu.c ****     printf("SYSCLK_Frequency = %d\r\n",rcc_clocks.SYSCLK_Frequency );
+ 310              		.loc 1 160 0
+ 311              		.cfi_startproc
+ 312              		@ args = 0, pretend = 0, frame = 0
+ 313              		@ frame_needed = 0, uses_anonymous_args = 0
+ 314 0000 10B5     		push	{r4, lr}
+ 315              	.LCFI4:
+ 316              		.cfi_def_cfa_offset 8
+ 317              		.cfi_offset 4, -8
+ 318              		.cfi_offset 14, -4
+ 161:Menu/src/main_menu.c ****     printf("HCLK_Frequency = %d\r\n",rcc_clocks.HCLK_Frequency );
+ 319              		.loc 1 161 0
+ 320 0002 0B4C     		ldr	r4, .L25
+ 321 0004 2168     		ldr	r1, [r4]
+ 322 0006 0B48     		ldr	r0, .L25+4
+ 323 0008 FFF7FEFF 		bl	printf
+ 324              	.LVL33:
+ 162:Menu/src/main_menu.c ****     printf("PCLK1_Frequency = %d\r\n",rcc_clocks.PCLK1_Frequency );
+ 325              		.loc 1 162 0
+ 326 000c 6168     		ldr	r1, [r4, #4]
+ 327 000e 0A48     		ldr	r0, .L25+8
+ 328 0010 FFF7FEFF 		bl	printf
+ 329              	.LVL34:
+ 163:Menu/src/main_menu.c ****     printf("PCLK2_Frequency = %d\r\n",rcc_clocks.PCLK2_Frequency );
+ 330              		.loc 1 163 0
+ 331 0014 A168     		ldr	r1, [r4, #8]
+ 332 0016 0948     		ldr	r0, .L25+12
+ 333 0018 FFF7FEFF 		bl	printf
+ 334              	.LVL35:
+ 164:Menu/src/main_menu.c ****     printf("ADCCLK_Frequency = %d\r\n",rcc_clocks.ADCCLK_Frequency );
+ 335              		.loc 1 164 0
+ 336 001c E168     		ldr	r1, [r4, #12]
+ 337 001e 0848     		ldr	r0, .L25+16
+ 338 0020 FFF7FEFF 		bl	printf
+ 339              	.LVL36:
+ 165:Menu/src/main_menu.c **** }
+ 340              		.loc 1 165 0
+ 341 0024 2169     		ldr	r1, [r4, #16]
+ 342 0026 0748     		ldr	r0, .L25+20
+ 343 0028 FFF7FEFF 		bl	printf
+ 344              	.LVL37:
+ 345 002c 10BD     		pop	{r4, pc}
+ 346              	.L26:
+ 347 002e 00BF     		.align	2
+ 348              	.L25:
+ 349 0030 00000000 		.word	rcc_clocks
+ 350 0034 10000000 		.word	.LC1
+ 351 0038 28000000 		.word	.LC2
+ 352 003c 40000000 		.word	.LC3
+ 353 0040 58000000 		.word	.LC4
+ 354 0044 70000000 		.word	.LC5
+ 355              		.cfi_endproc
+ 356              	.LFE31:
+ 358              		.section	.text.display_prompt,"ax",%progbits
+ 359              		.align	2
+ 360              		.global	display_prompt
+ 361              		.thumb
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 13
+
+
+ 362              		.thumb_func
+ 364              	display_prompt:
+ 365              	.LFB32:
+ 171:Menu/src/main_menu.c ****     if(prompt == NULL)
+ 366              		.loc 1 171 0
+ 367              		.cfi_startproc
+ 368              		@ args = 0, pretend = 0, frame = 0
+ 369              		@ frame_needed = 0, uses_anonymous_args = 0
+ 370              	.LVL38:
+ 371 0000 08B5     		push	{r3, lr}
+ 372              	.LCFI5:
+ 373              		.cfi_def_cfa_offset 8
+ 374              		.cfi_offset 3, -8
+ 375              		.cfi_offset 14, -4
+ 172:Menu/src/main_menu.c ****     {
+ 376              		.loc 1 172 0
+ 377 0002 18B9     		cbnz	r0, .L28
+ 174:Menu/src/main_menu.c ****     }
+ 378              		.loc 1 174 0
+ 379 0004 0448     		ldr	r0, .L31
+ 380              	.LVL39:
+ 381 0006 FFF7FEFF 		bl	printf
+ 382              	.LVL40:
+ 383 000a 08BD     		pop	{r3, pc}
+ 384              	.LVL41:
+ 385              	.L28:
+ 386 000c 0146     		mov	r1, r0
+ 178:Menu/src/main_menu.c ****     }
+ 387              		.loc 1 178 0
+ 388 000e 0348     		ldr	r0, .L31+4
+ 389              	.LVL42:
+ 390 0010 FFF7FEFF 		bl	printf
+ 391              	.LVL43:
+ 392 0014 08BD     		pop	{r3, pc}
+ 393              	.L32:
+ 394 0016 00BF     		.align	2
+ 395              	.L31:
+ 396 0018 68010000 		.word	.LC18
+ 397 001c 70010000 		.word	.LC19
+ 398              		.cfi_endproc
+ 399              	.LFE32:
+ 401              		.section	.text.get_command,"ax",%progbits
+ 402              		.align	2
+ 403              		.global	get_command
+ 404              		.thumb
+ 405              		.thumb_func
+ 407              	get_command:
+ 408              	.LFB33:
+ 182:Menu/src/main_menu.c ****     char key;
+ 409              		.loc 1 182 0
+ 410              		.cfi_startproc
+ 411              		@ args = 0, pretend = 0, frame = 0
+ 412              		@ frame_needed = 0, uses_anonymous_args = 0
+ 413              	.LVL44:
+ 414 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 415              	.LCFI6:
+ 416              		.cfi_def_cfa_offset 24
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 14
+
+
+ 417              		.cfi_offset 4, -24
+ 418              		.cfi_offset 5, -20
+ 419              		.cfi_offset 6, -16
+ 420              		.cfi_offset 7, -12
+ 421              		.cfi_offset 8, -8
+ 422              		.cfi_offset 14, -4
+ 423 0004 8046     		mov	r8, r0
+ 185:Menu/src/main_menu.c ****     for(rd_cnt = 0, i = 0; rd_cnt < rd_max; )
+ 424              		.loc 1 185 0
+ 425 0006 4F1E     		subs	r7, r1, #1
+ 426              	.LVL45:
+ 186:Menu/src/main_menu.c ****     {
+ 427              		.loc 1 186 0
+ 428 0008 0024     		movs	r4, #0
+ 429 000a 2546     		mov	r5, r4
+ 430 000c 2CE0     		b	.L34
+ 431              	.LVL46:
+ 432              	.L41:
+ 188:Menu/src/main_menu.c ****         if((key == '\n') || (key == '\r'))
+ 433              		.loc 1 188 0
+ 434 000e 1848     		ldr	r0, .L43
+ 435 0010 FFF7FEFF 		bl	USART_GetCharacter
+ 436              	.LVL47:
+ 189:Menu/src/main_menu.c ****         {
+ 437              		.loc 1 189 0
+ 438 0014 0A28     		cmp	r0, #10
+ 439 0016 01D0     		beq	.L35
+ 189:Menu/src/main_menu.c ****         {
+ 440              		.loc 1 189 0 is_stmt 0 discriminator 1
+ 441 0018 0D28     		cmp	r0, #13
+ 442 001a 08D1     		bne	.L36
+ 443              	.L35:
+ 444              	.LVL48:
+ 191:Menu/src/main_menu.c ****             printf("\r\n");
+ 445              		.loc 1 191 0 is_stmt 1
+ 446 001c 0023     		movs	r3, #0
+ 447 001e 08F80530 		strb	r3, [r8, r5]
+ 192:Menu/src/main_menu.c ****             return rd_cnt;
+ 448              		.loc 1 192 0
+ 449 0022 1448     		ldr	r0, .L43+4
+ 450              	.LVL49:
+ 451 0024 FFF7FEFF 		bl	puts
+ 452              	.LVL50:
+ 193:Menu/src/main_menu.c ****         }
+ 453              		.loc 1 193 0
+ 454 0028 2046     		mov	r0, r4
+ 455 002a BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 456              	.LVL51:
+ 457              	.L36:
+ 195:Menu/src/main_menu.c ****         {
+ 458              		.loc 1 195 0
+ 459 002e 0828     		cmp	r0, #8
+ 460 0030 07D1     		bne	.L38
+ 197:Menu/src/main_menu.c ****             {
+ 461              		.loc 1 197 0
+ 462 0032 002D     		cmp	r5, #0
+ 463 0034 18DD     		ble	.L34
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 15
+
+
+ 199:Menu/src/main_menu.c ****                 rd_cnt--;
+ 464              		.loc 1 199 0
+ 465 0036 013D     		subs	r5, r5, #1
+ 466              	.LVL52:
+ 200:Menu/src/main_menu.c ****                 printf("\b \b");
+ 467              		.loc 1 200 0
+ 468 0038 013C     		subs	r4, r4, #1
+ 469              	.LVL53:
+ 201:Menu/src/main_menu.c ****             }
+ 470              		.loc 1 201 0
+ 471 003a 0F48     		ldr	r0, .L43+8
+ 472              	.LVL54:
+ 473 003c FFF7FEFF 		bl	printf
+ 474              	.LVL55:
+ 475 0040 12E0     		b	.L34
+ 476              	.LVL56:
+ 477              	.L38:
+ 205:Menu/src/main_menu.c ****         {
+ 478              		.loc 1 205 0
+ 479 0042 50B9     		cbnz	r0, .L40
+ 207:Menu/src/main_menu.c ****             printf("\r\n");
+ 480              		.loc 1 207 0
+ 481 0044 0D4C     		ldr	r4, .L43+12
+ 482              	.LVL57:
+ 483 0046 2368     		ldr	r3, [r4]
+ 484 0048 0022     		movs	r2, #0
+ 485 004a 08F80320 		strb	r2, [r8, r3]
+ 208:Menu/src/main_menu.c ****             return cmd_size;
+ 486              		.loc 1 208 0
+ 487 004e 0948     		ldr	r0, .L43+4
+ 488              	.LVL58:
+ 489 0050 FFF7FEFF 		bl	puts
+ 490              	.LVL59:
+ 209:Menu/src/main_menu.c ****         }
+ 491              		.loc 1 209 0
+ 492 0054 2068     		ldr	r0, [r4]
+ 493 0056 BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 494              	.LVL60:
+ 495              	.L40:
+ 213:Menu/src/main_menu.c ****             rd_cnt++;
+ 496              		.loc 1 213 0
+ 497 005a 6E1C     		adds	r6, r5, #1
+ 498              	.LVL61:
+ 499 005c 08F80500 		strb	r0, [r8, r5]
+ 214:Menu/src/main_menu.c ****             printf("%c", key);
+ 500              		.loc 1 214 0
+ 501 0060 0134     		adds	r4, r4, #1
+ 502              	.LVL62:
+ 215:Menu/src/main_menu.c ****         }
+ 503              		.loc 1 215 0
+ 504 0062 FFF7FEFF 		bl	putchar
+ 505              	.LVL63:
+ 213:Menu/src/main_menu.c ****             rd_cnt++;
+ 506              		.loc 1 213 0
+ 507 0066 3546     		mov	r5, r6
+ 508              	.LVL64:
+ 509              	.L34:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 16
+
+
+ 186:Menu/src/main_menu.c ****     {
+ 510              		.loc 1 186 0 discriminator 1
+ 511 0068 BC42     		cmp	r4, r7
+ 512 006a D0DB     		blt	.L41
+ 219:Menu/src/main_menu.c **** 
+ 513              		.loc 1 219 0
+ 514 006c BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 515              	.LVL65:
+ 516              	.L44:
+ 517              		.align	2
+ 518              	.L43:
+ 519 0070 00380140 		.word	1073821696
+ 520 0074 78010000 		.word	.LC20
+ 521 0078 7C010000 		.word	.LC21
+ 522 007c 00000000 		.word	cmd_size
+ 523              		.cfi_endproc
+ 524              	.LFE33:
+ 526              		.section	.text.get_args,"ax",%progbits
+ 527              		.align	2
+ 528              		.global	get_args
+ 529              		.thumb
+ 530              		.thumb_func
+ 532              	get_args:
+ 533              	.LFB34:
+ 222:Menu/src/main_menu.c ****     int args = 0;
+ 534              		.loc 1 222 0
+ 535              		.cfi_startproc
+ 536              		@ args = 0, pretend = 0, frame = 0
+ 537              		@ frame_needed = 0, uses_anonymous_args = 0
+ 538              		@ link register save eliminated.
+ 539              	.LVL66:
+ 224:Menu/src/main_menu.c ****     {
+ 540              		.loc 1 224 0
+ 541 0000 40B3     		cbz	r0, .L55
+ 542 0002 0346     		mov	r3, r0
+ 224:Menu/src/main_menu.c ****     {
+ 543              		.loc 1 224 0 is_stmt 0 discriminator 1
+ 544 0004 0278     		ldrb	r2, [r0]	@ zero_extendqisi2
+ 545 0006 3AB3     		cbz	r2, .L56
+ 222:Menu/src/main_menu.c ****     int args = 0;
+ 546              		.loc 1 222 0 is_stmt 1
+ 547 0008 10B4     		push	{r4}
+ 548              	.LCFI7:
+ 549              		.cfi_def_cfa_offset 4
+ 550              		.cfi_offset 4, -4
+ 551 000a 0020     		movs	r0, #0
+ 552              	.LVL67:
+ 553 000c 1FE0     		b	.L47
+ 554              	.LVL68:
+ 555              	.L48:
+ 232:Menu/src/main_menu.c ****         }
+ 556              		.loc 1 232 0
+ 557 000e 0133     		adds	r3, r3, #1
+ 558              	.LVL69:
+ 559              	.L54:
+ 230:Menu/src/main_menu.c ****         {
+ 560              		.loc 1 230 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 17
+
+
+ 561 0010 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 562 0012 202A     		cmp	r2, #32
+ 563 0014 FBD0     		beq	.L48
+ 230:Menu/src/main_menu.c ****         {
+ 564              		.loc 1 230 0 is_stmt 0 discriminator 1
+ 565 0016 092A     		cmp	r2, #9
+ 566 0018 F9D0     		beq	.L48
+ 235:Menu/src/main_menu.c ****         {
+ 567              		.loc 1 235 0 is_stmt 1
+ 568 001a 1AB9     		cbnz	r2, .L49
+ 237:Menu/src/main_menu.c ****             return args;
+ 569              		.loc 1 237 0
+ 570 001c 0023     		movs	r3, #0
+ 571              	.LVL70:
+ 572 001e 41F82030 		str	r3, [r1, r0, lsl #2]
+ 238:Menu/src/main_menu.c ****         }
+ 573              		.loc 1 238 0
+ 574 0022 1BE0     		b	.L46
+ 575              	.LVL71:
+ 576              	.L49:
+ 240:Menu/src/main_menu.c ****         while(*s && (*s != ' ') && (*s != '\t'))
+ 577              		.loc 1 240 0
+ 578 0024 441C     		adds	r4, r0, #1
+ 579              	.LVL72:
+ 580 0026 41F82030 		str	r3, [r1, r0, lsl #2]
+ 241:Menu/src/main_menu.c ****         {
+ 581              		.loc 1 241 0
+ 582 002a 00E0     		b	.L50
+ 583              	.L52:
+ 243:Menu/src/main_menu.c ****         }
+ 584              		.loc 1 243 0
+ 585 002c 0133     		adds	r3, r3, #1
+ 586              	.LVL73:
+ 587              	.L50:
+ 241:Menu/src/main_menu.c ****         {
+ 588              		.loc 1 241 0
+ 589 002e 1A78     		ldrb	r2, [r3]	@ zero_extendqisi2
+ 590 0030 1AB1     		cbz	r2, .L51
+ 241:Menu/src/main_menu.c ****         {
+ 591              		.loc 1 241 0 is_stmt 0 discriminator 1
+ 592 0032 202A     		cmp	r2, #32
+ 593 0034 01D0     		beq	.L51
+ 241:Menu/src/main_menu.c ****         {
+ 594              		.loc 1 241 0 discriminator 2
+ 595 0036 092A     		cmp	r2, #9
+ 596 0038 F8D1     		bne	.L52
+ 597              	.L51:
+ 245:Menu/src/main_menu.c ****         {
+ 598              		.loc 1 245 0 is_stmt 1
+ 599 003a 22B9     		cbnz	r2, .L53
+ 247:Menu/src/main_menu.c ****             return args;
+ 600              		.loc 1 247 0
+ 601 003c 0023     		movs	r3, #0
+ 602              	.LVL74:
+ 603 003e 41F82430 		str	r3, [r1, r4, lsl #2]
+ 248:Menu/src/main_menu.c ****         }
+ 604              		.loc 1 248 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 18
+
+
+ 605 0042 2046     		mov	r0, r4
+ 606 0044 0AE0     		b	.L46
+ 607              	.LVL75:
+ 608              	.L53:
+ 250:Menu/src/main_menu.c ****     }
+ 609              		.loc 1 250 0
+ 610 0046 0022     		movs	r2, #0
+ 611 0048 1A70     		strb	r2, [r3]
+ 240:Menu/src/main_menu.c ****         while(*s && (*s != ' ') && (*s != '\t'))
+ 612              		.loc 1 240 0
+ 613 004a 2046     		mov	r0, r4
+ 250:Menu/src/main_menu.c ****     }
+ 614              		.loc 1 250 0
+ 615 004c 0133     		adds	r3, r3, #1
+ 616              	.LVL76:
+ 617              	.L47:
+ 228:Menu/src/main_menu.c ****     {
+ 618              		.loc 1 228 0
+ 619 004e 1D28     		cmp	r0, #29
+ 620 0050 DEDD     		ble	.L54
+ 621 0052 03E0     		b	.L46
+ 622              	.LVL77:
+ 623              	.L55:
+ 624              	.LCFI8:
+ 625              		.cfi_def_cfa_offset 0
+ 626              		.cfi_restore 4
+ 226:Menu/src/main_menu.c ****     }
+ 627              		.loc 1 226 0
+ 628 0054 0020     		movs	r0, #0
+ 629              	.LVL78:
+ 630 0056 7047     		bx	lr
+ 631              	.LVL79:
+ 632              	.L56:
+ 633 0058 0020     		movs	r0, #0
+ 634              	.LVL80:
+ 635 005a 7047     		bx	lr
+ 636              	.LVL81:
+ 637              	.L46:
+ 638              	.LCFI9:
+ 639              		.cfi_def_cfa_offset 4
+ 640              		.cfi_offset 4, -4
+ 253:Menu/src/main_menu.c **** 
+ 641              		.loc 1 253 0
+ 642 005c 10BC     		pop	{r4}
+ 643              	.LCFI10:
+ 644              		.cfi_restore 4
+ 645              		.cfi_def_cfa_offset 0
+ 646 005e 7047     		bx	lr
+ 647              		.cfi_endproc
+ 648              	.LFE34:
+ 650              		.section	.text.do_print_help,"ax",%progbits
+ 651              		.align	2
+ 652              		.global	do_print_help
+ 653              		.thumb
+ 654              		.thumb_func
+ 656              	do_print_help:
+ 657              	.LFB35:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 19
+
+
+ 257:Menu/src/main_menu.c ****     struct _CMD_TBL *cptr;
+ 658              		.loc 1 257 0
+ 659              		.cfi_startproc
+ 660              		@ args = 0, pretend = 0, frame = 0
+ 661              		@ frame_needed = 0, uses_anonymous_args = 0
+ 662              	.LVL82:
+ 663 0000 10B5     		push	{r4, lr}
+ 664              	.LCFI11:
+ 665              		.cfi_def_cfa_offset 8
+ 666              		.cfi_offset 4, -8
+ 667              		.cfi_offset 14, -4
+ 260:Menu/src/main_menu.c ****     {
+ 668              		.loc 1 260 0
+ 669 0002 0128     		cmp	r0, #1
+ 670 0004 13D1     		bne	.L60
+ 262:Menu/src/main_menu.c ****         printf("Help : Help for commands. \n");
+ 671              		.loc 1 262 0
+ 672 0006 0D48     		ldr	r0, .L66
+ 673              	.LVL83:
+ 674 0008 FFF7FEFF 		bl	puts
+ 675              	.LVL84:
+ 263:Menu/src/main_menu.c **** 
+ 676              		.loc 1 263 0
+ 677 000c 0C48     		ldr	r0, .L66+4
+ 678 000e FFF7FEFF 		bl	puts
+ 679              	.LVL85:
+ 265:Menu/src/main_menu.c ****         {
+ 680              		.loc 1 265 0
+ 681 0012 0C4C     		ldr	r4, .L66+8
+ 682 0014 04E0     		b	.L61
+ 683              	.LVL86:
+ 684              	.L63:
+ 267:Menu/src/main_menu.c ****             {
+ 685              		.loc 1 267 0
+ 686 0016 2069     		ldr	r0, [r4, #16]
+ 687 0018 08B1     		cbz	r0, .L62
+ 269:Menu/src/main_menu.c ****             }
+ 688              		.loc 1 269 0
+ 689 001a FFF7FEFF 		bl	printf
+ 690              	.LVL87:
+ 691              	.L62:
+ 265:Menu/src/main_menu.c ****         {
+ 692              		.loc 1 265 0 discriminator 2
+ 693 001e 1434     		adds	r4, r4, #20
+ 694              	.LVL88:
+ 695              	.L61:
+ 265:Menu/src/main_menu.c ****         {
+ 696              		.loc 1 265 0 is_stmt 0 discriminator 1
+ 697 0020 2368     		ldr	r3, [r4]
+ 698 0022 002B     		cmp	r3, #0
+ 699 0024 F7D1     		bne	.L63
+ 272:Menu/src/main_menu.c ****     }
+ 700              		.loc 1 272 0 is_stmt 1
+ 701 0026 0848     		ldr	r0, .L66+12
+ 702 0028 FFF7FEFF 		bl	puts
+ 703              	.LVL89:
+ 704 002c 03E0     		b	.L64
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 20
+
+
+ 705              	.LVL90:
+ 706              	.L60:
+ 276:Menu/src/main_menu.c ****     }
+ 707              		.loc 1 276 0
+ 708 002e 0968     		ldr	r1, [r1]
+ 709              	.LVL91:
+ 710 0030 0648     		ldr	r0, .L66+16
+ 711              	.LVL92:
+ 712 0032 FFF7FEFF 		bl	printf
+ 713              	.LVL93:
+ 714              	.L64:
+ 280:Menu/src/main_menu.c **** 
+ 715              		.loc 1 280 0
+ 716 0036 0120     		movs	r0, #1
+ 717 0038 10BD     		pop	{r4, pc}
+ 718              	.L67:
+ 719 003a 00BF     		.align	2
+ 720              	.L66:
+ 721 003c 80010000 		.word	.LC22
+ 722 0040 A8010000 		.word	.LC23
+ 723 0044 00000000 		.word	.LANCHOR0
+ 724 0048 C4010000 		.word	.LC24
+ 725 004c C8010000 		.word	.LC25
+ 726              		.cfi_endproc
+ 727              	.LFE35:
+ 729              		.global	cmd_tbl
+ 730              		.comm	cmd_size,4,4
+ 731              		.comm	cmd,128,4
+ 732              		.comm	ch,1,1
+ 733              		.comm	rcc_clocks,20,4
+ 734              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 735              		.align	2
+ 736              	.LC0:
+ 737 0000 0A546869 		.ascii	"\012This is test\000"
+ 737      73206973 
+ 737      20746573 
+ 737      7400
+ 738 000e 0000     		.space	2
+ 739              	.LC1:
+ 740 0010 53595343 		.ascii	"SYSCLK_Frequency = %d\015\012\000"
+ 740      4C4B5F46 
+ 740      72657175 
+ 740      656E6379 
+ 740      203D2025 
+ 741              	.LC2:
+ 742 0028 48434C4B 		.ascii	"HCLK_Frequency = %d\015\012\000"
+ 742      5F467265 
+ 742      7175656E 
+ 742      6379203D 
+ 742      2025640D 
+ 743 003e 0000     		.space	2
+ 744              	.LC3:
+ 745 0040 50434C4B 		.ascii	"PCLK1_Frequency = %d\015\012\000"
+ 745      315F4672 
+ 745      65717565 
+ 745      6E637920 
+ 745      3D202564 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 21
+
+
+ 746 0057 00       		.space	1
+ 747              	.LC4:
+ 748 0058 50434C4B 		.ascii	"PCLK2_Frequency = %d\015\012\000"
+ 748      325F4672 
+ 748      65717565 
+ 748      6E637920 
+ 748      3D202564 
+ 749 006f 00       		.space	1
+ 750              	.LC5:
+ 751 0070 41444343 		.ascii	"ADCCLK_Frequency = %d\015\012\000"
+ 751      4C4B5F46 
+ 751      72657175 
+ 751      656E6379 
+ 751      203D2025 
+ 752              	.LC6:
+ 753 0088 0D0A2D2D 		.ascii	"\015\012---------------------\015\000"
+ 753      2D2D2D2D 
+ 753      2D2D2D2D 
+ 753      2D2D2D2D 
+ 753      2D2D2D2D 
+ 754 00a1 000000   		.space	3
+ 755              	.LC7:
+ 756 00a4 4D616E67 		.ascii	"Mango M32 test start...\000"
+ 756      6F204D33 
+ 756      32207465 
+ 756      73742073 
+ 756      74617274 
+ 757              	.LC8:
+ 758 00bc 50726573 		.ascii	"Press menu key\015\000"
+ 758      73206D65 
+ 758      6E75206B 
+ 758      65790D00 
+ 759              	.LC9:
+ 760 00cc 2D2D2D2D 		.ascii	"---------------------\015\000"
+ 760      2D2D2D2D 
+ 760      2D2D2D2D 
+ 760      2D2D2D2D 
+ 760      2D2D2D2D 
+ 761 00e3 00       		.space	1
+ 762              	.LC10:
+ 763 00e4 303E2053 		.ascii	"0> System Information\015\000"
+ 763      79737465 
+ 763      6D20496E 
+ 763      666F726D 
+ 763      6174696F 
+ 764 00fb 00       		.space	1
+ 765              	.LC11:
+ 766 00fc 313E204C 		.ascii	"1> LED Test\015\000"
+ 766      45442054 
+ 766      6573740D 
+ 766      00
+ 767 0109 000000   		.space	3
+ 768              	.LC12:
+ 769 010c 323E204B 		.ascii	"2> KEY Test\015\000"
+ 769      45592054 
+ 769      6573740D 
+ 769      00
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 22
+
+
+ 770 0119 000000   		.space	3
+ 771              	.LC13:
+ 772 011c 333E2037 		.ascii	"3> 7-Segment Test\015\000"
+ 772      2D536567 
+ 772      6D656E74 
+ 772      20546573 
+ 772      740D00
+ 773 012f 00       		.space	1
+ 774              	.LC14:
+ 775 0130 343E2055 		.ascii	"4> USB HID Test\015\000"
+ 775      53422048 
+ 775      49442054 
+ 775      6573740D 
+ 775      00
+ 776 0141 000000   		.space	3
+ 777              	.LC15:
+ 778 0144 353E200D 		.ascii	"5> \015\000"
+ 778      00
+ 779 0149 000000   		.space	3
+ 780              	.LC16:
+ 781 014c 783E2071 		.ascii	"x> quit\015\012\015\000"
+ 781      7569740D 
+ 781      0A0D00
+ 782 0157 00       		.space	1
+ 783              	.LC17:
+ 784 0158 20697320 		.ascii	" is selected\015\012\015\000"
+ 784      73656C65 
+ 784      63746564 
+ 784      0D0A0D00 
+ 785              	.LC18:
+ 786 0168 3E3E3E20 		.ascii	">>> \000"
+ 786      00
+ 787 016d 000000   		.space	3
+ 788              	.LC19:
+ 789 0170 25730D0A 		.ascii	"%s\015\012\000"
+ 789      00
+ 790 0175 000000   		.space	3
+ 791              	.LC20:
+ 792 0178 0D00     		.ascii	"\015\000"
+ 793 017a 0000     		.space	2
+ 794              	.LC21:
+ 795 017c 08200800 		.ascii	"\010 \010\000"
+ 796              	.LC22:
+ 797 0180 0A546865 		.ascii	"\012The following command are supported : \000"
+ 797      20666F6C 
+ 797      6C6F7769 
+ 797      6E672063 
+ 797      6F6D6D61 
+ 798              	.LC23:
+ 799 01a8 48656C70 		.ascii	"Help : Help for commands. \000"
+ 799      203A2048 
+ 799      656C7020 
+ 799      666F7220 
+ 799      636F6D6D 
+ 800 01c3 00       		.space	1
+ 801              	.LC24:
+ 802 01c4 0A00     		.ascii	"\012\000"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 23
+
+
+ 803 01c6 0000     		.space	2
+ 804              	.LC25:
+ 805 01c8 0A092055 		.ascii	"\012\011 Unknow command : %s\012\000"
+ 805      6E6B6E6F 
+ 805      7720636F 
+ 805      6D6D616E 
+ 805      64203A20 
+ 806              	.LC26:
+ 807 01e0 74657374 		.ascii	"test\000"
+ 807      00
+ 808              		.section	.data.cmd_tbl,"aw",%progbits
+ 809              		.align	2
+ 810              		.set	.LANCHOR0,. + 0
+ 813              	cmd_tbl:
+ 814 0000 E0010000 		.word	.LC26
+ 815 0004 00000000 		.word	do_test
+ 816 0008 00000000 		.word	0
+ 817 000c 00000000 		.word	0
+ 818 0010 00000000 		.word	0
+ 819 0014 00000000 		.word	0
+ 820 0018 00000000 		.word	0
+ 821 001c 00000000 		.word	0
+ 822 0020 00000000 		.word	0
+ 823 0024 00000000 		.word	0
+ 824              		.text
+ 825              	.Letext0:
+ 826              		.file 2 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/machine/_default_types
+ 827              		.file 3 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/sys/_stdint.h"
+ 828              		.file 4 "CMSIS/Core/CM3/stm32f10x.h"
+ 829              		.file 5 "STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h"
+ 830              		.file 6 "Inc/hw_config.h"
+ 831              		.file 7 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/stdio.h"
+ 832              		.file 8 "STM32_USB-FS-Device_Driver/inc/usb_init.h"
+ 833              		.file 9 "<built-in>"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s 			page 24
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 main_menu.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:20     .text.do_test:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:25     .text.do_test:0000000000000000 do_test
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:49     .text.do_test:000000000000000c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:54     .text.System_Information:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:59     .text.System_Information:0000000000000000 System_Information
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:100    .text.System_Information:0000000000000030 $d
+                            *COM*:0000000000000014 rcc_clocks
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:110    .text.USB_Test_Start:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:115    .text.USB_Test_Start:0000000000000000 USB_Test_Start
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:140    .text.default_menu:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:145    .text.default_menu:0000000000000000 default_menu
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:227    .text.default_menu:000000000000006e $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:284    .text.default_menu:00000000000000b0 $d
+                            *COM*:0000000000000001 ch
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:303    .text.Sys_Info:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:308    .text.Sys_Info:0000000000000000 Sys_Info
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:349    .text.Sys_Info:0000000000000030 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:359    .text.display_prompt:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:364    .text.display_prompt:0000000000000000 display_prompt
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:396    .text.display_prompt:0000000000000018 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:402    .text.get_command:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:407    .text.get_command:0000000000000000 get_command
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:519    .text.get_command:0000000000000070 $d
+                            *COM*:0000000000000004 cmd_size
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:527    .text.get_args:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:532    .text.get_args:0000000000000000 get_args
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:651    .text.do_print_help:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:656    .text.do_print_help:0000000000000000 do_print_help
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:721    .text.do_print_help:000000000000003c $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:813    .data.cmd_tbl:0000000000000000 cmd_tbl
+                            *COM*:0000000000000080 cmd
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:735    .rodata.str1.4:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:809    .data.cmd_tbl:0000000000000000 $d
+                     .debug_frame:0000000000000010 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:232    .text.default_menu:0000000000000073 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccfHS4nq.s:232    .text.default_menu:0000000000000074 $t
+
+UNDEFINED SYMBOLS
+puts
+printf
+USB_Interrupts_Config
+Set_USBClock
+USB_Init
+USART_GetCharacter
+LED_Test
+KEY_Test
+Seven_Segment_Test
+Delay
+USB_Cable_Config
+g_TestProcessState
+putchar

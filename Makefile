@@ -85,6 +85,7 @@ AS_DEFS =
 C_DEFS =  \
 -D USE_STDPERIPH_DRIVER \
 -D BOARD_DEF_MANGO_M32 \
+#-D DEBUG
 
 #---------------------------------------------------------------------------
 # Include 디렉토리
@@ -175,11 +176,11 @@ $(BUILD_DIR):
 	mkdir $@		
 
 
-flash: $(TARGET).bin
+flash: $(BUILD_DIR)/$(TARGET).bin
 	st-flash write $(BUILD_DIR)$(TARGET).bin 0x8000000
 
-down_load: $(TARGET).bin
-	~/stm32ld /dev/tty.usbserial-14201 115200 $(BUILD_DIR)/$(TARGET).bin
+down_load: $(BUILD_DIR)/$(TARGET).bin
+	~/stm32ld /dev/tty.usbserial-14201 115200 ./$(BUILD_DIR)/$(TARGET).bin
 
 erase:
 	st-flash erase

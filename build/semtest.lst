@@ -1,0 +1,788 @@
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"semtest.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.prvSemaphoreTest,"ax",%progbits
+  20              		.align	2
+  21              		.thumb
+  22              		.thumb_func
+  24              	prvSemaphoreTest:
+  25              	.LFB33:
+  26              		.file 1 "FreeRTOS/test_Src/semtest.c"
+   1:FreeRTOS/test_Src/semtest.c **** /*
+   2:FreeRTOS/test_Src/semtest.c ****  * FreeRTOS Kernel V10.1.1
+   3:FreeRTOS/test_Src/semtest.c ****  * Copyright (C) 2018 Amazon.com, Inc. or its affiliates.  All Rights Reserved.
+   4:FreeRTOS/test_Src/semtest.c ****  *
+   5:FreeRTOS/test_Src/semtest.c ****  * Permission is hereby granted, free of charge, to any person obtaining a copy of
+   6:FreeRTOS/test_Src/semtest.c ****  * this software and associated documentation files (the "Software"), to deal in
+   7:FreeRTOS/test_Src/semtest.c ****  * the Software without restriction, including without limitation the rights to
+   8:FreeRTOS/test_Src/semtest.c ****  * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+   9:FreeRTOS/test_Src/semtest.c ****  * the Software, and to permit persons to whom the Software is furnished to do so,
+  10:FreeRTOS/test_Src/semtest.c ****  * subject to the following conditions:
+  11:FreeRTOS/test_Src/semtest.c ****  *
+  12:FreeRTOS/test_Src/semtest.c ****  * The above copyright notice and this permission notice shall be included in all
+  13:FreeRTOS/test_Src/semtest.c ****  * copies or substantial portions of the Software.
+  14:FreeRTOS/test_Src/semtest.c ****  *
+  15:FreeRTOS/test_Src/semtest.c ****  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  16:FreeRTOS/test_Src/semtest.c ****  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  17:FreeRTOS/test_Src/semtest.c ****  * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  18:FreeRTOS/test_Src/semtest.c ****  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  19:FreeRTOS/test_Src/semtest.c ****  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  20:FreeRTOS/test_Src/semtest.c ****  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  21:FreeRTOS/test_Src/semtest.c ****  *
+  22:FreeRTOS/test_Src/semtest.c ****  * http://www.FreeRTOS.org
+  23:FreeRTOS/test_Src/semtest.c ****  * http://aws.amazon.com/freertos
+  24:FreeRTOS/test_Src/semtest.c ****  *
+  25:FreeRTOS/test_Src/semtest.c ****  * 1 tab == 4 spaces!
+  26:FreeRTOS/test_Src/semtest.c ****  */
+  27:FreeRTOS/test_Src/semtest.c **** 
+  28:FreeRTOS/test_Src/semtest.c **** /*
+  29:FreeRTOS/test_Src/semtest.c ****  * Creates two sets of two tasks.  The tasks within a set share a variable, access
+  30:FreeRTOS/test_Src/semtest.c ****  * to which is guarded by a semaphore.
+  31:FreeRTOS/test_Src/semtest.c ****  *
+  32:FreeRTOS/test_Src/semtest.c ****  * Each task starts by attempting to obtain the semaphore.  On obtaining a
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 2
+
+
+  33:FreeRTOS/test_Src/semtest.c ****  * semaphore a task checks to ensure that the guarded variable has an expected
+  34:FreeRTOS/test_Src/semtest.c ****  * value.  It then clears the variable to zero before counting it back up to the
+  35:FreeRTOS/test_Src/semtest.c ****  * expected value in increments of 1.  After each increment the variable is checked
+  36:FreeRTOS/test_Src/semtest.c ****  * to ensure it contains the value to which it was just set. When the starting
+  37:FreeRTOS/test_Src/semtest.c ****  * value is again reached the task releases the semaphore giving the other task in
+  38:FreeRTOS/test_Src/semtest.c ****  * the set a chance to do exactly the same thing.  The starting value is high
+  39:FreeRTOS/test_Src/semtest.c ****  * enough to ensure that a tick is likely to occur during the incrementing loop.
+  40:FreeRTOS/test_Src/semtest.c ****  *
+  41:FreeRTOS/test_Src/semtest.c ****  * An error is flagged if at any time during the process a shared variable is
+  42:FreeRTOS/test_Src/semtest.c ****  * found to have a value other than that expected.  Such an occurrence would
+  43:FreeRTOS/test_Src/semtest.c ****  * suggest an error in the mutual exclusion mechanism by which access to the
+  44:FreeRTOS/test_Src/semtest.c ****  * variable is restricted.
+  45:FreeRTOS/test_Src/semtest.c ****  *
+  46:FreeRTOS/test_Src/semtest.c ****  * The first set of two tasks poll their semaphore.  The second set use blocking
+  47:FreeRTOS/test_Src/semtest.c ****  * calls.
+  48:FreeRTOS/test_Src/semtest.c ****  *
+  49:FreeRTOS/test_Src/semtest.c ****  */
+  50:FreeRTOS/test_Src/semtest.c **** 
+  51:FreeRTOS/test_Src/semtest.c **** 
+  52:FreeRTOS/test_Src/semtest.c **** #include <stdlib.h>
+  53:FreeRTOS/test_Src/semtest.c **** 
+  54:FreeRTOS/test_Src/semtest.c **** /* Scheduler include files. */
+  55:FreeRTOS/test_Src/semtest.c **** #include "FreeRTOS.h"
+  56:FreeRTOS/test_Src/semtest.c **** #include "task.h"
+  57:FreeRTOS/test_Src/semtest.c **** #include "semphr.h"
+  58:FreeRTOS/test_Src/semtest.c **** 
+  59:FreeRTOS/test_Src/semtest.c **** /* Demo app include files. */
+  60:FreeRTOS/test_Src/semtest.c **** #include "semtest.h"
+  61:FreeRTOS/test_Src/semtest.c **** 
+  62:FreeRTOS/test_Src/semtest.c **** /* The value to which the shared variables are counted. */
+  63:FreeRTOS/test_Src/semtest.c **** #define semtstBLOCKING_EXPECTED_VALUE		( ( uint32_t ) 0xfff )
+  64:FreeRTOS/test_Src/semtest.c **** #define semtstNON_BLOCKING_EXPECTED_VALUE	( ( uint32_t ) 0xff  )
+  65:FreeRTOS/test_Src/semtest.c **** 
+  66:FreeRTOS/test_Src/semtest.c **** #define semtstSTACK_SIZE			configMINIMAL_STACK_SIZE
+  67:FreeRTOS/test_Src/semtest.c **** 
+  68:FreeRTOS/test_Src/semtest.c **** #define semtstNUM_TASKS				( 4 )
+  69:FreeRTOS/test_Src/semtest.c **** 
+  70:FreeRTOS/test_Src/semtest.c **** #define semtstDELAY_FACTOR			( ( TickType_t ) 10 )
+  71:FreeRTOS/test_Src/semtest.c **** 
+  72:FreeRTOS/test_Src/semtest.c **** /* The task function as described at the top of the file. */
+  73:FreeRTOS/test_Src/semtest.c **** static portTASK_FUNCTION_PROTO( prvSemaphoreTest, pvParameters );
+  74:FreeRTOS/test_Src/semtest.c **** 
+  75:FreeRTOS/test_Src/semtest.c **** /* Structure used to pass parameters to each task. */
+  76:FreeRTOS/test_Src/semtest.c **** typedef struct SEMAPHORE_PARAMETERS
+  77:FreeRTOS/test_Src/semtest.c **** {
+  78:FreeRTOS/test_Src/semtest.c **** 	SemaphoreHandle_t xSemaphore;
+  79:FreeRTOS/test_Src/semtest.c **** 	volatile uint32_t *pulSharedVariable;
+  80:FreeRTOS/test_Src/semtest.c **** 	TickType_t xBlockTime;
+  81:FreeRTOS/test_Src/semtest.c **** } xSemaphoreParameters;
+  82:FreeRTOS/test_Src/semtest.c **** 
+  83:FreeRTOS/test_Src/semtest.c **** /* Variables used to check that all the tasks are still running without errors. */
+  84:FreeRTOS/test_Src/semtest.c **** static volatile short sCheckVariables[ semtstNUM_TASKS ] = { 0 };
+  85:FreeRTOS/test_Src/semtest.c **** static volatile short sNextCheckVariable = 0;
+  86:FreeRTOS/test_Src/semtest.c **** 
+  87:FreeRTOS/test_Src/semtest.c **** /*-----------------------------------------------------------*/
+  88:FreeRTOS/test_Src/semtest.c **** 
+  89:FreeRTOS/test_Src/semtest.c **** void vStartSemaphoreTasks( UBaseType_t uxPriority )
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 3
+
+
+  90:FreeRTOS/test_Src/semtest.c **** {
+  91:FreeRTOS/test_Src/semtest.c **** xSemaphoreParameters *pxFirstSemaphoreParameters, *pxSecondSemaphoreParameters;
+  92:FreeRTOS/test_Src/semtest.c **** const TickType_t xBlockTime = ( TickType_t ) 100;
+  93:FreeRTOS/test_Src/semtest.c **** 
+  94:FreeRTOS/test_Src/semtest.c **** 	/* Create the structure used to pass parameters to the first two tasks. */
+  95:FreeRTOS/test_Src/semtest.c **** 	pxFirstSemaphoreParameters = ( xSemaphoreParameters * ) pvPortMalloc( sizeof( xSemaphoreParameters
+  96:FreeRTOS/test_Src/semtest.c **** 
+  97:FreeRTOS/test_Src/semtest.c **** 	if( pxFirstSemaphoreParameters != NULL )
+  98:FreeRTOS/test_Src/semtest.c **** 	{
+  99:FreeRTOS/test_Src/semtest.c **** 		/* Create the semaphore used by the first two tasks. */
+ 100:FreeRTOS/test_Src/semtest.c **** 		pxFirstSemaphoreParameters->xSemaphore = xSemaphoreCreateBinary();
+ 101:FreeRTOS/test_Src/semtest.c **** 
+ 102:FreeRTOS/test_Src/semtest.c **** 		if( pxFirstSemaphoreParameters->xSemaphore != NULL )
+ 103:FreeRTOS/test_Src/semtest.c **** 		{
+ 104:FreeRTOS/test_Src/semtest.c **** 			xSemaphoreGive( pxFirstSemaphoreParameters->xSemaphore );
+ 105:FreeRTOS/test_Src/semtest.c **** 
+ 106:FreeRTOS/test_Src/semtest.c **** 			/* Create the variable which is to be shared by the first two tasks. */
+ 107:FreeRTOS/test_Src/semtest.c **** 			pxFirstSemaphoreParameters->pulSharedVariable = ( uint32_t * ) pvPortMalloc( sizeof( uint32_t ) 
+ 108:FreeRTOS/test_Src/semtest.c **** 
+ 109:FreeRTOS/test_Src/semtest.c **** 			/* Initialise the share variable to the value the tasks expect. */
+ 110:FreeRTOS/test_Src/semtest.c **** 			*( pxFirstSemaphoreParameters->pulSharedVariable ) = semtstNON_BLOCKING_EXPECTED_VALUE;
+ 111:FreeRTOS/test_Src/semtest.c **** 
+ 112:FreeRTOS/test_Src/semtest.c **** 			/* The first two tasks do not block on semaphore calls. */
+ 113:FreeRTOS/test_Src/semtest.c **** 			pxFirstSemaphoreParameters->xBlockTime = ( TickType_t ) 0;
+ 114:FreeRTOS/test_Src/semtest.c **** 
+ 115:FreeRTOS/test_Src/semtest.c **** 			/* Spawn the first two tasks.  As they poll they operate at the idle priority. */
+ 116:FreeRTOS/test_Src/semtest.c **** 			xTaskCreate( prvSemaphoreTest, "PolSEM1", semtstSTACK_SIZE, ( void * ) pxFirstSemaphoreParameter
+ 117:FreeRTOS/test_Src/semtest.c **** 			xTaskCreate( prvSemaphoreTest, "PolSEM2", semtstSTACK_SIZE, ( void * ) pxFirstSemaphoreParameter
+ 118:FreeRTOS/test_Src/semtest.c **** 
+ 119:FreeRTOS/test_Src/semtest.c **** 			/* vQueueAddToRegistry() adds the semaphore to the registry, if one
+ 120:FreeRTOS/test_Src/semtest.c **** 			is in use.  The registry is provided as a means for kernel aware
+ 121:FreeRTOS/test_Src/semtest.c **** 			debuggers to locate semaphores and has no purpose if a kernel aware
+ 122:FreeRTOS/test_Src/semtest.c **** 			debugger is not being used.  The call to vQueueAddToRegistry() will
+ 123:FreeRTOS/test_Src/semtest.c **** 			be removed by the pre-processor if configQUEUE_REGISTRY_SIZE is not
+ 124:FreeRTOS/test_Src/semtest.c **** 			defined or is defined to be less than 1. */
+ 125:FreeRTOS/test_Src/semtest.c **** 			vQueueAddToRegistry( ( QueueHandle_t ) pxFirstSemaphoreParameters->xSemaphore, "Counting_Sem_1" 
+ 126:FreeRTOS/test_Src/semtest.c **** 		}
+ 127:FreeRTOS/test_Src/semtest.c **** 	}
+ 128:FreeRTOS/test_Src/semtest.c **** 
+ 129:FreeRTOS/test_Src/semtest.c **** 	/* Do exactly the same to create the second set of tasks, only this time
+ 130:FreeRTOS/test_Src/semtest.c **** 	provide a block time for the semaphore calls. */
+ 131:FreeRTOS/test_Src/semtest.c **** 	pxSecondSemaphoreParameters = ( xSemaphoreParameters * ) pvPortMalloc( sizeof( xSemaphoreParameter
+ 132:FreeRTOS/test_Src/semtest.c **** 	if( pxSecondSemaphoreParameters != NULL )
+ 133:FreeRTOS/test_Src/semtest.c **** 	{
+ 134:FreeRTOS/test_Src/semtest.c **** 		pxSecondSemaphoreParameters->xSemaphore = xSemaphoreCreateBinary();
+ 135:FreeRTOS/test_Src/semtest.c **** 
+ 136:FreeRTOS/test_Src/semtest.c **** 		if( pxSecondSemaphoreParameters->xSemaphore != NULL )
+ 137:FreeRTOS/test_Src/semtest.c **** 		{
+ 138:FreeRTOS/test_Src/semtest.c **** 			xSemaphoreGive( pxSecondSemaphoreParameters->xSemaphore );
+ 139:FreeRTOS/test_Src/semtest.c **** 
+ 140:FreeRTOS/test_Src/semtest.c **** 			pxSecondSemaphoreParameters->pulSharedVariable = ( uint32_t * ) pvPortMalloc( sizeof( uint32_t )
+ 141:FreeRTOS/test_Src/semtest.c **** 			*( pxSecondSemaphoreParameters->pulSharedVariable ) = semtstBLOCKING_EXPECTED_VALUE;
+ 142:FreeRTOS/test_Src/semtest.c **** 			pxSecondSemaphoreParameters->xBlockTime = xBlockTime / portTICK_PERIOD_MS;
+ 143:FreeRTOS/test_Src/semtest.c **** 
+ 144:FreeRTOS/test_Src/semtest.c **** 			xTaskCreate( prvSemaphoreTest, "BlkSEM1", semtstSTACK_SIZE, ( void * ) pxSecondSemaphoreParamete
+ 145:FreeRTOS/test_Src/semtest.c **** 			xTaskCreate( prvSemaphoreTest, "BlkSEM2", semtstSTACK_SIZE, ( void * ) pxSecondSemaphoreParamete
+ 146:FreeRTOS/test_Src/semtest.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 4
+
+
+ 147:FreeRTOS/test_Src/semtest.c **** 			/* vQueueAddToRegistry() adds the semaphore to the registry, if one
+ 148:FreeRTOS/test_Src/semtest.c **** 			is in use.  The registry is provided as a means for kernel aware
+ 149:FreeRTOS/test_Src/semtest.c **** 			debuggers to locate semaphores and has no purpose if a kernel aware
+ 150:FreeRTOS/test_Src/semtest.c **** 			debugger is not being used.  The call to vQueueAddToRegistry() will
+ 151:FreeRTOS/test_Src/semtest.c **** 			be removed by the pre-processor if configQUEUE_REGISTRY_SIZE is not
+ 152:FreeRTOS/test_Src/semtest.c **** 			defined or is defined to be less than 1. */
+ 153:FreeRTOS/test_Src/semtest.c **** 			vQueueAddToRegistry( ( QueueHandle_t ) pxSecondSemaphoreParameters->xSemaphore, "Counting_Sem_2"
+ 154:FreeRTOS/test_Src/semtest.c **** 		}
+ 155:FreeRTOS/test_Src/semtest.c **** 	}
+ 156:FreeRTOS/test_Src/semtest.c **** }
+ 157:FreeRTOS/test_Src/semtest.c **** /*-----------------------------------------------------------*/
+ 158:FreeRTOS/test_Src/semtest.c **** 
+ 159:FreeRTOS/test_Src/semtest.c **** static portTASK_FUNCTION( prvSemaphoreTest, pvParameters )
+ 160:FreeRTOS/test_Src/semtest.c **** {
+  27              		.loc 1 160 0
+  28              		.cfi_startproc
+  29              		@ args = 0, pretend = 0, frame = 8
+  30              		@ frame_needed = 0, uses_anonymous_args = 0
+  31              	.LVL0:
+  32 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+  33              	.LCFI0:
+  34              		.cfi_def_cfa_offset 20
+  35              		.cfi_offset 4, -20
+  36              		.cfi_offset 5, -16
+  37              		.cfi_offset 6, -12
+  38              		.cfi_offset 7, -8
+  39              		.cfi_offset 14, -4
+  40 0002 83B0     		sub	sp, sp, #12
+  41              	.LCFI1:
+  42              		.cfi_def_cfa_offset 32
+  43 0004 0646     		mov	r6, r0
+  44              	.LVL1:
+ 161:FreeRTOS/test_Src/semtest.c **** xSemaphoreParameters *pxParameters;
+ 162:FreeRTOS/test_Src/semtest.c **** volatile uint32_t *pulSharedVariable, ulExpectedValue;
+ 163:FreeRTOS/test_Src/semtest.c **** uint32_t ulCounter;
+ 164:FreeRTOS/test_Src/semtest.c **** short sError = pdFALSE, sCheckVariableToUse;
+ 165:FreeRTOS/test_Src/semtest.c **** 
+ 166:FreeRTOS/test_Src/semtest.c **** 	/* See which check variable to use.  sNextCheckVariable is not semaphore
+ 167:FreeRTOS/test_Src/semtest.c **** 	protected! */
+ 168:FreeRTOS/test_Src/semtest.c **** 	portENTER_CRITICAL();
+  45              		.loc 1 168 0
+  46 0006 FFF7FEFF 		bl	vPortEnterCritical
+  47              	.LVL2:
+ 169:FreeRTOS/test_Src/semtest.c **** 		sCheckVariableToUse = sNextCheckVariable;
+  48              		.loc 1 169 0
+  49 000a 274A     		ldr	r2, .L17
+  50 000c 1788     		ldrh	r7, [r2]
+  51 000e 3FB2     		sxth	r7, r7
+  52              	.LVL3:
+ 170:FreeRTOS/test_Src/semtest.c **** 		sNextCheckVariable++;
+  53              		.loc 1 170 0
+  54 0010 1388     		ldrh	r3, [r2]
+  55 0012 0133     		adds	r3, r3, #1
+  56 0014 1BB2     		sxth	r3, r3
+  57 0016 1380     		strh	r3, [r2]	@ movhi
+ 171:FreeRTOS/test_Src/semtest.c **** 	portEXIT_CRITICAL();
+  58              		.loc 1 171 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 5
+
+
+  59 0018 FFF7FEFF 		bl	vPortExitCritical
+  60              	.LVL4:
+ 172:FreeRTOS/test_Src/semtest.c **** 
+ 173:FreeRTOS/test_Src/semtest.c **** 	/* A structure is passed in as the parameter.  This contains the shared
+ 174:FreeRTOS/test_Src/semtest.c **** 	variable being guarded. */
+ 175:FreeRTOS/test_Src/semtest.c **** 	pxParameters = ( xSemaphoreParameters * ) pvParameters;
+ 176:FreeRTOS/test_Src/semtest.c **** 	pulSharedVariable = pxParameters->pulSharedVariable;
+  61              		.loc 1 176 0
+  62 001c 7468     		ldr	r4, [r6, #4]
+  63              	.LVL5:
+ 177:FreeRTOS/test_Src/semtest.c **** 
+ 178:FreeRTOS/test_Src/semtest.c **** 	/* If we are blocking we use a much higher count to ensure loads of context
+ 179:FreeRTOS/test_Src/semtest.c **** 	switches occur during the count. */
+ 180:FreeRTOS/test_Src/semtest.c **** 	if( pxParameters->xBlockTime > ( TickType_t ) 0 )
+  64              		.loc 1 180 0
+  65 001e B368     		ldr	r3, [r6, #8]
+  66 0020 1BB1     		cbz	r3, .L2
+ 181:FreeRTOS/test_Src/semtest.c **** 	{
+ 182:FreeRTOS/test_Src/semtest.c **** 		ulExpectedValue = semtstBLOCKING_EXPECTED_VALUE;
+  67              		.loc 1 182 0
+  68 0022 40F6FF73 		movw	r3, #4095
+  69 0026 0193     		str	r3, [sp, #4]
+  70 0028 01E0     		b	.L3
+  71              	.L2:
+ 183:FreeRTOS/test_Src/semtest.c **** 	}
+ 184:FreeRTOS/test_Src/semtest.c **** 	else
+ 185:FreeRTOS/test_Src/semtest.c **** 	{
+ 186:FreeRTOS/test_Src/semtest.c **** 		ulExpectedValue = semtstNON_BLOCKING_EXPECTED_VALUE;
+  72              		.loc 1 186 0
+  73 002a FF23     		movs	r3, #255
+  74 002c 0193     		str	r3, [sp, #4]
+  75              	.L3:
+ 160:FreeRTOS/test_Src/semtest.c **** xSemaphoreParameters *pxParameters;
+  76              		.loc 1 160 0
+  77 002e 0025     		movs	r5, #0
+  78              	.LVL6:
+  79              	.L4:
+ 187:FreeRTOS/test_Src/semtest.c **** 	}
+ 188:FreeRTOS/test_Src/semtest.c **** 
+ 189:FreeRTOS/test_Src/semtest.c **** 	for( ;; )
+ 190:FreeRTOS/test_Src/semtest.c **** 	{
+ 191:FreeRTOS/test_Src/semtest.c **** 		/* Try to obtain the semaphore. */
+ 192:FreeRTOS/test_Src/semtest.c **** 		if( xSemaphoreTake( pxParameters->xSemaphore, pxParameters->xBlockTime ) == pdPASS )
+  80              		.loc 1 192 0
+  81 0030 B168     		ldr	r1, [r6, #8]
+  82 0032 3068     		ldr	r0, [r6]
+  83 0034 FFF7FEFF 		bl	xQueueSemaphoreTake
+  84              	.LVL7:
+  85 0038 0128     		cmp	r0, #1
+  86 003a 28D1     		bne	.L5
+ 193:FreeRTOS/test_Src/semtest.c **** 		{
+ 194:FreeRTOS/test_Src/semtest.c **** 			/* We have the semaphore and so expect any other tasks using the
+ 195:FreeRTOS/test_Src/semtest.c **** 			shared variable to have left it in the state we expect to find
+ 196:FreeRTOS/test_Src/semtest.c **** 			it. */
+ 197:FreeRTOS/test_Src/semtest.c **** 			if( *pulSharedVariable != ulExpectedValue )
+  87              		.loc 1 197 0
+  88 003c 2268     		ldr	r2, [r4]
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 6
+
+
+  89 003e 019B     		ldr	r3, [sp, #4]
+  90 0040 9A42     		cmp	r2, r3
+  91 0042 00D0     		beq	.L6
+ 198:FreeRTOS/test_Src/semtest.c **** 			{
+ 199:FreeRTOS/test_Src/semtest.c **** 				sError = pdTRUE;
+  92              		.loc 1 199 0
+  93 0044 0125     		movs	r5, #1
+  94              	.LVL8:
+  95              	.L6:
+ 200:FreeRTOS/test_Src/semtest.c **** 			}
+ 201:FreeRTOS/test_Src/semtest.c **** 
+ 202:FreeRTOS/test_Src/semtest.c **** 			/* Clear the variable, then count it back up to the expected value
+ 203:FreeRTOS/test_Src/semtest.c **** 			before releasing the semaphore.  Would expect a context switch or
+ 204:FreeRTOS/test_Src/semtest.c **** 			two during this time. */
+ 205:FreeRTOS/test_Src/semtest.c **** 			for( ulCounter = ( uint32_t ) 0; ulCounter <= ulExpectedValue; ulCounter++ )
+ 206:FreeRTOS/test_Src/semtest.c **** 			{
+ 207:FreeRTOS/test_Src/semtest.c **** 				*pulSharedVariable = ulCounter;
+ 208:FreeRTOS/test_Src/semtest.c **** 				if( *pulSharedVariable != ulCounter )
+ 209:FreeRTOS/test_Src/semtest.c **** 				{
+ 210:FreeRTOS/test_Src/semtest.c **** 					sError = pdTRUE;
+  96              		.loc 1 210 0 discriminator 1
+  97 0046 0023     		movs	r3, #0
+  98 0048 05E0     		b	.L7
+  99              	.LVL9:
+ 100              	.L9:
+ 207:FreeRTOS/test_Src/semtest.c **** 				if( *pulSharedVariable != ulCounter )
+ 101              		.loc 1 207 0
+ 102 004a 2360     		str	r3, [r4]
+ 208:FreeRTOS/test_Src/semtest.c **** 				{
+ 103              		.loc 1 208 0
+ 104 004c 2268     		ldr	r2, [r4]
+ 105 004e 9342     		cmp	r3, r2
+ 106 0050 00D0     		beq	.L8
+ 107              		.loc 1 210 0
+ 108 0052 0125     		movs	r5, #1
+ 109              	.LVL10:
+ 110              	.L8:
+ 205:FreeRTOS/test_Src/semtest.c **** 			{
+ 111              		.loc 1 205 0 discriminator 2
+ 112 0054 0133     		adds	r3, r3, #1
+ 113              	.LVL11:
+ 114              	.L7:
+ 205:FreeRTOS/test_Src/semtest.c **** 			{
+ 115              		.loc 1 205 0 is_stmt 0 discriminator 1
+ 116 0056 019A     		ldr	r2, [sp, #4]
+ 117 0058 9342     		cmp	r3, r2
+ 118 005a F6D9     		bls	.L9
+ 211:FreeRTOS/test_Src/semtest.c **** 				}
+ 212:FreeRTOS/test_Src/semtest.c **** 			}
+ 213:FreeRTOS/test_Src/semtest.c **** 
+ 214:FreeRTOS/test_Src/semtest.c **** 			/* Release the semaphore, and if no errors have occurred increment the check
+ 215:FreeRTOS/test_Src/semtest.c **** 			variable. */
+ 216:FreeRTOS/test_Src/semtest.c **** 			if(	xSemaphoreGive( pxParameters->xSemaphore ) == pdFALSE )
+ 119              		.loc 1 216 0 is_stmt 1
+ 120 005c 0023     		movs	r3, #0
+ 121              	.LVL12:
+ 122 005e 1A46     		mov	r2, r3
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 7
+
+
+ 123 0060 1946     		mov	r1, r3
+ 124 0062 3068     		ldr	r0, [r6]
+ 125 0064 FFF7FEFF 		bl	xQueueGenericSend
+ 126              	.LVL13:
+ 127 0068 00B9     		cbnz	r0, .L10
+ 217:FreeRTOS/test_Src/semtest.c **** 			{
+ 218:FreeRTOS/test_Src/semtest.c **** 				sError = pdTRUE;
+ 128              		.loc 1 218 0
+ 129 006a 0125     		movs	r5, #1
+ 130              	.LVL14:
+ 131              	.L10:
+ 219:FreeRTOS/test_Src/semtest.c **** 			}
+ 220:FreeRTOS/test_Src/semtest.c **** 
+ 221:FreeRTOS/test_Src/semtest.c **** 			if( sError == pdFALSE )
+ 132              		.loc 1 221 0
+ 133 006c 45B9     		cbnz	r5, .L11
+ 222:FreeRTOS/test_Src/semtest.c **** 			{
+ 223:FreeRTOS/test_Src/semtest.c **** 				if( sCheckVariableToUse < semtstNUM_TASKS )
+ 134              		.loc 1 223 0
+ 135 006e 032F     		cmp	r7, #3
+ 136 0070 06DC     		bgt	.L11
+ 224:FreeRTOS/test_Src/semtest.c **** 				{
+ 225:FreeRTOS/test_Src/semtest.c **** 					( sCheckVariables[ sCheckVariableToUse ] )++;
+ 137              		.loc 1 225 0
+ 138 0072 0E4A     		ldr	r2, .L17+4
+ 139 0074 32F81730 		ldrh	r3, [r2, r7, lsl #1]
+ 140 0078 0133     		adds	r3, r3, #1
+ 141 007a 1BB2     		sxth	r3, r3
+ 142 007c 22F81730 		strh	r3, [r2, r7, lsl #1]	@ movhi
+ 143              	.L11:
+ 226:FreeRTOS/test_Src/semtest.c **** 				}
+ 227:FreeRTOS/test_Src/semtest.c **** 			}
+ 228:FreeRTOS/test_Src/semtest.c **** 
+ 229:FreeRTOS/test_Src/semtest.c **** 			/* If we have a block time then we are running at a priority higher
+ 230:FreeRTOS/test_Src/semtest.c **** 			than the idle priority.  This task takes a long time to complete
+ 231:FreeRTOS/test_Src/semtest.c **** 			a cycle	(deliberately so to test the guarding) so will be starving
+ 232:FreeRTOS/test_Src/semtest.c **** 			out lower priority tasks.  Block for some time to allow give lower
+ 233:FreeRTOS/test_Src/semtest.c **** 			priority tasks some processor time. */
+ 234:FreeRTOS/test_Src/semtest.c **** 			vTaskDelay( pxParameters->xBlockTime * semtstDELAY_FACTOR );
+ 144              		.loc 1 234 0
+ 145 0080 B368     		ldr	r3, [r6, #8]
+ 146 0082 03EB8303 		add	r3, r3, r3, lsl #2
+ 147 0086 5800     		lsls	r0, r3, #1
+ 148 0088 FFF7FEFF 		bl	vTaskDelay
+ 149              	.LVL15:
+ 150 008c D0E7     		b	.L4
+ 151              	.L5:
+ 235:FreeRTOS/test_Src/semtest.c **** 		}
+ 236:FreeRTOS/test_Src/semtest.c **** 		else
+ 237:FreeRTOS/test_Src/semtest.c **** 		{
+ 238:FreeRTOS/test_Src/semtest.c **** 			if( pxParameters->xBlockTime == ( TickType_t ) 0 )
+ 152              		.loc 1 238 0
+ 153 008e B368     		ldr	r3, [r6, #8]
+ 154 0090 002B     		cmp	r3, #0
+ 155 0092 CDD1     		bne	.L4
+ 239:FreeRTOS/test_Src/semtest.c **** 			{
+ 240:FreeRTOS/test_Src/semtest.c **** 				/* We have not got the semaphore yet, so no point using the
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 8
+
+
+ 241:FreeRTOS/test_Src/semtest.c **** 				processor.  We are not blocking when attempting to obtain the
+ 242:FreeRTOS/test_Src/semtest.c **** 				semaphore. */
+ 243:FreeRTOS/test_Src/semtest.c **** 				taskYIELD();
+ 156              		.loc 1 243 0
+ 157 0094 4FF08052 		mov	r2, #268435456
+ 158 0098 054B     		ldr	r3, .L17+8
+ 159 009a 1A60     		str	r2, [r3]
+ 160              		.syntax unified
+ 161              	@ 243 "FreeRTOS/test_Src/semtest.c" 1
+ 162 009c BFF34F8F 		dsb
+ 163              	@ 0 "" 2
+ 164              	@ 243 "FreeRTOS/test_Src/semtest.c" 1
+ 165 00a0 BFF36F8F 		isb
+ 166              	@ 0 "" 2
+ 167              		.thumb
+ 168              		.syntax unified
+ 169 00a4 C4E7     		b	.L4
+ 170              	.L18:
+ 171 00a6 00BF     		.align	2
+ 172              	.L17:
+ 173 00a8 00000000 		.word	.LANCHOR0
+ 174 00ac 00000000 		.word	.LANCHOR1
+ 175 00b0 04ED00E0 		.word	-536810236
+ 176              		.cfi_endproc
+ 177              	.LFE33:
+ 179              		.section	.text.vStartSemaphoreTasks,"ax",%progbits
+ 180              		.align	2
+ 181              		.global	vStartSemaphoreTasks
+ 182              		.thumb
+ 183              		.thumb_func
+ 185              	vStartSemaphoreTasks:
+ 186              	.LFB32:
+  90:FreeRTOS/test_Src/semtest.c **** xSemaphoreParameters *pxFirstSemaphoreParameters, *pxSecondSemaphoreParameters;
+ 187              		.loc 1 90 0
+ 188              		.cfi_startproc
+ 189              		@ args = 0, pretend = 0, frame = 0
+ 190              		@ frame_needed = 0, uses_anonymous_args = 0
+ 191              	.LVL16:
+ 192 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 193              	.LCFI2:
+ 194              		.cfi_def_cfa_offset 20
+ 195              		.cfi_offset 4, -20
+ 196              		.cfi_offset 5, -16
+ 197              		.cfi_offset 6, -12
+ 198              		.cfi_offset 7, -8
+ 199              		.cfi_offset 14, -4
+ 200 0002 83B0     		sub	sp, sp, #12
+ 201              	.LCFI3:
+ 202              		.cfi_def_cfa_offset 32
+ 203 0004 0646     		mov	r6, r0
+ 204              	.LVL17:
+  95:FreeRTOS/test_Src/semtest.c **** 
+ 205              		.loc 1 95 0
+ 206 0006 0C20     		movs	r0, #12
+ 207              	.LVL18:
+ 208 0008 FFF7FEFF 		bl	pvPortMalloc
+ 209              	.LVL19:
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 9
+
+
+  97:FreeRTOS/test_Src/semtest.c **** 	{
+ 210              		.loc 1 97 0
+ 211 000c 28B3     		cbz	r0, .L20
+ 212 000e 0446     		mov	r4, r0
+ 100:FreeRTOS/test_Src/semtest.c **** 
+ 213              		.loc 1 100 0
+ 214 0010 0322     		movs	r2, #3
+ 215 0012 0021     		movs	r1, #0
+ 216 0014 0120     		movs	r0, #1
+ 217              	.LVL20:
+ 218 0016 FFF7FEFF 		bl	xQueueGenericCreate
+ 219              	.LVL21:
+ 220 001a 2060     		str	r0, [r4]
+ 102:FreeRTOS/test_Src/semtest.c **** 		{
+ 221              		.loc 1 102 0
+ 222 001c E8B1     		cbz	r0, .L20
+ 104:FreeRTOS/test_Src/semtest.c **** 
+ 223              		.loc 1 104 0
+ 224 001e 0023     		movs	r3, #0
+ 225 0020 1A46     		mov	r2, r3
+ 226 0022 1946     		mov	r1, r3
+ 227 0024 FFF7FEFF 		bl	xQueueGenericSend
+ 228              	.LVL22:
+ 107:FreeRTOS/test_Src/semtest.c **** 
+ 229              		.loc 1 107 0
+ 230 0028 0420     		movs	r0, #4
+ 231 002a FFF7FEFF 		bl	pvPortMalloc
+ 232              	.LVL23:
+ 233 002e 6060     		str	r0, [r4, #4]
+ 110:FreeRTOS/test_Src/semtest.c **** 
+ 234              		.loc 1 110 0
+ 235 0030 FF23     		movs	r3, #255
+ 236 0032 0360     		str	r3, [r0]
+ 113:FreeRTOS/test_Src/semtest.c **** 
+ 237              		.loc 1 113 0
+ 238 0034 0025     		movs	r5, #0
+ 239 0036 A560     		str	r5, [r4, #8]
+ 116:FreeRTOS/test_Src/semtest.c **** 			xTaskCreate( prvSemaphoreTest, "PolSEM2", semtstSTACK_SIZE, ( void * ) pxFirstSemaphoreParameter
+ 240              		.loc 1 116 0
+ 241 0038 1F4F     		ldr	r7, .L23
+ 242 003a 0195     		str	r5, [sp, #4]
+ 243 003c 0095     		str	r5, [sp]
+ 244 003e 2346     		mov	r3, r4
+ 245 0040 8022     		movs	r2, #128
+ 246 0042 1E49     		ldr	r1, .L23+4
+ 247 0044 3846     		mov	r0, r7
+ 248 0046 FFF7FEFF 		bl	xTaskCreate
+ 249              	.LVL24:
+ 117:FreeRTOS/test_Src/semtest.c **** 
+ 250              		.loc 1 117 0
+ 251 004a 0195     		str	r5, [sp, #4]
+ 252 004c 0095     		str	r5, [sp]
+ 253 004e 2346     		mov	r3, r4
+ 254 0050 8022     		movs	r2, #128
+ 255 0052 1B49     		ldr	r1, .L23+8
+ 256 0054 3846     		mov	r0, r7
+ 257 0056 FFF7FEFF 		bl	xTaskCreate
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 10
+
+
+ 258              	.LVL25:
+ 259              	.L20:
+ 131:FreeRTOS/test_Src/semtest.c **** 	if( pxSecondSemaphoreParameters != NULL )
+ 260              		.loc 1 131 0
+ 261 005a 0C20     		movs	r0, #12
+ 262 005c FFF7FEFF 		bl	pvPortMalloc
+ 263              	.LVL26:
+ 132:FreeRTOS/test_Src/semtest.c **** 	{
+ 264              		.loc 1 132 0
+ 265 0060 0446     		mov	r4, r0
+ 266 0062 30B3     		cbz	r0, .L19
+ 134:FreeRTOS/test_Src/semtest.c **** 
+ 267              		.loc 1 134 0
+ 268 0064 0322     		movs	r2, #3
+ 269 0066 0021     		movs	r1, #0
+ 270 0068 0120     		movs	r0, #1
+ 271              	.LVL27:
+ 272 006a FFF7FEFF 		bl	xQueueGenericCreate
+ 273              	.LVL28:
+ 274 006e 2060     		str	r0, [r4]
+ 136:FreeRTOS/test_Src/semtest.c **** 		{
+ 275              		.loc 1 136 0
+ 276 0070 F8B1     		cbz	r0, .L19
+ 138:FreeRTOS/test_Src/semtest.c **** 
+ 277              		.loc 1 138 0
+ 278 0072 0023     		movs	r3, #0
+ 279 0074 1A46     		mov	r2, r3
+ 280 0076 1946     		mov	r1, r3
+ 281 0078 FFF7FEFF 		bl	xQueueGenericSend
+ 282              	.LVL29:
+ 140:FreeRTOS/test_Src/semtest.c **** 			*( pxSecondSemaphoreParameters->pulSharedVariable ) = semtstBLOCKING_EXPECTED_VALUE;
+ 283              		.loc 1 140 0
+ 284 007c 0420     		movs	r0, #4
+ 285 007e FFF7FEFF 		bl	pvPortMalloc
+ 286              	.LVL30:
+ 287 0082 6060     		str	r0, [r4, #4]
+ 141:FreeRTOS/test_Src/semtest.c **** 			pxSecondSemaphoreParameters->xBlockTime = xBlockTime / portTICK_PERIOD_MS;
+ 288              		.loc 1 141 0
+ 289 0084 40F6FF73 		movw	r3, #4095
+ 290 0088 0360     		str	r3, [r0]
+ 142:FreeRTOS/test_Src/semtest.c **** 
+ 291              		.loc 1 142 0
+ 292 008a 6423     		movs	r3, #100
+ 293 008c A360     		str	r3, [r4, #8]
+ 144:FreeRTOS/test_Src/semtest.c **** 			xTaskCreate( prvSemaphoreTest, "BlkSEM2", semtstSTACK_SIZE, ( void * ) pxSecondSemaphoreParamete
+ 294              		.loc 1 144 0
+ 295 008e 0A4D     		ldr	r5, .L23
+ 296 0090 0027     		movs	r7, #0
+ 297 0092 0197     		str	r7, [sp, #4]
+ 298 0094 0096     		str	r6, [sp]
+ 299 0096 2346     		mov	r3, r4
+ 300 0098 8022     		movs	r2, #128
+ 301 009a 0A49     		ldr	r1, .L23+12
+ 302 009c 2846     		mov	r0, r5
+ 303 009e FFF7FEFF 		bl	xTaskCreate
+ 304              	.LVL31:
+ 145:FreeRTOS/test_Src/semtest.c **** 
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 11
+
+
+ 305              		.loc 1 145 0
+ 306 00a2 0197     		str	r7, [sp, #4]
+ 307 00a4 0096     		str	r6, [sp]
+ 308 00a6 2346     		mov	r3, r4
+ 309 00a8 8022     		movs	r2, #128
+ 310 00aa 0749     		ldr	r1, .L23+16
+ 311 00ac 2846     		mov	r0, r5
+ 312 00ae FFF7FEFF 		bl	xTaskCreate
+ 313              	.LVL32:
+ 314              	.L19:
+ 156:FreeRTOS/test_Src/semtest.c **** /*-----------------------------------------------------------*/
+ 315              		.loc 1 156 0
+ 316 00b2 03B0     		add	sp, sp, #12
+ 317              	.LCFI4:
+ 318              		.cfi_def_cfa_offset 20
+ 319              		@ sp needed
+ 320 00b4 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 321              	.LVL33:
+ 322              	.L24:
+ 323 00b6 00BF     		.align	2
+ 324              	.L23:
+ 325 00b8 00000000 		.word	prvSemaphoreTest
+ 326 00bc 00000000 		.word	.LC0
+ 327 00c0 08000000 		.word	.LC1
+ 328 00c4 10000000 		.word	.LC2
+ 329 00c8 18000000 		.word	.LC3
+ 330              		.cfi_endproc
+ 331              	.LFE32:
+ 333              		.section	.text.xAreSemaphoreTasksStillRunning,"ax",%progbits
+ 334              		.align	2
+ 335              		.global	xAreSemaphoreTasksStillRunning
+ 336              		.thumb
+ 337              		.thumb_func
+ 339              	xAreSemaphoreTasksStillRunning:
+ 340              	.LFB34:
+ 244:FreeRTOS/test_Src/semtest.c **** 			}
+ 245:FreeRTOS/test_Src/semtest.c **** 		}
+ 246:FreeRTOS/test_Src/semtest.c **** 	}
+ 247:FreeRTOS/test_Src/semtest.c **** }
+ 248:FreeRTOS/test_Src/semtest.c **** /*-----------------------------------------------------------*/
+ 249:FreeRTOS/test_Src/semtest.c **** 
+ 250:FreeRTOS/test_Src/semtest.c **** /* This is called to check that all the created tasks are still running. */
+ 251:FreeRTOS/test_Src/semtest.c **** BaseType_t xAreSemaphoreTasksStillRunning( void )
+ 252:FreeRTOS/test_Src/semtest.c **** {
+ 341              		.loc 1 252 0
+ 342              		.cfi_startproc
+ 343              		@ args = 0, pretend = 0, frame = 0
+ 344              		@ frame_needed = 0, uses_anonymous_args = 0
+ 345              		@ link register save eliminated.
+ 346              	.LVL34:
+ 253:FreeRTOS/test_Src/semtest.c **** static short sLastCheckVariables[ semtstNUM_TASKS ] = { 0 };
+ 254:FreeRTOS/test_Src/semtest.c **** BaseType_t xTask, xReturn = pdTRUE;
+ 347              		.loc 1 254 0
+ 348 0000 0120     		movs	r0, #1
+ 255:FreeRTOS/test_Src/semtest.c **** 
+ 256:FreeRTOS/test_Src/semtest.c **** 	for( xTask = 0; xTask < semtstNUM_TASKS; xTask++ )
+ 349              		.loc 1 256 0
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 12
+
+
+ 350 0002 0023     		movs	r3, #0
+ 351 0004 10E0     		b	.L26
+ 352              	.LVL35:
+ 353              	.L28:
+ 257:FreeRTOS/test_Src/semtest.c **** 	{
+ 258:FreeRTOS/test_Src/semtest.c **** 		if( sLastCheckVariables[ xTask ] == sCheckVariables[ xTask ] )
+ 354              		.loc 1 258 0
+ 355 0006 0A4A     		ldr	r2, .L30
+ 356 0008 32F91310 		ldrsh	r1, [r2, r3, lsl #1]
+ 357 000c 094A     		ldr	r2, .L30+4
+ 358 000e 32F81320 		ldrh	r2, [r2, r3, lsl #1]
+ 359 0012 12B2     		sxth	r2, r2
+ 360 0014 9142     		cmp	r1, r2
+ 361 0016 00D1     		bne	.L27
+ 259:FreeRTOS/test_Src/semtest.c **** 		{
+ 260:FreeRTOS/test_Src/semtest.c **** 			xReturn = pdFALSE;
+ 362              		.loc 1 260 0
+ 363 0018 0020     		movs	r0, #0
+ 364              	.LVL36:
+ 365              	.L27:
+ 261:FreeRTOS/test_Src/semtest.c **** 		}
+ 262:FreeRTOS/test_Src/semtest.c **** 
+ 263:FreeRTOS/test_Src/semtest.c **** 		sLastCheckVariables[ xTask ] = sCheckVariables[ xTask ];
+ 366              		.loc 1 263 0 discriminator 2
+ 367 001a 064A     		ldr	r2, .L30+4
+ 368 001c 32F81310 		ldrh	r1, [r2, r3, lsl #1]
+ 369 0020 034A     		ldr	r2, .L30
+ 370 0022 22F81310 		strh	r1, [r2, r3, lsl #1]	@ movhi
+ 256:FreeRTOS/test_Src/semtest.c **** 	{
+ 371              		.loc 1 256 0 discriminator 2
+ 372 0026 0133     		adds	r3, r3, #1
+ 373              	.LVL37:
+ 374              	.L26:
+ 256:FreeRTOS/test_Src/semtest.c **** 	{
+ 375              		.loc 1 256 0 is_stmt 0 discriminator 1
+ 376 0028 032B     		cmp	r3, #3
+ 377 002a ECDD     		ble	.L28
+ 264:FreeRTOS/test_Src/semtest.c **** 	}
+ 265:FreeRTOS/test_Src/semtest.c **** 
+ 266:FreeRTOS/test_Src/semtest.c **** 	return xReturn;
+ 267:FreeRTOS/test_Src/semtest.c **** }
+ 378              		.loc 1 267 0 is_stmt 1
+ 379 002c 7047     		bx	lr
+ 380              	.L31:
+ 381 002e 00BF     		.align	2
+ 382              	.L30:
+ 383 0030 00000000 		.word	.LANCHOR2
+ 384 0034 00000000 		.word	.LANCHOR1
+ 385              		.cfi_endproc
+ 386              	.LFE34:
+ 388              		.section	.bss.sCheckVariables,"aw",%nobits
+ 389              		.align	2
+ 390              		.set	.LANCHOR1,. + 0
+ 393              	sCheckVariables:
+ 394 0000 00000000 		.space	8
+ 394      00000000 
+ 395              		.section	.rodata.str1.4,"aMS",%progbits,1
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 13
+
+
+ 396              		.align	2
+ 397              	.LC0:
+ 398 0000 506F6C53 		.ascii	"PolSEM1\000"
+ 398      454D3100 
+ 399              	.LC1:
+ 400 0008 506F6C53 		.ascii	"PolSEM2\000"
+ 400      454D3200 
+ 401              	.LC2:
+ 402 0010 426C6B53 		.ascii	"BlkSEM1\000"
+ 402      454D3100 
+ 403              	.LC3:
+ 404 0018 426C6B53 		.ascii	"BlkSEM2\000"
+ 404      454D3200 
+ 405              		.section	.bss.sLastCheckVariables.7522,"aw",%nobits
+ 406              		.align	2
+ 407              		.set	.LANCHOR2,. + 0
+ 410              	sLastCheckVariables.7522:
+ 411 0000 00000000 		.space	8
+ 411      00000000 
+ 412              		.section	.bss.sNextCheckVariable,"aw",%nobits
+ 413              		.align	1
+ 414              		.set	.LANCHOR0,. + 0
+ 417              	sNextCheckVariable:
+ 418 0000 0000     		.space	2
+ 419              		.text
+ 420              	.Letext0:
+ 421              		.file 2 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/machine/_default_types
+ 422              		.file 3 "/usr/local/Cellar/gcc-arm-none-eabi/20160926/arm-none-eabi/include/sys/_stdint.h"
+ 423              		.file 4 "FreeRTOS/ARM_CM3/portmacro.h"
+ 424              		.file 5 "FreeRTOS/Inc/task.h"
+ 425              		.file 6 "FreeRTOS/Inc/queue.h"
+ 426              		.file 7 "FreeRTOS/Inc/semphr.h"
+ 427              		.file 8 "FreeRTOS/Inc/portable.h"
+ARM GAS  /var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s 			page 14
+
+
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 semtest.c
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:20     .text.prvSemaphoreTest:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:24     .text.prvSemaphoreTest:0000000000000000 prvSemaphoreTest
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:173    .text.prvSemaphoreTest:00000000000000a8 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:180    .text.vStartSemaphoreTasks:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:185    .text.vStartSemaphoreTasks:0000000000000000 vStartSemaphoreTasks
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:325    .text.vStartSemaphoreTasks:00000000000000b8 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:334    .text.xAreSemaphoreTasksStillRunning:0000000000000000 $t
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:339    .text.xAreSemaphoreTasksStillRunning:0000000000000000 xAreSemaphoreTasksStillRunning
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:383    .text.xAreSemaphoreTasksStillRunning:0000000000000030 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:389    .bss.sCheckVariables:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:393    .bss.sCheckVariables:0000000000000000 sCheckVariables
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:396    .rodata.str1.4:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:406    .bss.sLastCheckVariables.7522:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:410    .bss.sLastCheckVariables.7522:0000000000000000 sLastCheckVariables.7522
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:413    .bss.sNextCheckVariable:0000000000000000 $d
+/var/folders/g9/bbpj86ld7fx45vd1b3pqxmp00000gn/T//ccjC10Na.s:417    .bss.sNextCheckVariable:0000000000000000 sNextCheckVariable
+                     .debug_frame:0000000000000010 $d
+
+UNDEFINED SYMBOLS
+vPortEnterCritical
+vPortExitCritical
+xQueueSemaphoreTake
+xQueueGenericSend
+vTaskDelay
+pvPortMalloc
+xQueueGenericCreate
+xTaskCreate
