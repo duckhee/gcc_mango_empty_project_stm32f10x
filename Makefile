@@ -176,7 +176,10 @@ $(BUILD_DIR):
 
 
 flash: $(TARGET).bin
-	st-flash write $(TARGET).bin 0x8000000
+	st-flash write $(BUILD_DIR)$(TARGET).bin 0x8000000
+
+down_load: $(TARGET).bin
+	~/stm32ld /dev/tty.usbserial-14201 115200 $(BUILD_DIR)/$(TARGET).bin
 
 erase:
 	st-flash erase
