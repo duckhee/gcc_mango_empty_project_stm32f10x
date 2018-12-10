@@ -31,9 +31,9 @@ OPT = -Og
 # Build path
 BUILD_DIR = build
 
-MANGO_Z1 = yes
+MANGO_Z1 = no
 
-RTOS_FLAGS = yes
+RTOS_FLAGS = no
 
 
 
@@ -112,6 +112,7 @@ ALL_INCLUDES += $(CC2520_INCLUDES)
 ALL_SOURCES += $(CC2520_SRC)
 else
 C_DEFS += -D BOARD_DEF_MANGO_M32 
+ALL_SOURCES += src/Hw_driver/seven_segment.c 
 endif
 
 
