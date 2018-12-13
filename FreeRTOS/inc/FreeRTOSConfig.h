@@ -84,5 +84,18 @@ configKERNEL_INTERRUPT_PRIORITY setting.  Here 15 corresponds to the lowest
 NVIC value of 255. */
 #define configLIBRARY_KERNEL_INTERRUPT_PRIORITY	15
 
+/*
+ USART Configuration.
+*/
+#define configCOM0_RX_BUFFER_LENGTH      128
+#define configCOM0_TX_BUFFER_LENGTH      128
+#define configCOM1_RX_BUFFER_LENGTH      128
+#define configCOM1_TX_BUFFER_LENGTH      128
+
+//add freeRTOS to smt32
+#define vPortSVCHandler             SVC_Handler
+#define xPortPendSVHandler          PendSV_Handler
+#define xPortSysTickHandler         SysTick_Handler
+
 #endif /* FREERTOS_CONFIG_H */
 
